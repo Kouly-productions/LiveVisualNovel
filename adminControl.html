@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin panel</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+</head>
+<body>
+    <h1>Admin Control</h1>
+    <div class="controls">
+        <h2>Backgrounds</h2>
+        <div class="background-buttons">
+            <button onclick="updateBackground('residential_day')">Residential</button>
+            <button onclick="updateBackground('class_day')">Classroom</button>
+            <button onclick="updateBackground('corridor')">Corridor</button>
+            <button onclick="updateBackground('corridor_aiko')">Corridor Aiko</button>
+            <button onclick="updateBackground('corridor_aiko_in_class')">Corridor Aiko In Class</button>
+            <button onclick="updateBackground('club_day')">Club</button>
+            <button onclick="updateBackground('class_aiko')">Class Aiko</button>
+            <button onclick="updateBackground('closet')">Closet</button>
+            <button onclick="updateBackground('bedroom')">Bedroom</button>
+            <button onclick="updateBackground('bedroomV2')">Bedroom V2</button>
+            <button onclick="updateBackground('bedroom_night')">Bedroom Night</button>
+            <button onclick="updateBackground('bedroom_evil')">Bedroom Evil</button>
+            <button onclick="updateBackground('sayori_bedroom')">Sayori Bedroom</button>
+            <button onclick="updateBackground('house')">House</button>
+            <button onclick="updateBackground('kitchen')">Kitchen</button>
+            <button onclick="updateBackground('school')">School</button>
+            <button onclick="updateBackground('class')">Class</button>
+            <button onclick="updateBackground('notebook')">Notebook</button>
+            <button onclick="updateBackground('notebook_glitch')">Notebook Glitch</button>
+            <button onclick="updateBackground('cantine')">Cantine</button>
+            <button onclick="updateBackground('jacob_room')">Jacob Room</button>
+            <button onclick="updateBackground('jacob_house')">Jacob House</button>
+            <button onclick="updateBackground('elias_house')">Elias House</button>
+            <button onclick="updateBackground('akiraSportsHall')">Akira Sports Hall</button>
+            <button onclick="updateBackground('door')">Door</button>
+            <button onclick="updateBackground('void_door')">Void Door</button>
+            <button onclick="updateBackground('glitch')">Glitch</button>
+            <button onclick="updateBackground('street')">Street</button>
+            <button onclick="updateBackground('frontSchool')">Front School</button>
+            <button onclick="updateBackground('hallWay')">Hallway</button>
+            <button onclick="updateBackground('hallway_floor')">Hallway Floor</button>
+            <button onclick="updateBackground('hallway_aiko')">Hallway Aiko</button>
+            <button onclick="updateBackground('classWindow')">Class Window</button>
+            <button onclick="updateBackground('classWindowBig')">Class Window Big</button>
+            <button onclick="updateBackground('cantineIdle')">Cantine Idle</button>
+            <button onclick="updateBackground('cantineLookAway')">Cantine Look Away</button>
+            <button onclick="updateBackground('cantineAngry')">Cantine Angry</button>
+            <button onclick="updateBackground('in_cantine')">In Cantine</button>
+            <button onclick="updateBackground('cantine_at_table')">Cantine At Table</button>
+            <button onclick="updateBackground('cafe')">Cafe</button>
+            <button onclick="updateBackground('cafe_dark')">Cafe Dark</button>
+            <button onclick="updateBackground('street_night')">Street Night</button>
+            <button onclick="updateBackground('street_night2')">Street Night 2</button>
+            <button onclick="updateBackground('street_night2_aiko')">Street Night 2 Aiko</button>
+            <button onclick="updateBackground('street_forest_night')">Street Forest Night</button>
+            <button onclick="updateBackground('street_forest_night_aiko')">Street Forest Night Aiko</button>
+            <button onclick="updateBackground('street_rain')">Street Rain</button>
+            <button onclick="updateBackground('street_rain2')">Street Rain 2</button>
+            <button onclick="updateBackground('street_rain3')">Street Rain 3</button>
+            <button onclick="updateBackground('street_shop')">Street Shop</button>
+            <button onclick="updateBackground('street_shop_night')">Street Shop Night</button>
+            <button onclick="updateBackground('window_street')">Window Street</button>
+            <button onclick="updateBackground('train_hall')">Train Hall</button>
+            <button onclick="updateBackground('party_hall')">Party Hall</button>
+            <button onclick="updateBackground('party_hall_night')">Party Hall Night</button>
+            <button onclick="updateBackground('library')">Library</button>
+            <button onclick="updateBackground('bathroom')">Bathroom</button>
+            <button onclick="updateBackground('bathroom_aiko')">Bathroom Aiko</button>
+            <button onclick="updateBackground('school_closet')">School Closet</button>
+            <button onclick="updateBackground('school_yard')">School Yard</button>
+            <button onclick="updateBackground('livingroom')">Living Room</button>
+            <button onclick="updateBackground('livingroomUno')">Living Room Uno</button>
+            <button onclick="updateBackground('resturent')">Restaurant</button>
+            <button onclick="updateBackground('theater')">Theater</button>
+            <button onclick="updateBackground('theater_aiko')">Theater Aiko</button>
+            <button onclick="updateBackground('costume')">Costume</button>
+            <button onclick="updateBackground('changing_room')">Changing Room</button>
+            <button onclick="updateBackground('council')">Council</button>
+            <button onclick="updateBackground('locker')">Locker</button>
+        </div>
+        
+
+        <h2>Characters</h2>
+        <div class="character-controls">
+            <!-- Akira -->
+            <div class="character-section">
+                <h3>Akira</h3>
+                <button onclick="updateCharacter('akira', 'idle', 'left')">Idle (Left)</button>
+                <button onclick="updateCharacter('akira', 'happy1', 'center')">Happy (Center)</button>
+                <button onclick="updateCharacter('akira', 'flirt1', 'right')">Flirt (Right)</button>
+                <button onclick="removeCharacter('akira')">Remove Akira</button>
+            </div>
+
+            <!-- Sakura -->
+            <div class="character-section">
+                <h3>Sakura</h3>
+                <button onclick="updateCharacter('sakura', 'idle1', 'left')">Idle (Left)</button>
+                <button onclick="updateCharacter('sakura', 'happy1', 'center')">Happy (Center)</button>
+                <button onclick="updateCharacter('sakura', 'sad1', 'right')">Sad (Right)</button>
+                <button onclick="removeCharacter('sakura')">Remove Sakura</button>
+            </div>
+
+            <!-- Mika -->
+            <div class="character-section">
+                <h3>Mika</h3>
+                <button onclick="updateCharacter('mika', 'idle1', 'left')">Idle (Left)</button>
+                <button onclick="updateCharacter('mika', 'happy1', 'center')">Happy (Center)</button>
+                <button onclick="updateCharacter('mika', 'sad1', 'right')">Sad (Right)</button>
+                <button onclick="removeCharacter('mika')">Remove Mika</button>
+            </div>
+        </div>
+
+        <h2>Dialogue</h2>
+        <div class="dialogue-controls">
+            <select id="speakerSelect">
+                <option value="">Select Speaker</option>
+                <option value="akira">Akira</option>
+                <option value="sakura">Sakura</option>
+                <option value="mika">Mika</option>
+            </select>
+            <input type="text" id="dialogueText" placeholder="Enter dialogue...">
+            <button onclick="setDialogue(document.getElementById('speakerSelect').value, document.getElementById('dialogueText').value)">
+                Set Dialogue
+            </button>
+        </div>
+
+        <h2>Scene Controls</h2>
+        <div class="scene-controls">
+            <button onclick="clearCharacters()">Clear All Characters</button>
+        </div>
+    </div>
+
+    <div id="status">Waiting for data...</div>
+
+    <script type="module" src="/js/firebase.mjs"></script>
+</body>
+</html>

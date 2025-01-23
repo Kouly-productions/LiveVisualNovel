@@ -1,0 +1,100 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    background-size: cover;
+    background-position: center;
+}
+
+#character-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.character {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    max-height: 90vh;
+    transition: all 0.3s ease;
+}
+
+#dialogue-container {
+    position: absolute;
+    flex-direction: column;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 30%;
+    pointer-events: none;
+    align-items: center;
+}
+
+#character-name {
+    width: 15%;
+    height: 13%;
+    background-color: plum;
+    border-style: solid;
+    color: white;
+    border-top-left-radius:  15px;
+    border-top-right-radius:  15px;
+    margin-left: 5%;
+}
+
+#character-name p{
+    font-size: 150%;
+    color: black;
+    text-align: center;
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+
+#dialogue-box {
+    position: relative;
+    width: 100%;
+    height: 70%;
+    color: white;
+    background-color: rgb(231, 145, 231);
+    border-width: 5px;
+    border-style: solid;
+    background-size: cover;
+    background-position: center;
+    word-wrap: break-word;
+    font-size: 30px;
+    border-radius: 15px;
+    margin-bottom: 1%;
+}
+
+.dialogue-text {
+    margin-left: 1%;
+    margin-right: 1%;
+    margin-top: 1%;
+    display: block;
+    overflow-y: auto;
+}
+
+#dialogue-inner-container{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+}
