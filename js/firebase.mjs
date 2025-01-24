@@ -62,7 +62,7 @@ window.placeCharacter = function(position) {
     updateCharacter(selectedCharacter, selectedEmotion, position);
 }
 
-// Update your existing updateCharacter function
+// Update character function
 window.updateCharacter = function(characterId, emotion, position) {
     if (!characters[characterId]) {
         console.error(`Character ${characterId} not found!`);
@@ -101,15 +101,7 @@ window.clearCharacters = function() {
         });
 }
 
-// Listen for scene changes
-const sceneRef = ref(db, 'currentScene');
-onValue(sceneRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log('Current scene data:', data);
-    document.getElementById('status').textContent = 'Data received: ' + JSON.stringify(data);
-    updateDisplay(data);
-});
-
+// Set dialogue function
 window.setDialogue = function(speakerId, text) {
     if (speakerId && !characters[speakerId]) {
         console.error(`Character ${speakerId} not found!`);
@@ -123,6 +115,7 @@ window.setDialogue = function(speakerId, text) {
     });
 }
 
+// Update display function
 function updateDisplay(sceneData) {
     if (!sceneData) return;
 
@@ -137,4 +130,54 @@ function updateDisplay(sceneData) {
         if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
         if (characterName) characterName.textContent = sceneData.dialogue.speaker;
     }
+
+    // Update characters
+    if (sceneData.characters) {
+        // Clear all character positions first
+        ['left', 'center', 'right'].forEach(position => {
+            const container = document.getElementById(`${position}-character`);
+            if (container) {
+                container.innerHTML = '';
+            }
+        });
+
+        // Update each position that has a character
+        Object.entries(sceneData.characters).forEach(([position, imageUrl]) => {
+            if (imageUrl && imageUrl !== "") {
+                const container = document.getElementById(`${position}-character`);
+                if (container) {
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.classList.add('character-image');
+                    container.appendChild(img);
+                }
+            }
+        });
+    }
 }
+
+// Single listener for scene changes
+const sceneRef = ref(db, 'currentScene');
+onValue(sceneRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log('Current scene data:', data);
+    
+    // Update background and characters
+    updateDisplay(data);
+    
+    // Update the user response if it exists
+    if (data.playerText) {
+        const userResponse = document.getElementById('user-response');
+        if (userResponse) {
+            userResponse.textContent = data.playerText;
+            userResponse.style.display = 'block';
+        }
+    } else {
+        const userResponse = document.getElementById('user-response');
+        if (userResponse) {
+            userResponse.style.display = 'none';
+        }
+    }
+    
+    document.getElementById('status').textContent = 'Data received: ' + JSON.stringify(data);
+});

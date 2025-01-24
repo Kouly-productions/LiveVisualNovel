@@ -65,3 +65,7 @@ select, input {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 4px;
 }
+
+#user-response {
+    color: rgb(255, 114, 255);
+}

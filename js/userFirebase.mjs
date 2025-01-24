@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
@@ -15,6 +15,40 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// Handle send button click
+document.getElementById('send-button').addEventListener('click', () => {
+    const userInput = document.getElementById('user-input');
+    const message = userInput.value.trim();
+    
+    if (message) {
+        // Update the database with the new message
+        const sceneRef = ref(db, 'currentScene');
+        
+        // First get current scene data
+        onValue(sceneRef, (snapshot) => {
+            const currentData = snapshot.val();
+            
+            // Update only the playerText field
+            const updatedData = {
+                ...currentData,
+                playerText: message
+            };
+            
+            // Set the updated data back to Firebase
+            set(sceneRef, updatedData)
+                .then(() => {
+                    console.log('Message sent successfully');
+                    userInput.value = ''; // Clear the input field
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }, {
+            onlyOnce: true // Only read the data once
+        });
+    }
+});
 
 // Listen for scene changes
 const sceneRef = ref(db, 'currentScene');
