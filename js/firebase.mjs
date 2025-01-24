@@ -18,6 +18,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+let selectedCharacter = null;
+let selectedEmotion = null;
+
 // Update background function
 window.updateBackground = function(backgroundId) {
     if (!backgrounds[backgroundId]) {
@@ -29,6 +32,69 @@ window.updateBackground = function(backgroundId) {
     set(sceneRef, backgrounds[backgroundId])
         .then(() => {
             document.getElementById('status').textContent = 'Background updated successfully!';
+        })
+        .catch((error) => {
+            document.getElementById('status').textContent = 'Error: ' + error.message;
+        });
+}
+
+// Function to select emotion
+window.selectEmotion = function(characterId, emotion) {
+    selectedCharacter = characterId;
+    selectedEmotion = emotion;
+    
+    // Visual feedback
+    document.querySelectorAll('.emotion-buttons button').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+    
+    document.getElementById('status').textContent = `Selected ${characterId} with ${emotion} emotion`;
+}
+
+// Function to place character in position
+window.placeCharacter = function(position) {
+    if (!selectedCharacter || !selectedEmotion) {
+        document.getElementById('status').textContent = 'Please select a character and emotion first!';
+        return;
+    }
+
+    updateCharacter(selectedCharacter, selectedEmotion, position);
+}
+
+// Update your existing updateCharacter function
+window.updateCharacter = function(characterId, emotion, position) {
+    if (!characters[characterId]) {
+        console.error(`Character ${characterId} not found!`);
+        return;
+    }
+
+    const characterSprite = characters[characterId].expressions[emotion];
+    if (!characterSprite) {
+        console.error(`Expression ${emotion} not found for character ${characterId}!`);
+        return;
+    }
+
+    const characterRef = ref(db, `currentScene/characters/${position}`);
+    set(characterRef, characterSprite)
+        .then(() => {
+            document.getElementById('status').textContent = `${characterId} with ${emotion} placed at ${position}!`;
+        })
+        .catch((error) => {
+            document.getElementById('status').textContent = 'Error: ' + error.message;
+        });
+}
+
+// Function to clear all characters
+window.clearCharacters = function() {
+    const charactersRef = ref(db, 'currentScene/characters');
+    set(charactersRef, {
+        left: "",
+        center: "",
+        right: ""
+    })
+        .then(() => {
+            document.getElementById('status').textContent = 'All characters cleared!';
         })
         .catch((error) => {
             document.getElementById('status').textContent = 'Error: ' + error.message;

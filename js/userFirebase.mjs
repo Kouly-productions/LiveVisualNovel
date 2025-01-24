@@ -27,10 +27,35 @@ onValue(sceneRef, (snapshot) => {
         document.body.style.backgroundImage = `url(${data.background})`;
     }
 
+    // Update characters
+    if (data && data.characters) {
+        // Clear all character positions first
+        ['left', 'center', 'right'].forEach(position => {
+            const container = document.getElementById(`${position}-character`);
+            if (container) {
+                container.innerHTML = '';
+            }
+        });
+
+            // Update each position that has a character
+            Object.entries(data.characters).forEach(([position, imageUrl]) => {
+                if (imageUrl && imageUrl !== "") {
+                    const container = document.getElementById(`${position}-character`);
+                    if (container) {
+                        const img = document.createElement('img');
+                        img.src = imageUrl;
+                        img.classList.add('character-image');
+                        container.appendChild(img);
+                    }
+                }
+            });
+        }
+    
+
     // Update dialogue
     if (data && data.dialogue) {
-        const dialogueBox = document.getElementById('dialogue-box');
-        const speakerBox = document.getElementById('character-name');
+        const dialogueBox = document.getElementById('dialogue-text');
+        const speakerBox = document.getElementById('name-text');
         
         if (dialogueBox) dialogueBox.textContent = data.dialogue.text;
         if (speakerBox) speakerBox.textContent = data.dialogue.speaker;
