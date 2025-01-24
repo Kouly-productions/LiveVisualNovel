@@ -45,6 +45,8 @@ body {
     height: 30%;
     pointer-events: none;
     align-items: center;
+    z-index: 2;
+
 }
 
 #character-name {
@@ -60,7 +62,7 @@ body {
 
 #character-name p{
     font-size: 150%;
-    color: black;
+    color: rgb(255, 255, 255);
     text-align: center;
     margin-top: 1%;
     margin-bottom: 1%;
@@ -80,14 +82,7 @@ body {
     font-size: 30px;
     border-radius: 15px;
     margin-bottom: 1%;
-}
-
-.dialogue-text {
-    margin-left: 1%;
-    margin-right: 1%;
-    margin-top: 1%;
-    display: block;
-    overflow-y: auto;
+    padding-left: 1%;
 }
 
 #dialogue-inner-container{
@@ -97,4 +92,33 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: left;
+}
+
+.character-position {
+    position: absolute;
+    bottom: 0;
+    height: 100%; /* Fill entire height */
+    width: 33%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1;
+}
+
+#left-character {
+    left: 0;
+}
+
+#center-character {
+    left: 33.5%;
+}
+
+#right-character {
+    right: 0;
+}
+
+.character-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
 }

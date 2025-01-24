@@ -35,6 +35,47 @@ window.updateBackground = function(backgroundId) {
         });
 }
 
+window.updateCharacter = function(characterId, expression, position) {
+     // Check if character exists
+    if (!characters[characterId]) {
+        console.error(`Character ${characterId} not found!`);
+        return;
+    }
+
+    // Check if expression exists for this character
+    const characterSprite = characters[characterId].expressions[expression];
+    if (!characterSprite) {
+        console.error(`Expression ${expression} not found for character ${characterId}!`);
+        return;
+    }
+
+    // Update the character at the specified position in Firebase
+    const characterRef = ref(db, `currentScene/characters/${position}`);
+    set(characterRef, characterSprite)
+        .then(() => {
+            document.getElementById('status').textContent = `Character ${characterId} with expression ${expression} updated at ${position}!`;
+        })
+        .catch((error) => {
+            document.getElementById('status').textContent = 'Error: ' + error.message;
+        });
+}
+
+// Function to clear all characters
+window.clearCharacters = function() {
+    const charactersRef = ref(db, 'currentScene/characters');
+    set(charactersRef, {
+        left: "",
+        center: "",
+        right: ""
+    })
+        .then(() => {
+            document.getElementById('status').textContent = 'All characters cleared!';
+        })
+        .catch((error) => {
+            document.getElementById('status').textContent = 'Error: ' + error.message;
+        });
+}
+
 // Listen for scene changes
 const sceneRef = ref(db, 'currentScene');
 onValue(sceneRef, (snapshot) => {
