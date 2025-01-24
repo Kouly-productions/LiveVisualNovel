@@ -85,52 +85,351 @@
 
         <h2>Characters</h2>
         <div class="character-controls">
-            <!-- Akira -->
-            <div class="character-section">
-                <h3>Akira</h3>
-                <button onclick="updateCharacter('akira', 'idle', 'left')">Idle (Left)</button>
-                <button onclick="updateCharacter('akira', 'really', 'center')">Happy (Center)</button>
-                <button onclick="updateCharacter('akira', 'flirt1', 'right')">Flirt (Right)</button>
+        <!-- Akira -->
+        <div class="character-section">
+            <h3>Akira</h3>
+            <!-- Emotions -->
+            <div class="emotion-buttons">
+                <h4>Emotions</h4>
+                <button onclick="selectEmotion('akira', 'angry1')">Angry1</button>
+                <button onclick="selectEmotion('akira', 'angry2')">Angry2</button>
+                <button onclick="selectEmotion('akira', 'concerned')">Concerned</button>
+                <button onclick="selectEmotion('akira', 'flirt1')">Flirt1</button>
+                <button onclick="selectEmotion('akira', 'flirt2')">Flirt2</button>
+                <button onclick="selectEmotion('akira', 'flirtIdle')">FlirtIdle</button>
+                <button onclick="selectEmotion('akira', 'happyIdle')">HappyIdle</button>
+                <button onclick="selectEmotion('akira', 'idle')">Idle</button>
+                <button onclick="selectEmotion('akira', 'ohReally')">OhReally</button>
+                <button onclick="selectEmotion('akira', 'really')">Really</button>
+                <button onclick="selectEmotion('akira', 'really2')">Really2</button>
+                <button onclick="selectEmotion('akira', 'really3')">Really3</button>
+                <button onclick="selectEmotion('akira', 'really4')">Really4</button>
+                <button onclick="selectEmotion('akira', 'sad')">Sad</button>
+                <button onclick="selectEmotion('akira', 'weCanDoIt')">WeCanDoIt</button>
+                <button onclick="selectEmotion('akira', 'closeUpFlirt')">CloseUpFlirt</button>
+                <button onclick="selectEmotion('akira', 'closeUpFlirtSide')">CloseUpFlirtSide</button>
+                <button onclick="selectEmotion('akira', 'closeUpIdle')">CloseUpIdle</button>
+                <button onclick="selectEmotion('akira', 'closeUpReally')">CloseUpReally</button>
+                <button onclick="selectEmotion('akira', 'closeUpSmile')">CloseUpSmile</button>
+                <button onclick="selectEmotion('akira', 'closeUpSad')">CloseUpSad</button>
+                <button onclick="selectEmotion('akira', 'princess')">Princess</button>
+                <button onclick="selectEmotion('akira', 'special1')">Special1</button>
+                <button onclick="selectEmotion('akira', 'special2')">Special2</button>
+                <button onclick="selectEmotion('akira', 'special3')">Special3</button>
+                <button onclick="selectEmotion('akira', 'special4')">Special4</button>
+                <button onclick="selectEmotion('akira', 'special5')">Special5</button>
+                <button onclick="selectEmotion('akira', 'hug')">Hug</button>
+                <button onclick="selectEmotion('akira', 'hugV2')">HugV2</button>
+                <button onclick="selectEmotion('akira', 'hug_forgive_me')">Hug_forgive_me</button>
+                <button onclick="selectEmotion('akira', 'hug_sad')">Hug_sad</button>
+                <button onclick="selectEmotion('akira', 'hug_smile')">Hug_smile</button>
+                <button onclick="selectEmotion('akira', 'hug_worried')">Hug_worried</button>
+                <button onclick="selectEmotion('akira', 'hug_smile_small')">Hug_smile_small</button>
+                <button onclick="selectEmotion('akira', 'shy')">Shy</button>
+                <button onclick="selectEmotion('akira', 'evilHappy1')">EvilHappy1</button>
+                <button onclick="selectEmotion('akira', 'evilAngry1')">EvilAngry1</button>
+                <button onclick="selectEmotion('akira', 'evilAnnoyed1')">EvilAnnoyed1</button>
+                <button onclick="selectEmotion('akira', 'evilAnnoyed2')">EvilAnnoyed2</button>
+                <button onclick="selectEmotion('akira', 'evilAnnoyed3')">EvilAnnoyed3</button>
             </div>
-
-            <!-- Sakura -->
-            <div class="character-section">
-                <h3>Sakura</h3>
-                <button onclick="updateCharacter('sakura', 'idle1', 'left')">Idle (Left)</button>
-                <button onclick="updateCharacter('sakura', 'happy1', 'center')">Happy (Center)</button>
-                <button onclick="updateCharacter('sakura', 'sad1', 'right')">Sad (Right)</button>
+            <!-- Positions -->
+            <div class="position-buttons">
+                <h4>Positions</h4>
+                <button onclick="placeCharacter('left')">Left</button>
+                <button onclick="placeCharacter('center')">Center</button>
+                <button onclick="placeCharacter('right')">Right</button>
             </div>
-
-            <!-- Mika -->
-            <div class="character-section">
-                <h3>Mika</h3>
-                <button onclick="updateCharacter('mika', 'idle1', 'left')">Idle (Left)</button>
-                <button onclick="updateCharacter('mika', 'happy1', 'center')">Happy (Center)</button>
-                <button onclick="updateCharacter('mika', 'sad1', 'right')">Sad (Right)</button>
-            </div>
-        </div>
-
-        <h2>Dialogue</h2>
-        <div class="dialogue-controls">
-            <select id="speakerSelect">
-                <option value="">Select Speaker</option>
-                <option value="akira">Akira</option>
-                <option value="sakura">Sakura</option>
-                <option value="mika">Mika</option>
-            </select>
-            <input type="text" id="dialogueText" placeholder="Enter dialogue...">
-            <button onclick="setDialogue(document.getElementById('speakerSelect').value, document.getElementById('dialogueText').value)">
-                Set Dialogue
-            </button>
-        </div>
-
-        <h2>Scene Controls</h2>
-        <div class="scene-controls">
-            <button onclick="clearCharacters()">Clear All Characters</button>
+            <button id="removeCharacter" onclick="removeCharacter('akira')">Remove Akira</button>
         </div>
     </div>
 
-    <div id="status">Waiting for data...</div>
+    <!-- Sakura -->
+    <div class="character-section">
+        <h3>Sakura</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('sakura', 'blink1')">blink1</button>
+            <button onclick="selectEmotion('sakura', 'dissapointed1')">dissapointed1</button>
+            <button onclick="selectEmotion('sakura', 'happy1')">happy1</button>
+            <button onclick="selectEmotion('sakura', 'happy2')">happy2</button>
+            <button onclick="selectEmotion('sakura', 'happy3')">happy3</button>
+            <button onclick="selectEmotion('sakura', 'idle1')">idle1</button>
+            <button onclick="selectEmotion('sakura', 'idle2')">idle2</button>
+            <button onclick="selectEmotion('sakura', 'sad1')">sad1</button>
+            <button onclick="selectEmotion('sakura', 'sad2')">sad2</button>
+            <button onclick="selectEmotion('sakura', 'sad3')">sad3</button>
+            <button onclick="selectEmotion('sakura', 'hand')">hand</button>
+            <button onclick="selectEmotion('sakura', 'scared1')">scared1</button>
+            <button onclick="selectEmotion('sakura', 'special1')">special1</button>
+            <button onclick="selectEmotion('sakura', 'special2')">special2</button>
+            <button onclick="selectEmotion('sakura', 'special3')">special3</button>
+            <button onclick="selectEmotion('sakura', 'special4')">special4</button>
+            <button onclick="selectEmotion('sakura', 'special5')">special5</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('eddy')">Remove Eddy</button>
+    </div>
+
+    <!-- Sakura -->
+    <div class="character-section">
+        <h3>Ayano</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('ayano', 'angry1')">angry1</button>
+            <button onclick="selectEmotion('ayano', 'angry2')">angry2</button>
+            <button onclick="selectEmotion('ayano', 'idle1')">idle1</button>
+            <button onclick="selectEmotion('ayano', 'laugh')">laugh</button>
+            <button onclick="selectEmotion('ayano', 'sad1')">sad1</button>
+            <button onclick="selectEmotion('ayano', 'shy1')">shy1</button>
+            <button onclick="selectEmotion('ayano', 'shy2')">shy2</button>
+            <button onclick="selectEmotion('ayano', 'smile1')">smile1</button>
+            <button onclick="selectEmotion('ayano', 'smile2')">smile2</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('eddy')">Remove Eddy</button>
+    </div>
+
+    <!-- Eddy -->
+    <div class="character-section">
+        <h3>Eddy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('eddy', 'eddyNeutral')">Neutral</button>
+            <button onclick="selectEmotion('eddy', 'eddyLookAway')">LookAway</button>
+            <button onclick="selectEmotion('eddy', 'eddyEvil')">Evil</button>
+            <button onclick="selectEmotion('eddy', 'eddyHappy')">Happy</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('eddy')">Remove Eddy</button>
+    </div>
+
+    <!-- Helpy -->
+    <div class="character-section">
+        <h3>Helpy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('helpy', 'helpyThinking')">Thinking</button>
+            <button onclick="selectEmotion('helpy', 'helpyAngry')">Angry</button>
+            <button onclick="selectEmotion('helpy', 'helpydc')">Dc</button>
+            <button onclick="selectEmotion('helpy', 'helpydcLookAway')">DcLookAway</button>
+            <button onclick="selectEmotion('helpy', 'helpyHappy')">Happy</button>
+            <button onclick="selectEmotion('helpy', 'helpyIdlepng')">Idle</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('helpy')">Remove Helpy</button>
+    </div>
+
+    <!-- Freddy -->
+    <div class="character-section">
+        <h3>Freddy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('freddy', 'freddyAngry')">Angry</button>
+            <button onclick="selectEmotion('freddy', 'freddyConfused')">Confused</button>
+            <button onclick="selectEmotion('freddy', 'freddyGood')">Good</button>
+            <button onclick="selectEmotion('freddy', 'freddyNeutral')">Neutral</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+    </div>
+
+    <!-- Toy Freddy -->
+    <div class="character-section">
+        <h3>Toy Freddy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('toyfreddy', 'toyfreddyNeutral')">Neutral</button>
+            <button onclick="selectEmotion('toyfreddy', 'toyfreddyPoint')">Point</button>
+            <button onclick="selectEmotion('toyfreddy', 'toyfreddyConfused')">Confused</button>
+            <button onclick="selectEmotion('toyfreddy', 'toyfreddyHappy')">Happy</button>
+            <button onclick="selectEmotion('toyfreddy', 'toyfreddyAngry')">Angry</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+    </div>
+
+    <!-- Sakura -->
+    <div class="character-section">
+        <h3>Golden Freddy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('gfreddy', 'angry')">angry1</button>
+            <button onclick="selectEmotion('gfreddy', 'angryPoint')">angry2</button>
+            <button onclick="selectEmotion('gfreddy', 'confused')">idle1</button>
+            <button onclick="selectEmotion('gfreddy', 'happy')">laugh</button>
+            <button onclick="selectEmotion('gfreddy', 'idle')">sad1</button>
+            <button onclick="selectEmotion('gfreddy', 'lookingDown')">shy1</button>
+            <button onclick="selectEmotion('gfreddy', 'point')">shy2</button>
+            <button onclick="selectEmotion('gfreddy', 'sad')">smile1</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('eddy')">Remove Eddy</button>
+    </div>
+
+    <!-- Bedste mor gris -->
+    <div class="character-section">
+        <h3>Bedste mor gris</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('bedste', 'bgAngry')">Angry</button>
+            <button onclick="selectEmotion('bedste', 'bgConfused')">bgConfused</button>
+            <button onclick="selectEmotion('bedste', 'bgIdle')">bgIdle</button>
+            <button onclick="selectEmotion('bedste', 'bgLaugh')">bgLaugh</button>
+            <button onclick="selectEmotion('bedste', 'bgLookAway')">bgLookAway</button>
+            <button onclick="selectEmotion('bedste', 'bgLooking')">bgLooking</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+    </div>
+
+    <!-- Funtime Foxy -->
+    <div class="character-section">
+        <h3>Funtime Foxy</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('FT', 'FTThinking')">Thinking</button>
+            <button onclick="selectEmotion('FT', 'FTPoint')">Point</button>
+            <button onclick="selectEmotion('FT', 'FTHappy')">Happy</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+    </div>
+
+    <!-- Baldi -->
+    <div class="character-section">
+        <h3>Baldi</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('baldi', 'idleHappy')">IdleHappy</button>
+            <button onclick="selectEmotion('baldi', 'idle')">Idle</button>
+            <button onclick="selectEmotion('baldi', 'angry')">Angry</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+    </div>
+
+        <!-- Blækvard -->
+        <div class="character-section">
+            <h3>Blækvard</h3>
+            <!-- Emotions -->
+            <div class="emotion-buttons">
+                <h4>Emotions</h4>
+                <button onclick="selectEmotion('squidward', 'squidwardAngry')">Angry</button>
+                <button onclick="selectEmotion('squidward', 'squidwardDC')">DC</button>
+                <button onclick="selectEmotion('squidward', 'squidwardHappy')">Happy</button>
+            </div>
+            <!-- Positions -->
+            <div class="position-buttons">
+                <h4>Positions</h4>
+                <button onclick="placeCharacter('left')">Left</button>
+                <button onclick="placeCharacter('center')">Center</button>
+                <button onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
+        </div>
+
+            <h2>Dialogue</h2>
+            <div class="dialogue-controls">
+                <select id="speakerSelect">
+                    <option value="">Select Speaker</option>
+                    <option value="freddy">Freddy</option>
+                    <option value="toyfreddy">Toy Freddy</option>
+                    <option value="baldi">Baldi</option>
+                    <option value="gfreddy">Golden Freddy</option>
+                    <option value="akira">Akira</option>
+                    <option value="sakura">Sakura</option>
+                    <option value="ayano">Ayano</option>
+                    <option value="helpy">Helpy</option>
+                    <option value="eddy">Eddy</option>
+                    <option value="sakura">Sakura</option>
+                    <option value="bedste">Bedste mor gris</option>
+                    <option value="FT">Funtime Foxy</option>
+                </select>
+                <input type="text" id="dialogueText" placeholder="Enter dialogue...">
+                <button onclick="setDialogue(document.getElementById('speakerSelect').value, document.getElementById('dialogueText').value)">
+                    Set Dialogue
+                </button>
+            </div>
+    
+            <h2>Scene Controls</h2>
+            <div class="scene-controls">
+                <button onclick="clearCharacters()">Clear All Characters</button>
+            </div>
+        </div>
+    
+        <div id="status">Waiting for data...</div>
+        </div>
+
 
     <script type="module" src="/LiveVisualNovel/js/firebase.mjs"></script>
 </body>

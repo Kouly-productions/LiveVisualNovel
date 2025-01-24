@@ -186,14 +186,14 @@ export const characters = {
     gfreddy: {
       name: "GFreddy",
       expressions: {
-        angry: "./assets/characters/gfreddy/gfAngry.png",
-        angryPoint: "./assets/characters/gfreddy/gfAngryPoint.png",
-        confused: "./assets/characters/gfreddy/gfConfused.png",
-        happy: "./assets/characters/gfreddy/gfHappy.png",
-        idle: "./assets/characters/gfreddy/gfIdle.png",
-        lookingDown: "./assets/characters/gfreddy/gfLookingDown.png",
-        point: "./assets/characters/gfreddy/gfPoint.png",
-        sad: "./assets/characters/gfreddy/gfSad.png",
+        angry: "./assets/characters/gf/gfAngry.png",
+        angryPoint: "./assets/characters/gf/gfAngryPoint.png",
+        confused: "./assets/characters/gf/gfConfused.png",
+        happy: "./assets/characters/gf/gfHappy.png",
+        idle: "./assets/characters/gf/gfIdle.png",
+        lookingDown: "./assets/characters/gf/gfLookingDown.png",
+        point: "./assets/characters/gf/gfPoint.png",
+        sad: "./assets/characters/gf/gfSad.png",
       },
     },
     mika: {
@@ -291,6 +291,14 @@ export const characters = {
         bgLaugh: "./assets/characters/bedste/bgLaugh.png",
         bgLookAway: "./assets/characters/bedste/bgLookAway.png",
         bgLooking: "./assets/characters/bedste/bgLooking.png",
+      },
+    },
+    squidward: {
+      name: "Squidward",
+      expressions: {
+        squidwardAngry: "./assets/characters/squidward/squidwardAngry.png",
+        squidwardDC: "./assets/characters/squidward/squidwardDC.png",
+        squidwardHappy: "./assets/characters/squidward/squidwardHappy.png"
       },
     },
     vanny: {
