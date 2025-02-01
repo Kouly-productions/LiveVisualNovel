@@ -7,14 +7,29 @@
     <link rel="stylesheet" href="/LiveVisualNovel/styles/userStyle.css">
 </head>
 <body>
+    <!-- Character Container -->
     <div id="character-container">
         <div id="left-character" class="character-position"></div>
         <div id="center-character" class="character-position"></div>
         <div id="right-character" class="character-position"></div>
     </div>
 
-    <div id="dialogue-container">
+    <!-- Audio Control -->
+    <div id="audio-controls">
+        <div id="volume-control">
+            <label for="volume-slider">🔊</label>
+            <input 
+                type="range" 
+                id="volume-slider" 
+                min="0" 
+                max="100" 
+                value="50"
+            >
+        </div>
+    </div>
 
+    <!-- Dialogue Container -->
+    <div id="dialogue-container">
         <div id="dialogue-inner-container">
             <div id="character-name">
                 <p id="name-text">...</p>
@@ -25,12 +40,12 @@
             </div>
         </div>
 
+        <!-- User Input Section -->
         <div id="user-write">
-            <input id="user-write-as" placeholder="Type here..."></input>
-            <textarea id="user-input" placeholder="Type here..."></textarea>
+            <input id="user-write-as" placeholder="Write as..."></input>
+            <textarea id="user-input" placeholder="Type your message here..."></textarea>
             <button id="send-button">Send</button>
         </div>
-
     </div>
 
     <script type="module" src="/LiveVisualNovel/js/userFirebase.mjs"></script>

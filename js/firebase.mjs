@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { backgrounds } from './backgrounds.js';
 import { characters } from './characters.js';
+import { bgm } from './bgm.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
@@ -18,10 +19,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Global state
 let selectedCharacter = null;
 let selectedEmotion = null;
 
-// Update background function
+// Background Control
 window.updateBackground = function(backgroundId) {
     if (!backgrounds[backgroundId]) {
         console.error(`Background ${backgroundId} not found!`);
@@ -30,39 +32,32 @@ window.updateBackground = function(backgroundId) {
 
     const sceneRef = ref(db, 'currentScene/background');
     set(sceneRef, backgrounds[backgroundId])
-        .then(() => {
-            document.getElementById('status').textContent = 'Background updated successfully!';
-        })
-        .catch((error) => {
-            document.getElementById('status').textContent = 'Error: ' + error.message;
-        });
+        .then(() => updateStatus('Background updated successfully!'))
+        .catch(handleError);
 }
 
-// Function to select emotion
+// Character Control
 window.selectEmotion = function(characterId, emotion) {
     selectedCharacter = characterId;
     selectedEmotion = emotion;
     
-    // Visual feedback
     document.querySelectorAll('.emotion-buttons button').forEach(btn => {
         btn.classList.remove('selected');
     });
     event.target.classList.add('selected');
     
-    document.getElementById('status').textContent = `Selected ${characterId} with ${emotion} emotion`;
+    updateStatus(`Selected ${characterId} with ${emotion} emotion`);
 }
 
-// Function to place character in position
 window.placeCharacter = function(position) {
     if (!selectedCharacter || !selectedEmotion) {
-        document.getElementById('status').textContent = 'Please select a character and emotion first!';
+        updateStatus('Please select a character and emotion first!');
         return;
     }
 
     updateCharacter(selectedCharacter, selectedEmotion, position);
 }
 
-// Update character function
 window.updateCharacter = function(characterId, emotion, position) {
     if (!characters[characterId]) {
         console.error(`Character ${characterId} not found!`);
@@ -77,15 +72,19 @@ window.updateCharacter = function(characterId, emotion, position) {
 
     const characterRef = ref(db, `currentScene/characters/${position}`);
     set(characterRef, characterSprite)
-        .then(() => {
-            document.getElementById('status').textContent = `${characterId} with ${emotion} placed at ${position}!`;
-        })
-        .catch((error) => {
-            document.getElementById('status').textContent = 'Error: ' + error.message;
-        });
+        .then(() => updateStatus(`${characterId} with ${emotion} placed at ${position}!`))
+        .catch(handleError);
 }
 
-// Function to clear all characters
+window.removeCharacter = function(characterId) {
+    ['left', 'center', 'right'].forEach(position => {
+        const characterRef = ref(db, `currentScene/characters/${position}`);
+        set(characterRef, "")
+            .then(() => updateStatus(`${characterId} removed!`))
+            .catch(handleError);
+    });
+}
+
 window.clearCharacters = function() {
     const charactersRef = ref(db, 'currentScene/characters');
     set(charactersRef, {
@@ -93,15 +92,11 @@ window.clearCharacters = function() {
         center: "",
         right: ""
     })
-        .then(() => {
-            document.getElementById('status').textContent = 'All characters cleared!';
-        })
-        .catch((error) => {
-            document.getElementById('status').textContent = 'Error: ' + error.message;
-        });
+        .then(() => updateStatus('All characters cleared!'))
+        .catch(handleError);
 }
 
-// Set dialogue function
+// Dialogue Control
 window.setDialogue = function(speakerId, text) {
     if (speakerId && !characters[speakerId]) {
         console.error(`Character ${speakerId} not found!`);
@@ -112,40 +107,60 @@ window.setDialogue = function(speakerId, text) {
     set(dialogueRef, {
         speaker: speakerId ? characters[speakerId].name : '',
         text: text
-    });
+    }).catch(handleError);
 }
 
-// Update display function
+// BGM Control
+window.playBGM = function(songId) {
+    if (!bgm[songId]) {
+        console.error(`BGM ${songId} not found!`);
+        return;
+    }
+
+    const bgmRef = ref(db, 'currentScene/bgm');
+    set(bgmRef, songId)
+        .then(() => updateStatus(`Now playing: ${songId}`))
+        .catch(handleError);
+}
+
+window.stopBGM = function() {
+    const bgmRef = ref(db, 'currentScene/bgm');
+    set(bgmRef, null)
+        .then(() => updateStatus('Music stopped'))
+        .catch(handleError);
+}
+
+// Utility Functions
+function updateStatus(message) {
+    const statusElement = document.getElementById('status');
+    if (statusElement) {
+        statusElement.textContent = message;
+    }
+}
+
+function handleError(error) {
+    console.error('Error:', error);
+    updateStatus('Error: ' + error.message);
+}
+
+// Scene Update Handler
 function updateDisplay(sceneData) {
     if (!sceneData) return;
 
+    // Update background
     if (sceneData.background) {
         document.body.style.backgroundImage = `url(${sceneData.background})`;
     }
 
-    if (sceneData.dialogue) {
-        const dialogueText = document.querySelector('.dialogue-text');
-        const characterName = document.querySelector('#character-name p');
-        
-        if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
-        if (characterName) characterName.textContent = sceneData.dialogue.speaker;
-    }
-
     // Update characters
     if (sceneData.characters) {
-        // Clear all character positions first
         ['left', 'center', 'right'].forEach(position => {
             const container = document.getElementById(`${position}-character`);
             if (container) {
                 container.innerHTML = '';
-            }
-        });
-
-        // Update each position that has a character
-        Object.entries(sceneData.characters).forEach(([position, imageUrl]) => {
-            if (imageUrl && imageUrl !== "") {
-                const container = document.getElementById(`${position}-character`);
-                if (container) {
+                
+                const imageUrl = sceneData.characters[position];
+                if (imageUrl && imageUrl !== "") {
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.classList.add('character-image');
@@ -154,22 +169,21 @@ function updateDisplay(sceneData) {
             }
         });
     }
-}
 
-// Single listener for scene changes
-const sceneRef = ref(db, 'currentScene');
-onValue(sceneRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log('Current scene data:', data);
-    
-    // Update background and characters
-    updateDisplay(data);
-    
-    // Update the user response if it exists
-    if (data.playerText) {
+    // Update dialogue
+    if (sceneData.dialogue) {
+        const dialogueText = document.getElementById('dialogue-text');
+        const speakerBox = document.getElementById('name-text');
+        
+        if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
+        if (speakerBox) speakerBox.textContent = sceneData.dialogue.speaker;
+    }
+
+    // Update user response
+    if (sceneData.playerText) {
         const userResponse = document.getElementById('user-response');
         if (userResponse) {
-            userResponse.textContent = data.playerText;
+            userResponse.textContent = sceneData.playerText;
             userResponse.style.display = 'block';
         }
     } else {
@@ -178,6 +192,25 @@ onValue(sceneRef, (snapshot) => {
             userResponse.style.display = 'none';
         }
     }
-    
-    document.getElementById('status').textContent = 'Data received: ' + JSON.stringify(data);
+}
+
+// Initialize scene listener
+const sceneRef = ref(db, 'currentScene');
+onValue(sceneRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log('Current scene data:', data);
+    updateDisplay(data);
+});
+
+// Initialize BGM buttons when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.bgm-buttons');
+    if (container && bgm) {
+        Object.keys(bgm).forEach(songId => {
+            const button = document.createElement('button');
+            button.textContent = songId.replace(/_/g, ' ').toUpperCase();
+            button.onclick = () => playBGM(songId);
+            container.appendChild(button);
+        });
+    }
 });

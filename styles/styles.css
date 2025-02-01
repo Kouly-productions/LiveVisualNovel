@@ -69,3 +69,22 @@ select, input {
 #user-response {
     color: rgb(255, 114, 255);
 }
+
+.bgm-controls {
+    margin-top: 20px;
+}
+
+.bgm-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stop-bgm {
+    background-color: #ff4444;
+}
+
+.stop-bgm:hover {
+    background-color: #cc0000;
+}

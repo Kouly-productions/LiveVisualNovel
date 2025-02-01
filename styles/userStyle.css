@@ -53,12 +53,12 @@ body {
     background-color: plum;
     border-style: solid;
     color: white;
-    border-top-left-radius:  15px;
-    border-top-right-radius:  15px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
     margin-left: 5%;
 }
 
-#character-name p{
+#character-name p {
     font-size: 150%;
     color: rgb(255, 255, 255);
     text-align: center;
@@ -83,7 +83,7 @@ body {
     padding-left: 1%;
 }
 
-#dialogue-inner-container{
+#dialogue-inner-container {
     width: 50%;
     height: 100%;
     display: flex;
@@ -105,18 +105,18 @@ body {
 
 #dialogue-text {
     font-size: 2.4rem;
-    font-family: 'Segoe UI', Arial, sans-serif; 
+    font-family: 'Segoe UI', Arial, sans-serif;
     font-weight: 600;
     color: white;
     text-shadow: 
-        -2px -2px 0 #ff6edb,  
-         2px -2px 0 #ff6edb,
-        -2px  2px 0 #ff6edb,
-         2px  2px 0 #ff6edb,
-        -1px -1px 0 #ff6edb,  
-         1px -1px 0 #ff6edb,
-        -1px  1px 0 #ff6edb,
-         1px  1px 0 #ff6edb;
+        -2px -2px 0 #ff6edb,
+        2px -2px 0 #ff6edb,
+        -2px 2px 0 #ff6edb,
+        2px 2px 0 #ff6edb,
+        -1px -1px 0 #ff6edb,
+        1px -1px 0 #ff6edb,
+        -1px 1px 0 #ff6edb,
+        1px 1px 0 #ff6edb;
 }
 
 #left-character {
@@ -145,9 +145,9 @@ body {
     vertical-align: top;
     text-align: left;
     white-space: normal;
-    background-color: rgb(231, 145, 231, 033.5%);
+    background-color: rgb(231, 145, 231, 0.35);
     font-size: 1.25rem;
-    font-family: 'Segoe UI', Arial, sans-serif; 
+    font-family: 'Segoe UI', Arial, sans-serif;
     border-radius: 5px;
     border-style: solid;
     line-height: 1.2;
@@ -165,9 +165,9 @@ body {
     vertical-align: top;
     text-align: left;
     white-space: normal;
-    background-color: rgb(231, 145, 231, 033.5%);
+    background-color: rgb(231, 145, 231, 0.35);
     font-size: 1.25rem;
-    font-family: 'Segoe UI', Arial, sans-serif; 
+    font-family: 'Segoe UI', Arial, sans-serif;
     border-radius: 5px;
     border-style: solid;
     line-height: 1.2;
@@ -184,7 +184,6 @@ body {
 
 #user-input::placeholder {
     color: white;
-    content: "Enter your text here...";
 }
 
 #user-write-as::placeholder {
@@ -193,4 +192,87 @@ body {
 
 #send-button {
     width: 50%;
+}
+
+/* Special handling for hug scenes */
+.character-position:has(.character-image[src*="hug"]) {
+    width: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.character-image[src*="hug"] {
+    height: 95vh;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+}
+
+/* Audio Controls */
+#audio-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background-color: rgba(231, 145, 231, 0.7);
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid white;
+}
+
+#volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 200px;
+}
+
+#volume-control label {
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+}
+
+#volume-slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+}
+
+#volume-slider:focus {
+    outline: none;
+}
+
+#volume-slider:hover::-webkit-slider-thumb {
+    background: #ff6edb;
+}
+
+#volume-slider:hover::-moz-range-thumb {
+    background: #ff6edb;
 }
