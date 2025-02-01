@@ -327,5 +327,12 @@ export const characters = {
         angry: "./assets/characters/baldi/angry.png",
       },
     },
+    jacob: {
+      name: "Jacob",
+      expressions: {
+        idle: "./assets/characters/jacob/jacob.png",
+        annoyed: "./assets/characters/jacob/jacob_annoyed.png",
+      },
+    },
   };
   

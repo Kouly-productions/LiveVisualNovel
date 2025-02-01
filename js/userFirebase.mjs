@@ -19,7 +19,9 @@ const db = getDatabase(app);
 // Handle send button click
 document.getElementById('send-button').addEventListener('click', () => {
     const userInput = document.getElementById('user-input');
+    const userWriteAs = document.getElementById('user-write-as');
     const message = userInput.value.trim();
+    const writeAs = userWriteAs.value.trim();
     
     if (message) {
         // Update the database with the new message
@@ -32,7 +34,12 @@ document.getElementById('send-button').addEventListener('click', () => {
             // Update only the playerText field
             const updatedData = {
                 ...currentData,
-                playerText: message
+                playerText: message,
+                dialogue: {
+                    ...currentData.dialogue,
+                    speaker: writeAs,
+                    text: message
+                }
             };
             
             // Set the updated data back to Firebase
