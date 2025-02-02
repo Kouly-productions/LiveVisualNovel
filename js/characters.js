@@ -334,5 +334,37 @@ export const characters = {
         annoyed: "./assets/characters/jacob/jacob_annoyed.png",
       },
     },
+    natsuki: {
+      name: "Natsuki",
+      expressions: {
+        smil: "./assets/characters/natsuki/smil.png",
+        genert: "./assets/characters/natsuki/genert.png",
+        skeptisk: "./assets/characters/natsuki/skeptisk.png",
+        smiler: "./assets/characters/natsuki/smiler.png",
+        sur: "./assets/characters/natsuki/sur.png",
+        trist: "./assets/characters/natsuki/trist.png",
+      },
+    },
+    monika: {
+      name: "Monika",
+      expressions: {
+        flirt: "./assets/characters/monika/flirt.png",
+        genert: "./assets/characters/monika/genert.png",
+        griner: "./assets/characters/monika/griner.png",
+        smiler: "./assets/characters/monika/smiler.png",
+        sur: "./assets/characters/monika/sur.png",
+        trist: "./assets/characters/monika/trist.png",
+      },
+    },
+    sayori: {
+      name: "Sayori",
+      expressions: {
+        forvirret: "./assets/characters/sayori/forvirret.png",
+        genert: "./assets/characters/sayori/genert.png",
+        glad: "./assets/characters/sayori/glad.png",
+        sur: "./assets/characters/sayori/sur.png",
+        trist: "./assets/characters/sayori/trist.png",
+      },
+    },
   };
   

@@ -76,12 +76,32 @@ window.updateCharacter = function(characterId, emotion, position) {
         .catch(handleError);
 }
 
+function getSpriteUrlsForCharacter(characterId) {
+    if (!characters[characterId]) return [];
+    return Object.values(characters[characterId].expressions);
+}
+
 window.removeCharacter = function(characterId) {
+    // Get all possible sprite URLs for this character
+    const characterSprites = getSpriteUrlsForCharacter(characterId);
+    
+    // Check each position
     ['left', 'center', 'right'].forEach(position => {
         const characterRef = ref(db, `currentScene/characters/${position}`);
-        set(characterRef, "")
-            .then(() => updateStatus(`${characterId} removed!`))
-            .catch(handleError);
+        
+        // Get the current sprite at this position
+        onValue(characterRef, (snapshot) => {
+            const currentSprite = snapshot.val();
+            
+            // Only remove if this position contains one of this character's sprites
+            if (currentSprite && characterSprites.includes(currentSprite)) {
+                set(characterRef, "")
+                    .then(() => updateStatus(`${characterId} removed from ${position}!`))
+                    .catch(handleError);
+            }
+        }, {
+            onlyOnce: true // We only need to check once
+        });
     });
 }
 
