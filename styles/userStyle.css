@@ -238,6 +238,13 @@ body {
     width: auto;
 }
 
+.character-image[src*="helpy"] {
+    max-height: none;
+    max-width: none;
+    height: 110vh;
+    width: auto;
+}
+
 .character-image[src*="hug"] {
     height: 95vh;
     width: auto;
