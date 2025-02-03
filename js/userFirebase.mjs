@@ -19,6 +19,7 @@ const db = getDatabase(app);
 
 // Global audio state
 let currentAudio = null;
+let currentBgmId = null;
 
 // Initialize volume control
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,10 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('audioVolume', e.target.value);
         });
     }
+
+    // Initialize send button handler
+    const sendButton = document.getElementById('send-button');
+    if (sendButton) {
+        sendButton.addEventListener('click', handleSendMessage);
+    }
 });
 
 // Handle send button click
-document.getElementById('send-button').addEventListener('click', () => {
+function handleSendMessage() {
     const userInput = document.getElementById('user-input');
     const userWriteAs = document.getElementById('user-write-as');
     const message = userInput.value.trim();
@@ -77,14 +84,57 @@ document.getElementById('send-button').addEventListener('click', () => {
             onlyOnce: true
         });
     }
-});
+}
 
-// Listen for scene changes
-const sceneRef = ref(db, 'currentScene');
-onValue(sceneRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log('Scene data received:', data);
+// Handle BGM changes
+function handleBgmChange(data) {
+    const newBgmId = data && data.bgm;
     
+    if (newBgmId) {
+        // Only create new audio if the BGM has actually changed
+        if (newBgmId !== currentBgmId) {
+            console.log('Switching to new BGM:', newBgmId);
+            
+            // Stop current audio if it exists
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+
+            // Create new audio for the new BGM
+            const bgmPath = bgm[newBgmId];
+            currentAudio = new Audio(bgmPath);
+            currentAudio.loop = true;
+            
+            // Set volume from slider
+            const volumeSlider = document.getElementById('volume-slider');
+            if (volumeSlider) {
+                currentAudio.volume = volumeSlider.value / 100;
+            }
+            
+            currentAudio.play().catch(error => {
+                console.error('Audio playback failed:', error);
+            });
+            
+            // Update current BGM ID
+            currentBgmId = newBgmId;
+        }
+        // If the BGM is the same, just ensure it's playing
+        else if (currentAudio && currentAudio.paused) {
+            currentAudio.play().catch(error => {
+                console.error('Audio playback failed:', error);
+            });
+        }
+    } 
+    // If there's no BGM in the data, stop any playing audio
+    else if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        currentBgmId = null;
+    }
+}
+
+// Update scene display elements
+function updateSceneDisplay(data) {
     // Update background
     if (data && data.background) {
         document.body.style.backgroundImage = `url(${data.background})`;
@@ -96,13 +146,9 @@ onValue(sceneRef, (snapshot) => {
             const container = document.getElementById(`${position}-character`);
             if (container) {
                 container.innerHTML = '';
-            }
-        });
-
-        Object.entries(data.characters).forEach(([position, imageUrl]) => {
-            if (imageUrl && imageUrl !== "") {
-                const container = document.getElementById(`${position}-character`);
-                if (container) {
+                
+                const imageUrl = data.characters[position];
+                if (imageUrl && imageUrl !== "") {
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.classList.add('character-image');
@@ -121,37 +167,6 @@ onValue(sceneRef, (snapshot) => {
         if (speakerBox) speakerBox.textContent = data.dialogue.speaker;
     }
 
-    // Handle BGM changes
-    if (data && data.bgm) {
-        const bgmPath = bgm[data.bgm];
-        console.log('BGM path:', bgmPath); // Debug log
-        
-        if (!currentAudio || currentAudio.src !== window.location.origin + bgmPath) {
-            console.log('Starting new BGM:', bgmPath);
-            
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-            }
-
-            currentAudio = new Audio(bgmPath);
-            currentAudio.loop = true;
-            
-            // Set initial volume from slider
-            const volumeSlider = document.getElementById('volume-slider');
-            if (volumeSlider) {
-                currentAudio.volume = volumeSlider.value / 100;
-            }
-            
-            currentAudio.play().catch(error => {
-                console.error('Audio playback failed:', error);
-            });
-        }
-    } else if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-    }
-
     // Update user response
     if (data && data.playerText) {
         const userResponse = document.getElementById('user-response');
@@ -163,6 +178,30 @@ onValue(sceneRef, (snapshot) => {
         const userResponse = document.getElementById('user-response');
         if (userResponse) {
             userResponse.style.display = 'none';
+        }
+    }
+}
+
+// Listen for scene changes
+const sceneRef = ref(db, 'currentScene');
+onValue(sceneRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log('Scene data received:', data);
+    
+    // Update scene display
+    updateSceneDisplay(data);
+    
+    // Handle BGM changes
+    handleBgmChange(data);
+});
+
+// Add keyboard event listener for Enter key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        const activeElement = document.activeElement;
+        if (activeElement.id === 'user-input') {
+            e.preventDefault(); // Prevent default Enter behavior
+            handleSendMessage();
         }
     }
 });

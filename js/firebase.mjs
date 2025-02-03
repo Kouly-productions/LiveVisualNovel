@@ -234,3 +234,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Add search input before character controls
+    const characterControls = document.querySelector('.character-controls');
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+    
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.id = 'character-search';
+    searchInput.placeholder = 'Search characters...';
+    
+    searchContainer.appendChild(searchInput);
+    characterControls.parentNode.insertBefore(searchContainer, characterControls);
+
+    // Search functionality
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const characterSections = document.querySelectorAll('.character-section');
+
+        characterSections.forEach(section => {
+            const characterName = section.querySelector('h3').textContent.toLowerCase();
+            if (characterName.includes(searchTerm)) {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        });
+    });
+});
