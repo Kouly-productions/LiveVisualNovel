@@ -231,6 +231,13 @@ body {
     width: auto;
 }
 
+.character-image[src*="glitchtrap"] {
+    max-height: none;
+    max-width: none;
+    height: 140vh;
+    width: auto;
+}
+
 .character-image[src*="sayori"] {
     max-height: none;
     max-width: none;
