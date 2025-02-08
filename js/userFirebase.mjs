@@ -205,3 +205,44 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+// Update Firebase references to match new structure
+const kaikoPointsRef = ref(db, 'gameState/points/kaiko');
+const jamesPointsRef = ref(db, 'gameState/points/james');
+const currentDayRef = ref(db, 'gameState/currentDay');
+
+// Initialize points and day listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const kaikoInput = document.getElementById('kaiko-points');
+    const jamesInput = document.getElementById('james-points');
+    const dayDisplay = document.getElementById('current-day');
+
+    // Listen for Kaiko points changes
+    onValue(kaikoPointsRef, (snapshot) => {
+        const points = snapshot.val() || 1250;
+        kaikoInput.value = points;
+    });
+
+    // Listen for James points changes
+    onValue(jamesPointsRef, (snapshot) => {
+        const points = snapshot.val() || 1250;
+        jamesInput.value = points;
+    });
+
+    // Listen for day changes
+    onValue(currentDayRef, (snapshot) => {
+        const day = snapshot.val() || 'ONSDAG';
+        dayDisplay.textContent = day;
+    });
+
+    // Update points when input changes
+    kaikoInput.addEventListener('change', (e) => {
+        const points = parseInt(e.target.value) || 0;
+        set(kaikoPointsRef, points);
+    });
+
+    jamesInput.addEventListener('change', (e) => {
+        const points = parseInt(e.target.value) || 0;
+        set(jamesPointsRef, points);
+    });
+});
