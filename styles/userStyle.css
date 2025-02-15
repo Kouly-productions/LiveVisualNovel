@@ -238,6 +238,13 @@ body {
     width: auto;
 }
 
+.character-image[src*="bonnie"] {
+    max-height: none;
+    max-width: none;
+    height: 130vh;
+    width: auto;
+}
+
 .character-image[src*="sayori"] {
     max-height: none;
     max-width: none;
@@ -402,6 +409,27 @@ body {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+#current-time {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.current-corruption {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+}
+
+#current-corrupt {
+    color: rgb(84, 45, 105);
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 #character_btn {
     width: 25%;
     height: 10%;
@@ -413,4 +441,405 @@ body {
     border-color: pink;
     border-style: solid;
     align-self: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#character-status-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+#character-status-window {
+    background-color: rgb(231, 145, 231, 0.95);
+    border: 5px solid white;
+    border-radius: 15px;
+    width: 70%;
+    height: 80%;
+    max-height: 800px;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.character-card {
+    background-color: rgba(241, 165, 238, 0.9);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    border: 2px solid white;
+    min-width: 800px;
+}
+
+.character-portrait {
+    width: 120px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid plum;
+}
+
+.character-info {
+    flex: 1;
+}
+
+.character-name {
+    color: #fd1fc6;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.relationship-track {
+    margin-bottom: 30px;  /* Increased for point display */
+}
+
+.track-label {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.current-points {
+    font-size: 1rem;
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.relationship-stages {
+    display: flex;
+    align-items: center;
+    padding: 20px 0;  /* Increased padding for point display */
+    position: relative;
+    margin: 0 10px;
+}
+
+.progress-bar {
+    position: absolute;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    left: 0;        /* Changed from 10px */
+    right: 0;       /* Changed from 10px */
+    top: 28px;      /* Adjusted to align with dots */
+    z-index: 1;
+}
+
+.progress-bar .progress-fill {
+    /*position: absolute;
+    left: 5%;*/
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-bar.kaiko .progress-fill {
+    background-color: #ff6edb;
+}
+
+.progress-bar.james .progress-fill {
+    background-color: #6e9fff;
+}
+
+.stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    margin: 0 -10px; /* Compensate for dot size */
+}
+
+.stage-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 3;
+}
+
+/* Kaiko relationship styling */
+.stage.kaiko.completed .stage-dot {
+    background-color: #ff6edb;
+}
+
+.stage.kaiko.current .stage-dot {
+    background-color: #ff6edb;
+    box-shadow: 0 0 0 4px rgba(255, 110, 219, 0.3);
+}
+
+/* James relationship styling */
+.stage.james.completed .stage-dot {
+    background-color: #6e9fff;
+}
+
+.stage.james.current .stage-dot {
+    background-color: #6e9fff;
+    box-shadow: 0 0 0 4px rgba(110, 159, 255, 0.3);
+}
+
+.stage-name {
+    color: white;
+    font-size: 0.9rem; /* Smaller font */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin-bottom: 2px;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    white-space: nowrap; /* Prevent wrapping */
+    max-width: 100px;    /* Limit width */
+}
+
+.stage-points {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Scrollbar styling */
+#character-status-window::-webkit-scrollbar {
+    width: 10px;
+}
+
+#character-status-window::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+#character-status-window::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+#character-status-window::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.stage-name{
+    font-size: 1.1rem;
+    text-shadow: 
+    -2px -2px 0 #ff6edb,
+    2px -2px 0 #ff6edb,
+    -2px 2px 0 #ff6edb,
+    2px 2px 0 #ff6edb,
+    -1px -1px 0 #ff6edb,
+    1px -1px 0 #ff6edb,
+    -1px 1px 0 #ff6edb,
+    1px 1px 0 #ff6edb;
+}
+
+
+
+
+
+
+
+
+
+
+/* Tab Styles */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background: #ff6edb;
+}
+
+.tab-button:hover {
+    background: rgba(255, 110, 219, 0.5);
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* My Info Styles */
+.my-info-container {
+    color: white;
+    padding: 20px;
+}
+
+.player-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.player-section {
+    background: rgba(82, 64, 64, 0.5);
+    border-radius: 15px;
+    padding: 20px;
+    width: 100%;
+}
+
+.player-section h2 {
+    margin-bottom: 20px;
+    color: #ff6edb;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.stats-grid {
+    display: grid;
+    gap: 15px;
+    width: 100%;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    width: 100%;
+}
+
+.stat-label {
+    min-width: 80px;
+    white-space: nowrap;
+}
+
+.stat-value {
+    font-weight: bold;
+}
+
+/* Progress bar styles for stats */
+.stat-item .progress-bar {
+    flex: 1;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    max-width: calc(100% - 90px);
+    top: 0; /* Added override */
+}
+
+.stat-item .progress-bar .progress-fill {
+    height: 100%;
+    background: #ff6edb;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Different color for James' progress bars */
+.player-section.james .progress-bar .progress-fill {
+    background: #6e9fff;
+}
+
+/* Schedule section */
+.schedule-section {
+    background: rgba(82, 64, 64, 0.5);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.schedule-section h2 {
+    margin-bottom: 20px;
+    color: #ff6edb;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.schedule-grid {
+    display: grid;
+    gap: 15px;
+}
+
+.schedule-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.schedule-item.current {
+    background: rgba(255, 110, 219, 0.2);
+    border: 1px solid #ff6edb;
+}
+
+.schedule-item.past {
+    opacity: 0.7;
+}
+
+.time {
+    font-weight: bold;
+}
+
+.teacher {
+    color: #ff6edb;
+}
+
+#hunger-bar{
+    background-color: #ff6edb;
+}
+
+/* Make tabs scrollable on smaller screens */
+@media (max-width: 768px) {
+    .player-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
 }

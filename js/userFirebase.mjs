@@ -210,12 +210,16 @@ document.addEventListener('keydown', (e) => {
 const kaikoPointsRef = ref(db, 'gameState/points/kaiko');
 const jamesPointsRef = ref(db, 'gameState/points/james');
 const currentDayRef = ref(db, 'gameState/currentDay');
+const corruptionRef = ref(db, 'gameState/corruption');
+const timeRef = ref(db, 'gameState/time');
 
 // Initialize points and day listeners
 document.addEventListener('DOMContentLoaded', () => {
     const kaikoInput = document.getElementById('kaiko-points');
     const jamesInput = document.getElementById('james-points');
     const dayDisplay = document.getElementById('current-day');
+    const corruptionDisplay = document.getElementById('current-corrupt');
+    const currentTime = document.getElementById('current-time');
 
     // Listen for Kaiko points changes
     onValue(kaikoPointsRef, (snapshot) => {
@@ -233,6 +237,18 @@ document.addEventListener('DOMContentLoaded', () => {
     onValue(currentDayRef, (snapshot) => {
         const day = snapshot.val() || 'ONSDAG';
         dayDisplay.textContent = day;
+    });
+
+    // corruptionRef
+    onValue(corruptionRef, (snapshot) => {
+        const day = snapshot.val() || 'Corruption 55%';
+        corruptionDisplay.textContent = day;
+    });
+
+    // timeRef
+    onValue(timeRef, (snapshot) => {
+        const day = snapshot.val() || '07:30';
+        currentTime.textContent = day;
     });
 
     // Update points when input changes

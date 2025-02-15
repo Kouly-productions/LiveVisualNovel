@@ -380,5 +380,20 @@ export const characters = {
         varmt_smil: "./assets/characters/sayori/varmt_smil.png",
       },
     },
+    bonnie: {
+      name: "Bonnie",
+      expressions: {
+        chok: "./assets/characters/bonnie/chok.png",
+        forvirret: "./assets/characters/bonnie/forvirret.png",
+        glad: "./assets/characters/bonnie/glad.png",
+        meget_glad: "./assets/characters/bonnie/meget_glad.png",
+        nervøs: "./assets/characters/bonnie/nervøs.png",
+        neutral: "./assets/characters/bonnie/neutral.png",
+        sur: "./assets/characters/bonnie/sur.png",
+        tænker: "./assets/characters/bonnie/tænker.png",
+        trist_kig_væk: "./assets/characters/bonnie/trist_kig_væk.png",
+        trist: "./assets/characters/bonnie/trist.png",
+      },
+    },
   };
   

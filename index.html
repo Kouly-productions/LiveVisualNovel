@@ -7,11 +7,6 @@
     <link rel="stylesheet" href="/LiveVisualNovel/styles/userStyle.css">
 </head>
 <body>
-    <div id="character-menu-container">
-        <div id="">
-
-        </div>
-    </div>
 
     <!-- Character Container -->
     <div id="character-container">
@@ -46,6 +41,12 @@
         <div class="current-day">
             <span id="current-day">ONSDAG</span>
         </div>
+        <div class="current-day">
+            <span id="current-time">07:30</span>
+        </div>
+        <div class="current-corruption">
+            <span id="current-corrupt">Corruption 55%</span>
+        </div>
     </div>
 
     <!-- Dialogue Container -->
@@ -58,6 +59,11 @@
             <div id="dialogue-box">
                 <p id="dialogue-text">Place holder</p>
             </div>
+            <div id="character-menu-container">
+                <div id="">
+        
+                </div>
+            </div>
         </div>
 
         <!-- User Input Section -->
@@ -69,5 +75,9 @@
     </div>
 
     <script type="module" src="/LiveVisualNovel/js/userFirebase.mjs"></script>
+    <script type="module">
+        import { initializeCharacterSystem } from '/LiveVisualNovel/js/characterSystem.js';
+        document.addEventListener('DOMContentLoaded', initializeCharacterSystem);
+    </script>
 </body>
 </html>
