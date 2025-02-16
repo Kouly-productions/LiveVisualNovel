@@ -146,74 +146,7 @@ function createCharacterCard(character, relationships) {
 
 function createMyInfoContent() {
     return `
-        <div class="my-info-container">
-            <div class="player-stats">
-                <div class="player-section kaiko">
-                    <h2>Kaiko</h2>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-label">Money:</span>
-                            <span class="stat-value">5000¥</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Hunger:</span>
-                            <div class="progress-bar"">
-                                <div class="progress-fill" style="width: 75%;"></div>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">First:</span>
-                            <div class="progress-bar" id="thirst-bar">
-                                <div class="progress-fill" style="width: 60%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="player-section james">
-                    <h2>James</h2>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-label">Money:</span>
-                            <span class="stat-value">3500¥</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Hunger:</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">First:</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 45%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="schedule-section">
-                <h2>Timer</h2>
-                <div class="schedule-grid">
-                    <div class="schedule-item past">
-                        <span class="time">08:30</span>
-                        <span class="subject">Math</span>
-                        <span class="teacher">Ms. Akira</span>
-                    </div>
-                    <div class="schedule-item current">
-                        <span class="time">10:15</span>
-                        <span class="subject">Physics</span>
-                        <span class="teacher">Mr. Freddy</span>
-                    </div>
-                    <div class="schedule-item next">
-                        <span class="time">13:00</span>
-                        <span class="subject">Literature</span>
-                        <span class="teacher">Baldi</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     `;
 }
 

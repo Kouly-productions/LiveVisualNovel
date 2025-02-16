@@ -280,6 +280,12 @@ export const characters = {
         sweet: "./assets/characters/aiko/sweet.png",
         heart: "./assets/characters/aiko/heart.png",
         wdym: "./assets/characters/aiko/wdym.png",
+        hug: "./assets/characters/aiko/hug.png",
+        hug_closed: "./assets/characters/aiko/hugClosed.png",
+        hug_flirt: "./assets/characters/aiko/hugFlirt.png",
+        hug_sad: "./assets/characters/aiko/hugSad.png",
+        kiss_open: "./assets/characters/aiko/kiss.png",
+        kiss_closed: "./assets/characters/aiko/kissClosed.png",
       },
     },
     bedste: {
