@@ -224,6 +224,28 @@ body {
     transform: translate(-50%, -50%) scale(1.2); /* Center and scale up */
 }
 
+.character-position:has(.character-image[src*="yandere"]) {
+    width: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: 70vh; /* Ensure full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.character-image[src*="yandere"] {
+    height: auto;
+    width: auto;
+    max-height: 100vh; /* Allow overflow beyond viewport */
+    max-width: 100vw; /* Allow overflow beyond viewport */
+    object-fit: contain;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.2); /* Center and scale up */
+}
+
 .character-image[src*="freddy"],
 .character-image[src*=vanny]{
     max-height: none;

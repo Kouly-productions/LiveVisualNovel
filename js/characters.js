@@ -286,6 +286,8 @@ export const characters = {
         hug_sad: "./assets/characters/aiko/hugSad.png",
         kiss_open: "./assets/characters/aiko/kiss.png",
         kiss_closed: "./assets/characters/aiko/kissClosed.png",
+        close_yandere_smile: "./assets/characters/aiko/close_yandere_smile.png",
+        close_yandere_flirt: "./assets/characters/aiko/close_yandere_flirt.png",
       },
     },
     bedste: {
