@@ -23,6 +23,8 @@ const db = getDatabase(app);
 let selectedCharacter = null;
 let selectedEmotion = null;
 
+
+
 // Background Control
 window.updateBackground = function(backgroundId) {
     if (!backgrounds[backgroundId]) {
@@ -32,7 +34,18 @@ window.updateBackground = function(backgroundId) {
 
     const sceneRef = ref(db, 'currentScene/background');
     set(sceneRef, backgrounds[backgroundId])
-        .then(() => updateStatus('Background updated successfully!'))
+        .then(() => {
+            updateStatus('Background updated successfully!');
+            // Highlight the selected background
+            document.querySelectorAll('.background-item').forEach(item => {
+                item.style.border = '1px solid #ddd';
+            });
+            const selectedItem = Array.from(document.querySelectorAll('.background-item'))
+                .find(item => item.querySelector('button').textContent === backgroundId.replace(/_/g, ' '));
+            if (selectedItem) {
+                selectedItem.style.border = '2px solid #4CAF50';
+            }
+        })
         .catch(handleError);
 }
 
@@ -222,13 +235,18 @@ onValue(sceneRef, (snapshot) => {
     updateDisplay(data);
 });
 
-// Initialize BGM buttons when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.bgm-buttons');
     if (container && bgm) {
         Object.keys(bgm).forEach(songId => {
             const button = document.createElement('button');
             button.textContent = songId.replace(/_/g, ' ').toUpperCase();
+            
+            // Check if the button text contains 'dark' and add the theme class
+            if (button.textContent.toLowerCase().includes('dark')) {
+                button.classList.add('dark-theme');
+            }
+            
             button.onclick = () => playBGM(songId);
             container.appendChild(button);
         });
@@ -263,4 +281,107 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Create search bar
+    const controlsDiv = document.querySelector('.controls');
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+    
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.id = 'background-search';
+    searchInput.placeholder = 'Search backgrounds...';
+    
+    searchContainer.appendChild(searchInput);
+    controlsDiv.insertBefore(searchContainer, document.querySelector('.background-buttons'));
+
+    // Create background buttons
+    const container = document.querySelector('.background-buttons');
+    if (container) {
+        // Clear existing buttons
+        container.innerHTML = '';
+        
+        // Create new button-preview pairs
+        Object.entries(backgrounds).forEach(([backgroundId, backgroundUrl]) => {
+            const item = document.createElement('div');
+            item.className = 'background-item';
+            
+            // Create button
+            const button = document.createElement('button');
+            button.textContent = backgroundId.replace(/_/g, ' ');
+            button.onclick = () => updateBackground(backgroundId);
+            
+            // Create preview div
+            const preview = document.createElement('div');
+            preview.className = 'background-preview';
+            preview.style.backgroundImage = `url(${backgroundUrl})`;
+            
+            // Add button and preview to item container
+            item.appendChild(button);
+            item.appendChild(preview);
+            container.appendChild(item);
+        });
+    }
+
+    // Add search functionality
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const backgroundItems = document.querySelectorAll('.background-item');
+        
+        backgroundItems.forEach(item => {
+            const buttonText = item.querySelector('button').textContent.toLowerCase();
+            if (buttonText.includes(searchTerm)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Create floating navigation
+    const nav = document.createElement('div');
+    nav.className = 'floating-nav';
+
+    // Define sections to jump to
+    const sections = [
+        { title: 'Backgrounds', selector: '.background-buttons' },
+        { title: 'Characters', selector: '.character-controls' },
+        { title: 'Music', selector: '.bgm-controls' },
+    ];
+
+    // Create buttons for each section
+    sections.forEach(section => {
+        const button = document.createElement('button');
+        button.textContent = `Jump to ${section.title}`;
+        
+        button.addEventListener('click', () => {
+            const element = document.querySelector(section.selector);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+        
+        nav.appendChild(button);
+    });
+
+    // Add "Jump to Top" button
+    const topButton = document.createElement('button');
+    topButton.textContent = 'Back to Top';
+    topButton.addEventListener('click', () => {
+        window.scrollTo({ 
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    nav.appendChild(topButton);
+
+    // Add navigation to the page
+    document.body.appendChild(nav);
 });
