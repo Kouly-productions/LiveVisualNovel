@@ -265,8 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add these functions after your existing Firebase initialization code
 // Time control state
+// Add new reference for time speed multiplier
+const timeSpeedRef = ref(db, 'gameState/timeSpeedMultiplier');
+const timerStateRef = ref(db, 'gameState/timerState');
 let timeInterval = null;
 let isTimerRunning = false;
+let currentTimeSpeed = 45;
 
 function parseTime(timeString) {
     const [hours, minutes] = timeString.split(':').map(num => parseInt(num));
@@ -301,17 +305,31 @@ function updateTime() {
 }
 
 function startTimer() {
-    if (!isTimerRunning) {
-        isTimerRunning = true;
-        timeInterval = setInterval(updateTime, 45000);
-        document.getElementById('start-timer').disabled = true;
-        document.getElementById('pause-timer').disabled = false;
-        console.log('Timer started');
-    }
+    // Update Firebase timer state
+    set(timerStateRef, 'running')
+        .then(() => {
+            console.log('Timer state updated to running');
+        })
+        .catch(error => console.error('Error updating timer state:', error));
 }
 
 function pauseTimer() {
-    if (isTimerRunning) {
+    // Update Firebase timer state
+    set(timerStateRef, 'paused')
+        .then(() => {
+            console.log('Timer state updated to paused');
+        })
+        .catch(error => console.error('Error updating timer state:', error));
+}
+
+function handleTimerStateChange(isRunning) {
+    if (isRunning) {
+        isTimerRunning = true;
+        timeInterval = setInterval(updateTime, currentTimeSpeed * 1000);
+        document.getElementById('start-timer').disabled = true;
+        document.getElementById('pause-timer').disabled = false;
+        console.log('Timer started with speed multiplier:', currentTimeSpeed);
+    } else {
         isTimerRunning = false;
         clearInterval(timeInterval);
         document.getElementById('start-timer').disabled = false;
@@ -320,7 +338,34 @@ function pauseTimer() {
     }
 }
 
+// Listen for changes to time speed multiplier
+function initializeTimeSpeedListener() {
+    onValue(timeSpeedRef, (snapshot) => {
+        const newTimeSpeed = snapshot.val() || 45;
+        if (newTimeSpeed !== currentTimeSpeed) {
+            currentTimeSpeed = newTimeSpeed;
+            console.log('Time speed updated to:', currentTimeSpeed);
+            
+            // Restart timer if it's running to apply new speed
+            if (isTimerRunning) {
+                clearInterval(timeInterval);
+                timeInterval = setInterval(updateTime, currentTimeSpeed * 1000);
+            }
+        }
+    });
+}
+
+
 function initializeTimeSystem() {
+    // Initialize time speed listener
+    initializeTimeSpeedListener();
+    
+    // Listen for timer state changes
+    onValue(timerStateRef, (snapshot) => {
+        const timerState = snapshot.val() || 'paused';
+        handleTimerStateChange(timerState === 'running');
+    });
+    
     // Create timer controls
     const controlsContainer = document.createElement('div');
     controlsContainer.id = 'timer-controls';
@@ -335,15 +380,18 @@ function initializeTimeSystem() {
     pauseButton.id = 'pause-timer';
     pauseButton.textContent = '⏸️ Pause';
     pauseButton.onclick = pauseTimer;
-    pauseButton.disabled = true;  // Initially disabled since timer starts paused
+    pauseButton.disabled = true;
+    
+    // Add speed display
+    const speedDisplay = document.createElement('div');
     
     controlsContainer.appendChild(startButton);
     controlsContainer.appendChild(pauseButton);
+    controlsContainer.appendChild(speedDisplay);
     
-    // Find the time display element
+    // Find the time display element and add controls
     const timeDisplay = document.getElementById('current-time');
     if (timeDisplay) {
-        // Create a wrapper div for both time and controls if it doesn't exist
         let timeWrapper = timeDisplay.parentElement;
         if (!timeWrapper.classList.contains('time-wrapper')) {
             timeWrapper = document.createElement('div');
@@ -351,8 +399,6 @@ function initializeTimeSystem() {
             timeDisplay.parentNode.insertBefore(timeWrapper, timeDisplay);
             timeWrapper.appendChild(timeDisplay);
         }
-        
-        // Add the controls after the time display
         timeWrapper.appendChild(controlsContainer);
     }
 }
