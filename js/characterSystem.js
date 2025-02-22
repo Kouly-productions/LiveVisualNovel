@@ -2,39 +2,40 @@ import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebase
 
 // Relationship stage descriptions
 const relationshipStageDescriptions = {
-    'Neutral': 'Karakteren viser ingen særlig interesse i dig. De hilser måske, men glemmer dig hurtigt.',
-    'Nysgerrig': 'Karakteren vil gerne lære mere om dig, og er villig til at stille dig spørgsmål',
-    'Venlig': 'Karakteren smiler til dig, og kan godt lide at snakke med dig',
-    'Venskab': 'Karakteren vil gerne være sammen med dig, personen deler personlige historier og stoler på dig',
-    'Interesseret': 'Karakteren ligger mere mærke til dig, giver dig komplimenter og finder undskyldinger for at være sammen med dig',
-    'Tiltrukket': 'Karakteren opfører sig mere nervøst eller energisk omkring dig, personen griner mere af dine vittigheder og finder måder at røre dig let på',
-    'Forelsket': 'Karakteren er blevet forelsket i dig, og vil beskytte dig og føle at du er det vigtigste for dem om alt andet',
-    'Kærlighed': 'En dyb og ægte kærlighed er opstået mellem jer.',
-    'Eneste ene': 'Karakteren ser dig som deres eneste ene, og planlægger sin fremtid i hemmelighed sammen med dig.',
-    'Besættelse': 'Karakteren har svært ved at acceptere afstand. De vil altid vide, hvor du er, og kan reagere stærkt på, hvis du trækker dig væk',
-    'Yandere': 'Karakteren vil gøre ALT for at holde dig for sig selv – hun vik skubbe andre væk, manipulere situationer eller i værste fald bruge ekstreme midler for at sikre, at du aldrig forlader hende. Hun vil endda skade andre eller slå ijhel'
+    'Neutral': 'I kender knap nok hinanden',
+    'Nysgerrig': 'vil gerne lære dig bedre at kende',
+    'Venlig': 'Er glad for at snakke med dig',
+    'Venskab': 'Deler personlige ting med dig',
+    'Bedste ven': 'Ser dig som sin bedste ven',
+    'Interesseret': 'Giver dig komplimenter og vil være sammen med dig',
+    'Tiltrukket': 'Opfører sig anderledes omkring dig, og vil gerne være tættere på dig',
+    'Forelsket': 'Er blevet forelsket i dig',
+    'Kærlighed': 'Føler en dyb kærlighed til dig',
+    'Eneste ene': 'Ser dig som deres eneste ene',
+    'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
+    'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
 };
 
 const teacherRelationshipDescriptions = {
-    'Neutral': 'Et almindeligt lærer-elev forhold.',
-    'Observerende': 'Læreren har bemærket dit potentiale.',
-    'Støttende': 'Læreren ønsker aktivt at hjælpe dig med at udvikle dig.',
-    'Respekteret': 'Du har vundet lærerens professionelle respekt.',
-    'Stolt': 'Læreren er stolt af din udvikling og præstationer.',
-    'Favorit': 'Du er blevet en af lærerens foretrukne elever.',
-    'Beskyttende': 'Læreren føler et særligt ansvar for din trivsel.',
-    'Overbeskyttende': 'Læreren er ekstremt fokuseret på din succes og sikkerhed.'
+    'Neutral': 'Ser dig som alle de andre elever',
+    'Observerende': 'Ligger mere mærke til dig end de andre elever',
+    'Støttende': 'Ønsker at hjælpe dig med at blive bedre.',
+    'Respekteret': 'Respektere dig faktisk.',
+    'Stolt': 'Stolt af dig, og stoler på dig',
+    'Favorit': 'Du er en af lærerens yndlings elever.',
+    'Beskyttende': 'Læreren føler at han har en ansvar over for dig.',
+    'Overbeskyttende': 'Læren vil altid tro mere på dig end nogen anden'
 };
 
 const nonDatableRelationshipDescriptions = {
     'Neutral': 'I kender knap nok hinanden.',
     'Nysgerrig': 'Der er en begyndende interesse for venskab.',
-    'Venlig': 'En behagelig og afslappet relation er opstået.',
-    'Venskab': 'Et ægte venskab er under udvikling.',
+    'Venlig': 'Karakteren er venlig over for dig, og er glad for at se dig.',
+    'Venskab': 'Et ægte venskab.',
     'Tæt Venskab': 'I stoler på hinanden og deler personlige tanker.',
-    'Loyal': 'En ubetinget loyalitet er opstået mellem jer.',
+    'Loyal': 'Personen har ikke at dele personlige ting og hemmeligheder med dig',
     'Broderskab': 'I ser hinanden som brødre/søstre.',
-    'Bedste ven': 'Det stærkeste venskabsbånd er smedet mellem jer.'
+    'Bedste ven': 'Det stærkeste venskab.'
 };
 
 // Constants for student relationship stages
@@ -43,10 +44,11 @@ const relationshipStagePoints = {
     'Nysgerrig': 50,
     'Venlig': 150,
     'Venskab': 200,
-    'Interesseret': 250,
-    'Tiltrukket': 400,
-    'Forelsket': 800,
-    'Kærlighed': 1200,
+    'Bedste ven': 250,
+    'Interesseret': 350,
+    'Tiltrukket': 500,
+    'Forelsket': 1000,
+    'Kærlighed': 1500,
     'Eneste ene': 3000,
     'Besættelse': 4000,
     'Yandere': 5000
@@ -81,21 +83,25 @@ const characterData = {
         name: "Akira",
         image: "./assets/characters/akira/flirt1.png"
     },
-    mika: {
-        name: "Mika",
-        image: "./assets/characters/mika/idle1.png"
-    },
-    sakura: {
-        name: "Sakura",
-        image: "./assets/characters/sakura/idle1.png"
+    akemi: {
+        name: "Akemi",
+        image: "./assets/characters/akemi/happy1.png"
     },
     aiko: {
         name: "Aiko",
         image: "./assets/characters/aiko/heart.png"
     },
+    aya: {
+        name: "Aya",
+        image: "./assets/characters/aiko/heart.png"
+    },
     ayano: {
         name: "Ayano",
-        image: "./assets/characters/ayano/shy1.png"
+        image: "./assets/characters/aya/idleSmile.png"
+    },
+    mika: {
+        name: "Mika",
+        image: "./assets/characters/mika/idle1.png"
     },
     minako: {
         name: "Minako",
@@ -105,13 +111,17 @@ const characterData = {
         name: "Monika",
         image: "./assets/characters/monika/flirt.png"
     },
-    sayori: {
-        name: "Sayori",
-        image: "./assets/characters/sayori/glad.png"
-    },
     natsuki: {
         name: "Natsuki",
         image: "./assets/characters/natsuki/smil.png"
+    },
+    sakura: {
+        name: "Sakura",
+        image: "./assets/characters/sakura/idle1.png"
+    },
+    sayori: {
+        name: "Sayori",
+        image: "./assets/characters/sayori/glad.png"
     }
 };
 
@@ -203,10 +213,10 @@ function calculateProgress(points) {
     const pointsNeededForNextStage = nextStagePoints - currentStagePoints;
 
     const segmentProgress = pointsInCurrentStage / pointsNeededForNextStage;
-    const baseProgress = (currentStageIndex / (stages.length - 1)) * 90;
+    const baseProgress = (currentStageIndex / (stages.length - 1)) * 98;
     const additionalProgress = (segmentProgress / (stages.length - 1)) * 90;
 
-    return Math.min(baseProgress + additionalProgress + 5, 100);
+    return Math.min(baseProgress + additionalProgress, 100);
 }
 
 // Utility functions for teacher relationships
@@ -345,11 +355,6 @@ function createStudentRelationshipTrack(character, relationship, isKaiko) {
             <div class="hearts-row">
                 ${heartsHTML}
             </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    ✨ ${currentStage} ✨ (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
         </div>
     `;
 }
@@ -375,7 +380,7 @@ function createTeacherRelationshipTrack(character, relationship, isKaiko) {
     return `
         <div class="relationship-track ${playerClass}">
             <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Elias' : 'Kouly'}</span>
+                <span class="status-main-name">${isKaiko ? 'Elias' : 'Jakob'}</span>
                 <span class="current-points">${points}p (${currentStage})</span>
             </div>
             <div class="progress-bar">
@@ -384,11 +389,6 @@ function createTeacherRelationshipTrack(character, relationship, isKaiko) {
             <div class="hearts-row">
                 ${heartsHTML}
             </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    📚 ${currentStage} 📚 (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
         </div>
     `;
 }
@@ -423,11 +423,6 @@ function createNonDatableRelationshipTrack(character, relationship, isKaiko) {
             <div class="hearts-row">
                 ${heartsHTML}
             </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    🤝 ${currentStage} 🤝 (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
         </div>
     `;
 }

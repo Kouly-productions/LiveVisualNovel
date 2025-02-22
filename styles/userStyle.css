@@ -670,11 +670,15 @@ body {
 
 /* Hearts Row */
 .hearts-row {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: space-between;
+}
+
+.heart-container {
     display: flex;
-    justify-content: space-around;
-    margin: 10px 0;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
 }
 
 .heart {
@@ -683,7 +687,13 @@ body {
     cursor: help;
     transition: all 0.3s ease;
     position: relative;
+    display: flex;
+    justify-content: center;
+    width: 30px; /* Fixed width for the heart emoji */
+    height: 30px; /* Fixed height to match width */
+    align-items: center;
 }
+
 
 .heart.filled {
     color: #FF6B95;
@@ -699,15 +709,9 @@ body {
     color: #4AA5FF;
 }
 
-.heart-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 5px;
-}
 
 .stage-label {
-    font-size: 0.em;
+    font-size: 0.7em;
     text-align: center;
     margin-top: 4px;
     max-width: 80px;
