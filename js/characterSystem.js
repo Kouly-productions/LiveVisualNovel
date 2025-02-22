@@ -167,6 +167,10 @@ const teacherCharacterData = {
         name: "Glitchtrap",
         image: "./assets/characters/glitchtrap/glitchtrap.png"
     },
+    glitchtrap: {
+        name: "Baldi",
+        image: "./assets/characters/baldi/idle.png"
+    },
     bonnie: {
         name: "Bonnie",
         image: "./assets/characters/bonnie/glad.png"
@@ -332,7 +336,7 @@ function createStudentRelationshipTrack(character, relationship, isKaiko) {
     return `
         <div class="relationship-track ${playerClass}">
             <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Kaiko' : 'James'}</span>
+                <span class="status-main-name">${isKaiko ? 'Elias' : 'Jakob'}</span>
                 <span class="current-points">${points}p (${currentStage})</span>
             </div>
             <div class="progress-bar">
@@ -371,7 +375,7 @@ function createTeacherRelationshipTrack(character, relationship, isKaiko) {
     return `
         <div class="relationship-track ${playerClass}">
             <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Kaiko' : 'James'}</span>
+                <span class="status-main-name">${isKaiko ? 'Elias' : 'Kouly'}</span>
                 <span class="current-points">${points}p (${currentStage})</span>
             </div>
             <div class="progress-bar">
@@ -410,7 +414,7 @@ function createNonDatableRelationshipTrack(character, relationship, isKaiko) {
     return `
         <div class="relationship-track ${playerClass}">
             <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Kaiko' : 'James'}</span>
+                <span class="status-main-name">${isKaiko ? 'Elias' : 'Jakob'}</span>
                 <span class="current-points">${points}p (${currentStage})</span>
             </div>
             <div class="progress-bar">
