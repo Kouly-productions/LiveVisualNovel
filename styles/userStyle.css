@@ -27,6 +27,10 @@ body {
     pointer-events: none;
 }
 
+.character-details {
+    width: 100%;
+}
+
 .character {
     position: absolute;
     bottom: 0;
@@ -504,215 +508,304 @@ body {
 
 
 
-
-
-
+/* Character Status Window */
 #character-status-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+}
+
+#character-status-overlay.hidden {
+    display: none;
 }
 
 #character-status-window {
-    background-color: rgb(231, 145, 231, 0.95);
-    border: 5px solid white;
-    border-radius: 15px;
-    width: 70%;
-    height: 80%;
-    max-height: 800px;
+    background: #fef6f9;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Header and Tabs */
+.tabs {
+    background: linear-gradient(45deg, #FF8FAB, #FF6B95);
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tab-button.active {
+    background: white;
+    color: #FF6B95;
+}
+
+/* Content Area */
+.tab-content {
     padding: 20px;
     overflow-y: auto;
+    max-height: calc(85vh - 80px);
+    background: #333;
 }
 
+/* Character Cards */
 .character-card {
-    background-color: rgba(241, 165, 238, 0.9);
-    border-radius: 15px;
-    padding: 15px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #FFE4E9;
+    overflow: hidden;
     margin-bottom: 20px;
-    display: flex;
-    gap: 20px;
-    border: 2px solid white;
-    min-width: 800px;
+    transition: transform 0.3s ease;
 }
 
-.character-portrait {
-    width: 120px;
-    height: 160px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid plum;
+.character-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 182, 193, 0.2);
 }
 
 .character-info {
-    flex: 1;
+    padding: 20px;
+    background-color: #d6afcc;
+}
+
+.character-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.character-portrait {
+    width: 70px;
+    height: 70px;
+    border-radius: 35px;
+    object-fit: cover;
+    border: 3px solid #FFE4E9;
 }
 
 .character-name {
-    color: #fd1fc6;
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 30px;
+    font-weight: 600;
+    color: #ff00f2;
 }
 
+/* Relationship Track */
 .relationship-track {
-    margin-bottom: 30px;  /* Increased for point display */
+    background: #813d73;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.status-main-name {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
 .track-label {
-    color: white;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 .current-points {
-    font-size: 1rem;
-    opacity: 0.9;
-    color: rgba(255, 255, 255, 0.9);
+    background: #FFE4E9;
+    color: #FF6B95;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
-.relationship-stages {
-    display: flex;
-    align-items: center;
-    padding: 20px 0;  /* Increased padding for point display */
-    position: relative;
-    margin: 0 10px;
-}
-
+/* Progress Bar */
 .progress-bar {
-    position: absolute;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.2);
-    left: 0;        /* Changed from 10px */
-    right: 0;       /* Changed from 10px */
-    top: 28px;      /* Adjusted to align with dots */
-    z-index: 1;
+    height: 20px;
+    background: #FFE4E9;
+    border-radius: 4px;
+    margin: 15px 0;
+    overflow: hidden;
 }
 
-.progress-bar .progress-fill {
-    /*position: absolute;
-    left: 5%;*/
+.progress-fill {
     height: 100%;
     transition: width 0.3s ease;
 }
 
-.progress-bar.kaiko .progress-fill {
-    background-color: #ff6edb;
+.kaiko .progress-fill {
+    background: linear-gradient(90deg, #FF8FAB, #FF6B95);
 }
 
-.progress-bar.james .progress-fill {
-    background-color: #6e9fff;
+.james .progress-fill {
+    background: linear-gradient(90deg, #7EC6FF, #4AA5FF);
 }
 
-.stage {
+/* Hearts Row */
+.hearts-row {
+    display: flex;
+    justify-content: space-around;
+    margin: 10px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.heart {
+    font-size: 20px;
+    color: #FFB6C1;
+    cursor: help;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.heart.filled {
+    color: #FF6B95;
+}
+
+.heart.current {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 2px rgba(255,107,149,0.5));
+}
+
+.james .heart.filled,
+.james .heart.current {
+    color: #4AA5FF;
+}
+
+.heart-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
-    position: relative;
-    z-index: 2;
-    margin: 0 -10px; /* Compensate for dot size */
+    margin: 0 5px;
 }
 
-.stage-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 2px solid white;
-    background-color: rgba(255, 255, 255, 0.2);
-    margin-bottom: 5px;
-    position: relative;
-    z-index: 3;
+.stage-label {
+    font-size: 0.em;
+    text-align: center;
+    margin-top: 4px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Kaiko relationship styling */
-.stage.kaiko.completed .stage-dot {
-    background-color: #ff6edb;
-}
-
-.stage.kaiko.current .stage-dot {
-    background-color: #ff6edb;
-    box-shadow: 0 0 0 4px rgba(255, 110, 219, 0.3);
-}
-
-/* James relationship styling */
-.stage.james.completed .stage-dot {
-    background-color: #6e9fff;
-}
-
-.stage.james.current .stage-dot {
-    background-color: #6e9fff;
-    box-shadow: 0 0 0 4px rgba(110, 159, 255, 0.3);
-}
-
-.stage-name {
+/* Stage Labels */
+.stage-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.95);
     color: white;
-    font-size: 0.9rem; /* Smaller font */
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin-bottom: 2px;
-    text-align: center;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    white-space: nowrap; /* Prevent wrapping */
-    max-width: 100px;    /* Limit width */
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    min-width: 300px;
+    width: max-content;
+    max-width: 400px;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-align: left;
+    bottom: 100%;
+    margin-bottom: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.stage-points {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
-    text-align: center;
+/* Center tooltip (default) */
+.tooltip-center {
+    left: 50%;
+    transform: translateX(-50%);
 }
 
-.hidden {
-    display: none !important;
+/* Left-aligned tooltip */
+.tooltip-left {
+    left: 0;
+    transform: translateX(0);
 }
 
-/* Scrollbar styling */
-#character-status-window::-webkit-scrollbar {
-    width: 10px;
+/* Right-aligned tooltip */
+.tooltip-right {
+    right: 0;
+    left: auto;
+    transform: translateX(0);
+}
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-#character-status-window::-webkit-scrollbar-track {
+.tooltip-header strong {
+    font-size: 1.1em;
+    color: #ff6edb;
+}
+
+.tooltip-points {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
 }
 
-#character-status-window::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 5px;
+.tooltip-description {
+    line-height: 1.4;
+    font-size: 0.95em;
 }
 
-#character-status-window::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
+.heart:hover .stage-tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
-.stage-name{
-    font-size: 1.1rem;
-    text-shadow: 
-    -2px -2px 0 #ff6edb,
-    2px -2px 0 #ff6edb,
-    -2px 2px 0 #ff6edb,
-    2px 2px 0 #ff6edb,
-    -1px -1px 0 #ff6edb,
-    1px -1px 0 #ff6edb,
-    -1px 1px 0 #ff6edb,
-    1px 1px 0 #ff6edb;
+/* Current Stage Label */
+.current-stage {
+    text-align: center;
+    margin-top: 15px;
+    color: #FF6B95;
+    font-size: 14px;
+    padding: 8px;
+    background: #FFF0F3;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-
-
-
-
+.james .current-stage {
+    color: #4AA5FF;
+    background: #F0F7FF;
+}
 
 
 
@@ -722,7 +815,6 @@ body {
 .tabs {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .tab-button {
@@ -737,11 +829,11 @@ body {
 }
 
 .tab-button.active {
-    background: #ff6edb;
+    background: #000000;
 }
 
 .tab-button:hover {
-    background: rgba(255, 110, 219, 0.5);
+    background: rgba(255, 210, 244, 0.5);
 }
 
 .tab-pane {

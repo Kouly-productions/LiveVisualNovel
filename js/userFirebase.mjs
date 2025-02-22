@@ -262,3 +262,139 @@ document.addEventListener('DOMContentLoaded', () => {
         set(jamesPointsRef, points);
     });
 });
+
+// Add these functions after your existing Firebase initialization code
+// Time control state
+let timeInterval = null;
+let isTimerRunning = false;
+
+function parseTime(timeString) {
+    const [hours, minutes] = timeString.split(':').map(num => parseInt(num));
+    return { hours, minutes };
+}
+
+function formatTime(hours, minutes) {
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function addMinutesToTime(timeString, minutesToAdd) {
+    let { hours, minutes } = parseTime(timeString);
+    
+    minutes += minutesToAdd;
+    hours += Math.floor(minutes / 60);
+    minutes = minutes % 60;
+    hours = hours % 24;  // Wrap around at midnight
+    
+    return formatTime(hours, minutes);
+}
+
+function updateTime() {
+    onValue(timeRef, (snapshot) => {
+        const currentTime = snapshot.val() || '07:30';
+        const newTime = addMinutesToTime(currentTime, 5);
+        set(timeRef, newTime)
+            .then(() => console.log('Time updated to:', newTime))
+            .catch(error => console.error('Error updating time:', error));
+    }, {
+        onlyOnce: true
+    });
+}
+
+function startTimer() {
+    if (!isTimerRunning) {
+        isTimerRunning = true;
+        timeInterval = setInterval(updateTime, 45000);
+        document.getElementById('start-timer').disabled = true;
+        document.getElementById('pause-timer').disabled = false;
+        console.log('Timer started');
+    }
+}
+
+function pauseTimer() {
+    if (isTimerRunning) {
+        isTimerRunning = false;
+        clearInterval(timeInterval);
+        document.getElementById('start-timer').disabled = false;
+        document.getElementById('pause-timer').disabled = true;
+        console.log('Timer paused');
+    }
+}
+
+function initializeTimeSystem() {
+    // Create timer controls
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'timer-controls';
+    controlsContainer.className = 'timer-controls';
+    
+    const startButton = document.createElement('button');
+    startButton.id = 'start-timer';
+    startButton.textContent = '▶️ Resume';
+    startButton.onclick = startTimer;
+    
+    const pauseButton = document.createElement('button');
+    pauseButton.id = 'pause-timer';
+    pauseButton.textContent = '⏸️ Pause';
+    pauseButton.onclick = pauseTimer;
+    pauseButton.disabled = true;  // Initially disabled since timer starts paused
+    
+    controlsContainer.appendChild(startButton);
+    controlsContainer.appendChild(pauseButton);
+    
+    // Find the time display element
+    const timeDisplay = document.getElementById('current-time');
+    if (timeDisplay) {
+        // Create a wrapper div for both time and controls if it doesn't exist
+        let timeWrapper = timeDisplay.parentElement;
+        if (!timeWrapper.classList.contains('time-wrapper')) {
+            timeWrapper = document.createElement('div');
+            timeWrapper.className = 'time-wrapper';
+            timeDisplay.parentNode.insertBefore(timeWrapper, timeDisplay);
+            timeWrapper.appendChild(timeDisplay);
+        }
+        
+        // Add the controls after the time display
+        timeWrapper.appendChild(controlsContainer);
+    }
+}
+
+// Add styles to the document
+const styles = document.createElement('style');
+styles.textContent = `
+.time-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.timer-controls button {
+    padding: 4px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9em;
+}
+
+.timer-controls button:hover {
+    background-color: #444;
+}
+
+.timer-controls button:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+`;
+document.head.appendChild(styles);
+
+// Initialize when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeTimeSystem();
+});
