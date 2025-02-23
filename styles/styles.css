@@ -115,6 +115,25 @@ select, input {
     border-color: #444;
 }
 
+.bgm-buttons button.orange-theme {
+    background: #da7e16;
+    color: #fff;
+    border-color: #444;
+}
+
+.bgm-buttons button.dark_green-theme {
+    background: #0c6418;
+    color: #fff;
+    border-color: #444;
+}
+
+.bgm-buttons button.dark_pink-theme {
+    background: #86146a;
+    color: #fff;
+    border-color: #444;
+}
+
+
 .stop-bgm {
     background-color: #ff4444;
 }
@@ -215,4 +234,3 @@ select, input {
 .floating-nav button:hover {
     background: #45a049;
 }
-

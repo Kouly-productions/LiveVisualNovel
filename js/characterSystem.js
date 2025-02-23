@@ -81,31 +81,31 @@ const nonDatableRelationshipStagePoints = {
 const characterData = {
     akira: {
         name: "Akira",
-        image: "./assets/characters/akira/flirt1.png"
+        image: "./assets/characters/akira/head.png"
     },
     akemi: {
-        name: "Akemi",
-        image: "./assets/characters/akemi/happy1.png"
+        name: "Mia",
+        image: "./assets/characters/akemi/head.png"
     },
     aiko: {
         name: "Aiko",
-        image: "./assets/characters/aiko/heart.png"
+        image: "./assets/characters/aiko/head.png"
     },
     aya: {
         name: "Aya",
-        image: "./assets/characters/aiko/heart.png"
+        image: "./assets/characters/aya/head.png"
     },
     ayano: {
         name: "Ayano",
-        image: "./assets/characters/aya/idleSmile.png"
+        image: "./assets/characters/ayano/head.png"
     },
     mika: {
         name: "Mika",
-        image: "./assets/characters/mika/idle1.png"
+        image: "./assets/characters/mika/head.png"
     },
     minako: {
         name: "Minako",
-        image: "./assets/characters/minako/ohReally1.png"
+        image: "./assets/characters/minako/head.png"
     },
     monika: {
         name: "Monika",
@@ -117,7 +117,7 @@ const characterData = {
     },
     sakura: {
         name: "Sakura",
-        image: "./assets/characters/sakura/idle1.png"
+        image: "./assets/characters/sakura/head.png"
     },
     sayori: {
         name: "Sayori",
@@ -255,7 +255,17 @@ function calculateTeacherProgress(points) {
 function createHeartWithLabel(stage, index, currentStageIndex, points, descriptions, totalStages) {
     const filled = index <= currentStageIndex;
     const isCurrent = index === currentStageIndex;
-    const position = index === 0 ? 'left' : index === totalStages - 1 ? 'right' : 'center';
+    let position;
+    if (index === 10) {
+        // Force the eleventh heart (index 10) to use tooltip-left
+        position = 'right';
+    } else if (index === 0) {
+        position = 'left';
+    } else if (index === totalStages - 1) {
+        position = 'right';
+    } else {
+        position = 'center';
+    }
     
     return `
         <div class="heart-container">
@@ -275,6 +285,7 @@ function createHeartWithLabel(stage, index, currentStageIndex, points, descripti
         </div>
     `;
 }
+
 
 function createTeacherHeartWithLabel(stage, index, currentStageIndex, points, descriptions, totalStages) {
     const filled = index <= currentStageIndex;
@@ -367,10 +378,6 @@ function createTeacherRelationshipTrack(character, relationship, isKaiko) {
     const currentStageIndex = getTeacherStageIndex(points);
     const currentStage = stages[currentStageIndex];
     
-    const nextStage = stages[currentStageIndex + 1];
-    const pointsNeeded = nextStage ? 
-        teacherRelationshipStagePoints[nextStage] - points : 0;
-    
     const playerClass = isKaiko ? 'kaiko' : 'james';
 
     const heartsHTML = stages.map((stage, index) => 
@@ -400,10 +407,6 @@ function createNonDatableRelationshipTrack(character, relationship, isKaiko) {
     const progress = calculateTeacherProgress(points);
     const currentStageIndex = getTeacherStageIndex(points);
     const currentStage = stages[currentStageIndex];
-    
-    const nextStage = stages[currentStageIndex + 1];
-    const pointsNeeded = nextStage ? 
-        nonDatableRelationshipStagePoints[nextStage] - points : 0;
     
     const playerClass = isKaiko ? 'kaiko' : 'james';
 

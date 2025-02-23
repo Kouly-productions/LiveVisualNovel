@@ -420,5 +420,20 @@ export const characters = {
         smile1: "./assets/characters/akemi/smile1.png",
       },
     },
+    toybonnie: {
+      name: "Toy Bonnie",
+      expressions: {
+        idle: "./assets/characters/toy_bonnie/tb_idle.png",
+        think: "./assets/characters/toy_bonnie/tb_think.png",
+        point: "./assets/characters/toy_bonnie/tb_point.png",
+      },
+    },
+    puppet: {
+      name: "puppet",
+      expressions: {
+        idle: "./assets/characters/puppet/puppet_idle.png",
+        idle2: "./assets/characters/puppet/puppet_idle2.png",
+      },
+    },
   };
   

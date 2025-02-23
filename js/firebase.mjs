@@ -246,6 +246,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button.textContent.toLowerCase().includes('dark')) {
                 button.classList.add('dark-theme');
             }
+
+            // Check if the button text contains 'orange' and add the theme class
+            if (button.textContent.toLowerCase().includes('theme')) {
+                button.classList.add('orange-theme');
+            }
+
+            // Check if the button text contains 'dark_green' and add the theme class
+            if (button.textContent.toLowerCase().includes('sv')) {
+                button.classList.add('dark_green-theme');
+            }
+
+            // Check if the button text contains 'dark_pinkt' and add the theme class
+            if (button.textContent.toLowerCase().includes('doki')) {
+                button.classList.add('dark_pink-theme');
+            }
             
             button.onclick = () => playBGM(songId);
             container.appendChild(button);

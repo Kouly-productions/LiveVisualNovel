@@ -704,6 +704,45 @@
         <button id="removeCharacter" onclick="removeCharacter('bonnie')">Remove Bonnie</button>
     </div>
 
+    <!-- Toy Bonnie -->
+    <div class="character-section">
+        <h3>Toy Bonnie</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('toybonnie', 'idle')">idle</button>
+            <button onclick="selectEmotion('toybonnie', 'think')">think</button>
+            <button onclick="selectEmotion('toybonnie', 'point')">point</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('toybonnie')">Remove Bonnie</button>
+    </div>
+
+    <!-- Puppet -->
+    <div class="character-section">
+        <h3>Puppet</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('puppet', 'idle')">idle</button>
+            <button onclick="selectEmotion('puppet', 'idle2')">idle2</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('puppet')">Remove Bonnie</button>
+    </div>
+
         <!-- Add this after your other controls -->
     <h2>Background Music</h2>
     <div class="bgm-controls">
@@ -718,7 +757,7 @@
             <div class="dialogue-controls">
                 <select id="speakerSelect">
                     <option value="">Select Speaker</option>
-                    <option value="">Lasse</option>
+                    <option value="lasse">Lasse</option>
                     <option value="freddy">Freddy</option>
                     <option value="toyfreddy">Toy Freddy</option>
                     <option value="baldi">Baldi</option>
@@ -745,8 +784,6 @@
             <div class="scene-controls">
                 <button onclick="clearCharacters()">Clear All Characters</button>
             </div>
-
-            <h1 id="user-response">Wow</h1>
         </div>
     
         <div id="status">Waiting for data...</div>
