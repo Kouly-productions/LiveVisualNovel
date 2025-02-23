@@ -403,5 +403,22 @@ export const characters = {
         trist: "./assets/characters/bonnie/trist.png",
       },
     },
+    mia: {
+      name: "Mia",
+      expressions: {
+        embarrased_closed: "./assets/characters/akemi/embarrased_closed.png",
+        embarrased_lookaway: "./assets/characters/akemi/embarrased_lookaway.png",
+        embarrased_sad: "./assets/characters/akemi/embarrased_sad.png",
+        embarrased_smile: "./assets/characters/akemi/embarrased_smile.png",
+        happy1: "./assets/characters/akemi/happy1.png",
+        happy2: "./assets/characters/akemi/happy2.png",
+        nervous1: "./assets/characters/akemi/nervous1.png",
+        nervous2: "./assets/characters/akemi/nervous2.png",
+        nervous3: "./assets/characters/akemi/nervous3.png",
+        nervous4: "./assets/characters/akemi/nervous4.png",
+        sad1: "./assets/characters/akemi/sad1.png",
+        smile1: "./assets/characters/akemi/smile1.png",
+      },
+    },
   };
   
