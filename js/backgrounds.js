@@ -92,5 +92,14 @@ export const backgrounds = {
     sayori_rope: "./assets/backgrounds/sayori_rope.png",
     school_bus: "./assets/backgrounds/school_bus.png",
     vanny_dead: "./assets/backgrounds/vanny_dead.png",
+    mia_happy: "./assets/backgrounds/mia_happy.png",
+    mia_sad: "./assets/backgrounds/mia_sad.png",
+    mia_sad_look: "./assets/backgrounds/mia_sad_look.png",
+    mia_sad_look_cover: "./assets/backgrounds/mia_sad_look_cover.png",
+    mia_sad_look_shy: "./assets/backgrounds/mia_sad_look_shy.png",
+    mia_shocked: "./assets/backgrounds/mia_shocked.png",
+    mia_freddy: "./assets/backgrounds/mia_freddy.png",
+    mia_freddy_sad: "./assets/backgrounds/mia_freddy_sad.png",
+    mia_freddy_sad_lookdown: "./assets/backgrounds/mia_freddy_sad_lookdown.png",
   };
   
