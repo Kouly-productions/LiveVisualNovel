@@ -225,21 +225,30 @@ function getStageData(percentValue, thresholds) {
 
 // Renders active/inactive hearts based on the percentage value
 function renderHearts(percentValue, thresholds, icon = '❤️') {
-    // Calculate total hearts based on thresholds length
+    // Count how many stages have been achieved
+    let filledHearts = 0;
+    for (let threshold of thresholds) {
+        if (percentValue >= threshold.threshold) {
+            filledHearts++;
+        } else {
+            break; // Stop once we exceed the percentage
+        }
+    }
+
+    // Total hearts is the number of stages
     const totalHearts = thresholds.length;
-    const filledHearts = Math.ceil((percentValue / 100) * totalHearts);
-    
     let heartsHTML = '';
     for (let i = 0; i < totalHearts; i++) {
         if (i < filledHearts) {
-            heartsHTML += `<span class="heart active">${icon}</span>`;
+            heartsHTML += `<span class="heart active">${icon}</span>`; // Filled heart
         } else {
-            heartsHTML += `<span class="heart">${icon}</span>`;
+            heartsHTML += `<span class="heart">${icon}</span>`; // Empty heart
         }
     }
-    
+
     return heartsHTML;
 }
+
 // New card creation functions for the grid layout
 function createCharacterCard(id, character, relationships, type) {
     // Get the active player from the UI or default to Jakob (james)
