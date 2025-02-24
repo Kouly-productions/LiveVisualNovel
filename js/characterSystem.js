@@ -63,7 +63,7 @@ const teacherRelationshipThresholds = [
     { stage: 'Stolt', threshold: 60 },
     { stage: 'Favorit', threshold: 75 },
     { stage: 'Beskyttende', threshold: 85 },
-    { stage: 'Overbeskyttende', threshold: 95 }
+    { stage: 'Overbeskyttende', threshold: 100 }
 ];
 
 const nonDatableRelationshipThresholds = [
@@ -74,7 +74,7 @@ const nonDatableRelationshipThresholds = [
     { stage: 'Tæt Venskab', threshold: 60 },
     { stage: 'Loyal', threshold: 75 },
     { stage: 'Broderskab', threshold: 90 },
-    { stage: 'Bedste ven', threshold: 95 }
+    { stage: 'Bedste ven', threshold: 100 }
 ];
 
 // Character data unchanged
@@ -242,9 +242,12 @@ function renderHearts(percentValue, thresholds, icon = '❤️') {
 }
 // New card creation functions for the grid layout
 function createCharacterCard(id, character, relationships, type) {
-    // Database is currently storing old point values
-    // For now, we'll convert those to percentages
-    // Later, you can modify your database to store percentages directly
+    // Get the active player from the UI or default to Jakob (james)
+    const activePlayerElement = document.querySelector('.player-option.active');
+    const isJakobActive = !activePlayerElement || activePlayerElement.classList.contains('jakob');
+    const playerKey = isJakobActive ? 'james' : 'kaiko';
+    const displayName = isJakobActive ? 'Jakob' : 'Elias';
+    const playerClass = isJakobActive ? 'jakob' : 'elias';
     
     let percentage = {
         kaiko: 0,
@@ -272,8 +275,8 @@ function createCharacterCard(id, character, relationships, type) {
         icon = '🤝';
     }
     
-    // Get relationship data for the active player (default to Elias/kaiko)
-    const { currentStage, progress } = getStageData(percentage.kaiko, thresholds);
+    // Get relationship data for the active player
+    const { currentStage, progress } = getStageData(percentage[playerKey], thresholds);
     
     const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
     
@@ -287,16 +290,16 @@ function createCharacterCard(id, character, relationships, type) {
                 </div>
             </div>
             <div class="relationship-tracks">
-                <div class="relationship-track" data-player="kaiko">
+                <div class="relationship-track" data-player="${playerKey}">
                     <div class="track-header">
-                        <span class="player-name player-elias">Elias</span>
-                        <span class="relationship-points">${percentage.kaiko}% - <span class="relationship-status">${currentStage}</span></span>
+                        <span class="player-name player-${playerClass}">${displayName}</span>
+                        <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar" style="width: ${progress}%;"></div>
                     </div>
                     <div class="hearts-container">
-                        ${renderHearts(percentage.kaiko, thresholds, icon)}
+                        ${renderHearts(percentage[playerKey], thresholds, icon)}
                     </div>
                 </div>
             </div>
@@ -340,24 +343,12 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
     const displayName = playerName === 'kaiko' ? 'Elias' : 'Jakob';
     
     // Current active player 
-    const { currentStage, progress, nextStage, pointsNeeded } = getStageData(percentage[playerKey], thresholds);
+    const { currentStage, progress } = getStageData(percentage[playerKey], thresholds);
     
     const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
     
-    let nextStageInfo = '';
-    if (nextStage) {
-        nextStageInfo = `
-            <div class="relationship-stage">
-                <div class="stage-header">
-                    <span>Next Stage: <span id="popupNextStage">${nextStage}</span></span>
-                    <span id="popupNextPoints">at ${nextStage === thresholds[thresholds.length-1].stage ? '100' : thresholds.find(t => t.stage === nextStage).threshold}%</span>
-                </div>
-                <p class="stage-description" id="popupNextDescription">
-                    ${descriptions[nextStage]}
-                </p>
-            </div>
-        `;
-    }
+    // Create the relationship stages visualization
+    let stagesVisualization = createStagesVisualization(thresholds, currentStage, percentage[playerKey], descriptions);
     
     return `
         <div class="popup-header">
@@ -369,7 +360,7 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
         </div>
         
         <div class="relationship-details" data-player="${playerKey}">
-            <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Realation med ${displayName}</h3>
+            <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Relation med ${displayName}</h3>
             <div class="progress-container">
                 <div class="progress-bar" id="popupProgress" style="width: ${progress}%;"></div>
             </div>
@@ -378,20 +369,58 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
                 ${renderHearts(percentage[playerKey], thresholds, icon)}
             </div>
             
-            <div class="relationship-stage">
-                <div class="stage-header">
-                    <span>Level: <span id="popupStage">${currentStage}</span></span>
-                    <span id="popupPoints">${percentage[playerKey]}%</span>
+            <div class="current-stage-info">
+                <div class="current-level">
+                    <span class="level-label">Nuværende niveau:</span>
+                    <span class="level-value">${currentStage} (${percentage[playerKey]}%)</span>
                 </div>
-                <p class="stage-description" id="popupDescription">
+                <p class="current-description">
                     ${descriptions[currentStage]}
                 </p>
             </div>
             
-            ${nextStageInfo}
+            <div class="relationship-progression">
+                <h4>Forhold Progression</h4>
+                ${stagesVisualization}
+            </div>
         </div>
     `;
 }
+
+function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions) {
+    let html = '<div class="stages-container">';
+    
+    
+    thresholds.forEach((threshold, index) => {
+        const isCurrentStage = threshold.stage === currentStage;
+        const isPastStage = currentPercentage >= threshold.threshold;
+        const stageClass = isCurrentStage ? 'current' : (isPastStage ? 'completed' : 'future');
+        
+        // Get the next threshold value for width calculation
+        const nextThreshold = index < thresholds.length - 1 ? thresholds[index + 1].threshold : 100;
+        const stageWidth = index < thresholds.length - 1 ? 
+            (nextThreshold - threshold.threshold) + '%' : 
+            (100 - threshold.threshold) + '%';
+        
+        html += `
+            <div class="stage-item ${stageClass}" 
+                 style="--stage-width: ${stageWidth};" 
+                 title="${threshold.stage}: ${descriptions[threshold.stage]}">
+                <div class="stage-marker">
+                    <span class="stage-number">${index + 1}</span>
+                </div>
+                <div class="stage-info">
+                    <div class="stage-name">${threshold.stage}</div>
+                    <div class="stage-threshold">${threshold.threshold}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    return html;
+}
+
 
 // Display update functions
 function updateCharacterGridDisplay(relationships) {
@@ -557,10 +586,10 @@ function createCharacterStatusUI() {
         <div class="container">
             <h1>💕 Sweet Pink Dating Sim - Relationship Tracker 💕</h1>
             
-            <!-- Player switcher -->
+            <!-- Player switcher - Note Jakob is active by default -->
             <div class="player-switch">
-                <button class="player-option elias active">Elias</button>
-                <button class="player-option jakob">Jakob</button>
+                <button class="player-option elias">Elias</button>
+                <button class="player-option jakob active">Jakob</button>
             </div>
             
             <!-- Filter controls -->
@@ -595,7 +624,7 @@ function createCharacterStatusUI() {
         </div>
     `;
     
-    // Add CSS styles
+    // Rest of the function remains the same
     const styleElement = document.createElement('style');
     
     document.head.appendChild(styleElement);

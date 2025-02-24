@@ -141,6 +141,28 @@ body {
     object-fit: contain;
 }
 
+.current-level {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.level-label {
+    color: var(--text);
+}
+
+.level-value {
+    color: var(--primary-dark);
+}
+
+.current-description {
+    font-style: italic;
+    line-height: 1.3;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
 #user-input {
     height: 130px;
     width: 50%;
@@ -441,6 +463,7 @@ body {
 .points-input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
+
 }
 
 .current-day {
@@ -786,6 +809,16 @@ h1 {
     color: var(--text);
 }
 
+.relationship-progression {
+    margin-top: 15px;
+}
+
+.relationship-progression h4 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--primary-dark);
+    font-size: 1rem;
+}
 .relationship-status {
     font-weight: bold;
     color: var(--primary-dark);
@@ -993,4 +1026,149 @@ h1 {
 .stage-description {
     font-size: 0.9rem;
     line-height: 1.4;
+}
+
+.stages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.current-stage-info {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--primary-light);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 12px 0;
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.stage-item {
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.stage-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.stage-item.completed::after {
+    width: 100%;
+}
+
+.stage-item.current {
+    background-color: var(--primary-light);
+    box-shadow: 0 2px 8px var(--shadow);
+    transform: scale(1.02);
+    z-index: 2;
+    border: 2px solid var(--primary);
+}
+
+.stage-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.stage-item.completed .stage-marker,
+.stage-item.current .stage-marker {
+    background-color: var(--primary);
+    color: white;
+}
+
+.stage-number {
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.stage-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.stage-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.stage-threshold {
+    font-size: 0.8rem;
+    color: var(--text);
+}
+
+.stage-item.current .stage-name,
+.stage-item.current .stage-threshold {
+    color: var(--primary-dark);
+    font-weight: bold;
+}
+
+.stages-container.vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.popup-content {
+    height: 95vh;
+}
+
+/* Fix popup height issues */
+.popup-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    height: auto;
+    padding-bottom: 20px;
+}
+
+/* Improve scrollbar styling */
+.stages-container.vertical::-webkit-scrollbar,
+.popup-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stages-container.vertical::-webkit-scrollbar-track,
+.popup-content::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.stages-container.vertical::-webkit-scrollbar-thumb,
+.popup-content::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+}
+
+.stages-container.vertical::-webkit-scrollbar-thumb:hover,
+.popup-content::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
 }
