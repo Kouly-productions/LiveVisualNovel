@@ -287,7 +287,15 @@ function createCharacterCard(id, character, relationships, type) {
     // Get relationship data for the active player
     const { currentStage, progress } = getStageData(percentage[playerKey], thresholds);
     
-    const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
+    let typeLabel;
+    if (type === 'girls') {
+        const isDatable = relationships?.datable ?? true;
+        typeLabel = isDatable ? 'Kan dates' : 'Har kæreste';
+    } else if (type === 'teachers') {
+        typeLabel = 'Teacher';
+    } else {
+        typeLabel = 'Friend';
+    }
     
     return `
         <div class="character-card" data-id="${id}" data-type="${type}">
@@ -367,17 +375,15 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
                 <span class="character-type" id="popupType">${typeLabel}</span>
             </div>
         </div>
-        
+        ${type === 'girls' && relationships?.datable === false ? '<p class="taken-note">Denne karakter er optaget og kan ikke dates.</p>' : ''}
         <div class="relationship-details" data-player="${playerKey}">
             <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Relation med ${displayName}</h3>
             <div class="progress-container">
                 <div class="progress-bar" id="popupProgress" style="width: ${progress}%;"></div>
             </div>
-            
             <div class="hearts-container large">
                 ${renderHearts(percentage[playerKey], thresholds, icon)}
             </div>
-            
             <div class="current-stage-info">
                 <div class="current-level">
                     <span class="level-label">Nuværende niveau:</span>
@@ -387,7 +393,6 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
                     ${descriptions[currentStage]}
                 </p>
             </div>
-            
             <div class="relationship-progression">
                 <h4>Forhold Progression</h4>
                 ${stagesVisualization}
