@@ -1082,15 +1082,53 @@ h1 {
 }
 
 .stage-item {
+    position: relative;
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
     align-items: center;
     padding: 6px;
     border-radius: 8px;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
     background-color: #f0f0f0;
+}
+
+.tooltip-text {
+    position: absolute;
+    bottom: calc(100% + 10px); /* Position above the stage-item with a 10px gap */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--primary); /* Medium pink background (#ff79b0) */
+    color: white; /* White text for contrast */
+    padding: 8px 12px;
+    border-radius: 10px; /* Rounded corners for cuteness */
+    box-shadow: 0 4px 8px var(--shadow); /* Soft shadow for depth */
+    font-size: 0.9rem;
+    white-space: normal; /* Allow text wrapping */
+    max-width: 250px; /* Prevent overly wide tooltips */
+    text-align: center;
+    z-index: 10; /* Ensure it appears above other elements */
+    opacity: 0; /* Hidden by default */
+    visibility: hidden; /* Hidden by default */
+    transition: all 0.3s ease; /* Smooth fade-in effect */
+    pointer-events: none; /* Prevent mouse interference */
+}
+
+/* Show tooltip on hover */
+.stage-item:hover .tooltip-text {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Add a small arrow pointing downward */
+.tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* Position at the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px; /* Center the arrow */
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--primary) transparent transparent transparent; /* Pink arrow pointing down */
 }
 
 .stage-item::after {

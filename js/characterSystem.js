@@ -2,39 +2,47 @@ import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebase
 
 // Keep your relationship stage descriptions for tooltips
 const relationshipStageDescriptions = {
-    'Neutral': 'I kender knap nok hinanden',
+    'Neutral': 'Kender dig næsten ikke',
     'Nysgerrig': 'vil gerne lære dig bedre at kende',
     'Venlig': 'Er glad for at snakke med dig',
-    'Venskab': 'Deler personlige ting med dig',
+    'Venskab': 'Deler mere personlige ting med dig',
     'Bedste ven': 'Ser dig som sin bedste ven',
-    'Interesseret': 'Giver dig komplimenter og vil være sammen med dig',
-    'Tiltrukket': 'Opfører sig anderledes omkring dig, og vil gerne være tættere på dig',
+    'Interesseret': 'Synes du er sød og vil være sammen med dig',
+    'Tiltrukket': 'Vil gerne være tæt på dig hele tiden',
     'Forelsket': 'Er blevet forelsket i dig',
-    'Kærlighed': 'Føler en dyb kærlighed til dig',
-    'Eneste ene': 'Ser dig som deres eneste ene',
+    'Kærlighed': 'Føler dybt forelsket i dig',
+    'Eneste ene': 'Ser dig som den eneste ene',
     'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
     'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
 };
 
 const teacherRelationshipDescriptions = {
+    'Hadefuld': 'Vil forsøge at få dig smidt ud',
+    'Fjendtlig': 'Ønsker at straffe dig ofte',
+    'Meget negativ': 'Ser dig som person som et problem',
+    'Negativ': 'Vil helst undgå dig',
+    'Irriteret': 'Finder dig irriterende',
+    'Utilfreds': 'Er utilfreds med dig',
+    'Skeptisk': 'Stoler ikke på dig',
+    'Tålende': 'Kan lide dig mindre end de andre',
     'Neutral': 'Ser dig som alle de andre elever',
     'Observerende': 'Ligger mere mærke til dig end de andre elever',
     'Støttende': 'Ønsker at hjælpe dig med at blive bedre.',
     'Respekteret': 'Respektere dig faktisk.',
     'Stolt': 'Stolt af dig, og stoler på dig',
     'Favorit': 'Du er en af lærerens yndlings elever.',
-    'Beskyttende': 'Læreren føler at han har en ansvar over for dig.',
-    'Overbeskyttende': 'Læren vil altid tro mere på dig end nogen anden'
+    'Beskyttende': 'Vil passe godt på dig.',
+    'Overbeskyttende': 'Vil altid vælge din side'
 };
 
 const nonDatableRelationshipDescriptions = {
-    'Neutral': 'I kender knap nok hinanden.',
-    'Nysgerrig': 'Der er en begyndende interesse for venskab.',
-    'Venlig': 'Karakteren er venlig over for dig, og er glad for at se dig.',
-    'Venskab': 'Et ægte venskab.',
-    'Tæt Venskab': 'I stoler på hinanden og deler personlige tanker.',
-    'Loyal': 'Personen har ikke at dele personlige ting og hemmeligheder med dig',
-    'Broderskab': 'I ser hinanden som brødre/søstre.',
+    'Neutral': 'Kender dig næsten ikke.',
+    'Nysgerrig': 'Vil gerne snakke mere med dig.',
+    'Venlig': 'Venlig over for dig, og er glad for at se dig.',
+    'Venskab': 'Stoler på dig.',
+    'Tæt Venskab': 'Deler personlige ting om sig selv',
+    'Loyal': 'Er der altid for dig, når du har brug for det',
+    'Broderskab': 'I ser hinanden som bror/søster.',
     'Bedste ven': 'Det stærkeste venskab.'
 };
 
@@ -56,6 +64,14 @@ const relationshipStageThresholds = [
 ];
 
 const teacherRelationshipThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Tålende', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
     { stage: 'Observerende', threshold: 15 },
     { stage: 'Støttende', threshold: 30 },
@@ -292,9 +308,9 @@ function createCharacterCard(id, character, relationships, type) {
         const isDatable = relationships?.datable ?? true;
         typeLabel = isDatable ? 'Kan dates' : 'Har kæreste';
     } else if (type === 'teachers') {
-        typeLabel = 'Teacher';
+        typeLabel = 'Lære';
     } else {
-        typeLabel = 'Friend';
+        typeLabel = 'Ven';
     }
     
     return `
@@ -404,13 +420,11 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
 function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions) {
     let html = '<div class="stages-container">';
     
-    
     thresholds.forEach((threshold, index) => {
         const isCurrentStage = threshold.stage === currentStage;
         const isPastStage = currentPercentage >= threshold.threshold;
         const stageClass = isCurrentStage ? 'current' : (isPastStage ? 'completed' : 'future');
         
-        // Get the next threshold value for width calculation
         const nextThreshold = index < thresholds.length - 1 ? thresholds[index + 1].threshold : 100;
         const stageWidth = index < thresholds.length - 1 ? 
             (nextThreshold - threshold.threshold) + '%' : 
@@ -418,8 +432,7 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
         
         html += `
             <div class="stage-item ${stageClass}" 
-                 style="--stage-width: ${stageWidth};" 
-                 title="${threshold.stage}: ${descriptions[threshold.stage]}">
+                 style="--stage-width: ${stageWidth};">
                 <div class="stage-marker">
                     <span class="stage-number">${index + 1}</span>
                 </div>
@@ -427,6 +440,7 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
                     <div class="stage-name">${threshold.stage}</div>
                     <div class="stage-threshold">${threshold.threshold}%</div>
                 </div>
+                <span class="tooltip-text">${descriptions[threshold.stage]}</span>
             </div>
         `;
     });
