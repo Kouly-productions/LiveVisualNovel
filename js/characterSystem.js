@@ -49,10 +49,10 @@ const relationshipStageThresholds = [
     { stage: 'Interesseret', threshold: 60 },
     { stage: 'Tiltrukket', threshold: 70 },
     { stage: 'Forelsket', threshold: 80 },
-    { stage: 'Kærlighed', threshold: 85 },
-    { stage: 'Eneste ene', threshold: 90 },
-    { stage: 'Besættelse', threshold: 95 },
-    { stage: 'Yandere', threshold: 100 }
+    { stage: 'Kærlighed', threshold: 90 },
+    { stage: 'Eneste ene', threshold: 100 },
+    { stage: 'Besættelse', threshold: 150 },
+    { stage: 'Yandere', threshold: 200 }
 ];
 
 const teacherRelationshipThresholds = [
@@ -109,11 +109,11 @@ const characterData = {
     },
     monika: {
         name: "Monika",
-        image: "./assets/characters/monika/flirt.png"
+        image: "./assets/characters/monika/head.png"
     },
     natsuki: {
         name: "Natsuki",
-        image: "./assets/characters/natsuki/smil.png"
+        image: "./assets/characters/natsuki/head.png"
     },
     sakura: {
         name: "Sakura",
@@ -121,18 +121,18 @@ const characterData = {
     },
     sayori: {
         name: "Sayori",
-        image: "./assets/characters/sayori/glad.png"
+        image: "./assets/characters/sayori/head.png"
     }
 };
 
 const nonDatableCharacterData = {
     eddy: {
         name: "Eddy",
-        image: "./assets/characters/eddy/eddyHappy.png"
+        image: "./assets/characters/eddy/head.png"
     },
     vanny: {
         name: "Vanny",
-        image: "./assets/characters/vanny/vanny.png"
+        image: "./assets/characters/vanny/head.png"
     },
     funtimefoxy: {
         name: "Funtime Foxy",
@@ -140,11 +140,11 @@ const nonDatableCharacterData = {
     },
     helpy: {
         name: "Helpy",
-        image: "./assets/characters/helpy/helpydc.png"
+        image: "./assets/characters/helpy/head.png"
     },
     bg: {
         name: "Bedste mor gris",
-        image: "./assets/characters/bedste/bgLaugh.png"
+        image: "./assets/characters/bedste/head.png"
     }
 };
 
@@ -155,7 +155,7 @@ const teacherCharacterData = {
     },
     freddy: {
         name: "Freddy",
-        image: "./assets/characters/freddy/freddyNeutral.png"
+        image: "./assets/characters/freddy/head.png"
     },
     toyfreddy: {
         name: "Toy Freddy",
@@ -175,7 +175,7 @@ const teacherCharacterData = {
     },
     glitchtrap: {
         name: "Glitchtrap",
-        image: "./assets/characters/glitchtrap/glitchtrap.png"
+        image: "./assets/characters/glitchtrap/head.png"
     },
     baldi: {
         name: "Baldi",
@@ -306,7 +306,8 @@ function createCharacterCard(id, character, relationships, type) {
 }
 
 // Create detailed popup for character
-function createCharacterPopup(id, character, relationships, type) {
+// Update createCharacterPopup function to include the player name parameter
+function createCharacterPopup(id, character, relationships, type, playerName = 'kaiko') {
     // Convert to percentages for display
     let percentage = {
         kaiko: relationships?.kaiko || 0,
@@ -334,8 +335,12 @@ function createCharacterPopup(id, character, relationships, type) {
         icon = '🤝';
     }
     
-    // Current active player (default to Elias/kaiko)
-    const { currentStage, progress, nextStage, pointsNeeded } = getStageData(percentage.kaiko, thresholds);
+    // Get data for the selected player
+    const playerKey = playerName === 'kaiko' ? 'kaiko' : 'james';
+    const displayName = playerName === 'kaiko' ? 'Elias' : 'Jakob';
+    
+    // Current active player 
+    const { currentStage, progress, nextStage, pointsNeeded } = getStageData(percentage[playerKey], thresholds);
     
     const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
     
@@ -351,12 +356,6 @@ function createCharacterPopup(id, character, relationships, type) {
                     ${descriptions[nextStage]}
                 </p>
             </div>
-            
-            <div class="relationship-stage">
-                <div class="stage-header">
-                    <span>Progress needed: <span id="popupNeededPoints">${pointsNeeded}%</span></span>
-                </div>
-            </div>
         `;
     }
     
@@ -369,20 +368,20 @@ function createCharacterPopup(id, character, relationships, type) {
             </div>
         </div>
         
-        <div class="relationship-details" data-player="kaiko">
-            <h3 class="player-name player-elias">Relationship with Elias</h3>
+        <div class="relationship-details" data-player="${playerKey}">
+            <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Realation med ${displayName}</h3>
             <div class="progress-container">
                 <div class="progress-bar" id="popupProgress" style="width: ${progress}%;"></div>
             </div>
             
             <div class="hearts-container large">
-                ${renderHearts(percentage.kaiko, thresholds, icon)}
+                ${renderHearts(percentage[playerKey], thresholds, icon)}
             </div>
             
             <div class="relationship-stage">
                 <div class="stage-header">
                     <span>Level: <span id="popupStage">${currentStage}</span></span>
-                    <span id="popupPoints">${percentage.kaiko}%</span>
+                    <span id="popupPoints">${percentage[playerKey]}%</span>
                 </div>
                 <p class="stage-description" id="popupDescription">
                     ${descriptions[currentStage]}
@@ -442,12 +441,15 @@ function updateCharacterGridDisplay(relationships) {
             
             characterRelationship = relationships[id] || { kaiko: 0, james: 0 };
             
+            // Get currently active player
+            const activePlayer = document.querySelector('.player-option.active').classList.contains('elias') ? 'kaiko' : 'james';
+            
             const popup = document.getElementById('characterPopup');
             const popupContent = popup.querySelector('.popup-content');
             
             popupContent.innerHTML = `
                 <button class="close-popup">&times;</button>
-                ${createCharacterPopup(id, character, characterRelationship, type)}
+                ${createCharacterPopup(id, character, characterRelationship, type, activePlayer)}
             `;
             
             popup.classList.add('active');
@@ -563,8 +565,8 @@ function createCharacterStatusUI() {
             
             <!-- Filter controls -->
             <div class="filter-controls">
-                <button class="filter-button active" data-filter="all">All Characters</button>
-                <button class="filter-button" data-filter="girls">Girls</button>
+                <button class="filter-button" data-filter="all">All Characters</button>
+                <button class="filter-button active" data-filter="girls">Girls</button>
                 <button class="filter-button" data-filter="teachers">Teachers</button>
                 <button class="filter-button" data-filter="boys">Boys</button>
             </div>
