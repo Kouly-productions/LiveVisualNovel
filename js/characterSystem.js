@@ -247,9 +247,14 @@ function getStageData(percentValue, thresholds) {
     // Calculate how much more needed for next stage
     const pointsNeeded = nextStage ? (nextThreshold - percentValue) : 0;
     
+    // Determine if this is a negative relationship
+    const isNegative = percentValue < 0;
+    
     return {
         currentStage,
-        progress: percentValue,
+        progress: percentValue, // Raw percentage 
+        progressBarWidth: isNegative ? Math.abs(percentValue) : percentValue, // Absolute value for width
+        isNegative, // Flag for styling
         nextStage,
         pointsNeeded
     };
@@ -340,7 +345,7 @@ function createCharacterCard(id, character, relationships, type) {
     }
     
     // Get relationship data for the active player
-    const { currentStage, progress } = getStageData(percentage[playerKey], thresholds);
+    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
     
     let typeLabel;
     if (type === 'girls') {
@@ -368,7 +373,7 @@ function createCharacterCard(id, character, relationships, type) {
                         <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
                     </div>
                     <div class="progress-container">
-                        <div class="progress-bar" style="width: ${progress}%;"></div>
+                        <div class="progress-bar ${isNegative ? 'negative' : ''}" style="width: ${progressBarWidth}%;"></div>
                     </div>
                     <div class="hearts-container">
                         ${renderHearts(percentage[playerKey], thresholds, icon)}
@@ -415,7 +420,7 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
     const displayName = playerName === 'kaiko' ? 'Elias' : 'Jakob';
     
     // Current active player 
-    const { currentStage, progress } = getStageData(percentage[playerKey], thresholds);
+    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
     
     const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
     
@@ -434,7 +439,7 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
         <div class="relationship-details" data-player="${playerKey}">
             <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Relation med ${displayName}</h3>
             <div class="progress-container">
-                <div class="progress-bar" id="popupProgress" style="width: ${progress}%;"></div>
+                <div class="progress-bar ${isNegative ? 'negative' : ''}" id="popupProgress" style="width: ${progressBarWidth}%;"></div>
             </div>
             <div class="hearts-container large">
                 ${renderHearts(percentage[playerKey], thresholds, icon)}
@@ -610,7 +615,7 @@ function switchActivePlayer(player) {
             icon = '🤝';
         }
         
-        const { currentStage, progress } = getStageData(percentage, thresholds);
+        const { currentStage, progressBarWidth, isNegative } = getStageData(percentage, thresholds);
         
         // Update the track element
         const trackElement = card.querySelector('.relationship-track');
@@ -626,7 +631,8 @@ function switchActivePlayer(player) {
         
         // Update the progress bar
         const progressBar = trackElement.querySelector('.progress-bar');
-        progressBar.style.width = `${progress}%`;
+        progressBar.style.width = `${progressBarWidth}%`;
+        progressBar.className = `progress-bar ${isNegative ? 'negative' : ''}`;
         
         // Update hearts
         const heartsContainer = trackElement.querySelector('.hearts-container');

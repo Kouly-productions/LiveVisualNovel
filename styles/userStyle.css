@@ -880,6 +880,10 @@ h1 {
     border-radius: 10px;
 }
 
+.progress-bar.negative {
+    background: linear-gradient(to right, gray, black);
+}
+
 /* Hearts display styles */
 .hearts-container {
     display: flex;
