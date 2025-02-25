@@ -9,7 +9,7 @@ const relationshipStageDescriptions = {
     'Irriteret': 'Finder dig irriterende, og vil undgå dig',
     'Utilfreds': 'Kan ikke lide dig',
     'Skeptisk': 'Stoler ikke på dig',
-    'Tålende': 'Tillader at du er i samme rum',
+    'Mindre værd': 'Tillader at du er i samme rum',
     'Neutral': 'Kender dig næsten ikke',
     'Nysgerrig': 'vil gerne lære dig bedre at kende',
     'Venlig': 'Er glad for at snakke med dig',
@@ -32,7 +32,7 @@ const teacherRelationshipDescriptions = {
     'Irriteret': 'Finder dig irriterende',
     'Utilfreds': 'Er utilfreds med dig',
     'Skeptisk': 'Stoler ikke på dig',
-    'Tålende': 'Kan lide dig mindre end de andre',
+    'Tåler dig': 'Kan lide dig mindre end de andre',
     'Neutral': 'Ser dig som alle de andre elever',
     'Observerende': 'Ligger mere mærke til dig end de andre elever',
     'Støttende': 'Ønsker at hjælpe dig med at blive bedre.',
@@ -257,24 +257,47 @@ function getStageData(percentValue, thresholds) {
 
 // Renders active/inactive hearts based on the percentage value
 function renderHearts(percentValue, thresholds, icon = '❤️') {
-    // Count how many stages have been achieved
-    let filledHearts = 0;
-    for (let threshold of thresholds) {
-        if (percentValue >= threshold.threshold) {
-            filledHearts++;
-        } else {
-            break; // Stop once we exceed the percentage
-        }
+    // Determine if the relationship is negative
+    const isNegative = percentValue < 0;
+    const totalHearts = isNegative ? 8 : 12;
+
+    // Find the neutral index to split positive and negative stages
+    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    if (neutralIndex === -1) {
+        console.error('Neutral stage not found in thresholds');
+        return '';
     }
 
-    // Total hearts is the number of stages
-    const totalHearts = thresholds.length;
+    // Separate positive and negative thresholds
+    const negativeThresholds = thresholds.slice(0, neutralIndex).reverse(); // Most negative first
+
+    // Calculate the number of filled hearts
+    let filledHearts = 0;
+
+    if (isNegative) {
+        // For negative relationships, count how many negative stages are achieved
+        for (let i = 0; i < negativeThresholds.length; i++) {
+            if (percentValue <= negativeThresholds[i].threshold) {
+                filledHearts = i + 1;
+            } else {
+                break;
+            }
+        }
+    } else {
+        // For positive relationships, calculate filled hearts proportionally
+        filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / 200))));
+    }
+
+    // Generate hearts HTML
     let heartsHTML = '';
     for (let i = 0; i < totalHearts; i++) {
         if (i < filledHearts) {
-            heartsHTML += `<span class="heart active">${icon}</span>`; // Filled heart
+            // Filled hearts (active)
+            const heartEmoji = isNegative ? '🖤' : icon;
+            heartsHTML += `<span class="heart active">${heartEmoji}</span>`;
         } else {
-            heartsHTML += `<span class="heart">${icon}</span>`; // Empty heart
+            // Unfilled hearts (inactive)
+            heartsHTML += `<span class="heart">${icon}</span>`;
         }
     }
 
