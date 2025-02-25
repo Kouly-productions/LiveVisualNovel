@@ -2,6 +2,14 @@ import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebase
 
 // Keep your relationship stage descriptions for tooltips
 const relationshipStageDescriptions = {
+    'Hadefuld': 'Hader dig intenst, vil finde en måde på at skade dig',
+    'Fjendtlig': 'Ser dig som en fjende, vil gerne straffe dig',
+    'Meget negativ': 'Har stærke negative følelser for dig',
+    'Negativ': 'Kan slet ikke lide dig som person',
+    'Irriteret': 'Finder dig irriterende, og vil undgå dig',
+    'Utilfreds': 'Kan ikke lide dig',
+    'Skeptisk': 'Stoler ikke på dig',
+    'Tålende': 'Tillader at du er i samme rum',
     'Neutral': 'Kender dig næsten ikke',
     'Nysgerrig': 'vil gerne lære dig bedre at kende',
     'Venlig': 'Er glad for at snakke med dig',
@@ -49,6 +57,14 @@ const nonDatableRelationshipDescriptions = {
 // Stage thresholds for heart progression - these values will be used for determining stages
 // but the actual progress will be directly calculated from the percentage (0-100)
 const relationshipStageThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Tålende', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
     { stage: 'Nysgerrig', threshold: 15 },
     { stage: 'Venlig', threshold: 30 },
