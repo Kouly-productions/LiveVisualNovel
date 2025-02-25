@@ -1251,3 +1251,30 @@ h1 {
 .popup-content::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
 }
+
+/* Existing styles for positive stages */
+.stage-item.completed {
+    background-color: #ffcee6; /* Light pink for positive completed stages */
+}
+
+/* New styles for negative stages */
+.stage-item.completed-negative {
+    background-color: #a5a5a5; /* Dark gray for negative completed stages */
+    color: white;
+}
+
+.stage-item.current-negative {
+    background-color: #3d3d3d; /* Even darker for current negative stage */
+    color: white;
+    font-weight: bold;
+}
+
+/* Make sure numbers are visible against dark backgrounds */
+.stage-item.completed-negative .stage-number,
+.stage-item.current-negative .stage-number,
+.stage-item.completed-negative .stage-name,
+.stage-item.current-negative .stage-name,
+.stage-item.completed-negative .stage-threshold,
+.stage-item.current-negative .stage-threshold {
+    color: white;
+}

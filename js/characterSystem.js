@@ -2,11 +2,11 @@ import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebase
 
 // Keep your relationship stage descriptions for tooltips
 const relationshipStageDescriptions = {
-    'Hadefuld': 'Hader dig intenst, vil finde en måde på at skade dig',
+    'Hadefuld': 'Hader dig intenst, og kan blive farligt',
     'Fjendtlig': 'Ser dig som en fjende, vil gerne straffe dig',
     'Meget negativ': 'Har stærke negative følelser for dig',
-    'Negativ': 'Kan slet ikke lide dig som person',
-    'Irriteret': 'Finder dig irriterende, og vil undgå dig',
+    'Negativ': 'Kan slet ikke lide dig',
+    'Irriteret': 'Finder dig irriterende',
     'Utilfreds': 'Kan ikke lide dig',
     'Skeptisk': 'Stoler ikke på dig',
     'Mindre værd': 'Tillader at du er i samme rum',
@@ -32,7 +32,7 @@ const teacherRelationshipDescriptions = {
     'Irriteret': 'Finder dig irriterende',
     'Utilfreds': 'Er utilfreds med dig',
     'Skeptisk': 'Stoler ikke på dig',
-    'Tåler dig': 'Kan lide dig mindre end de andre',
+    'Mindre værd': 'Kan lide dig mindre end de andre',
     'Neutral': 'Ser dig som alle de andre elever',
     'Observerende': 'Ligger mere mærke til dig end de andre elever',
     'Støttende': 'Ønsker at hjælpe dig med at blive bedre.',
@@ -64,7 +64,7 @@ const relationshipStageThresholds = [
     { stage: 'Irriteret', threshold: -30 },
     { stage: 'Utilfreds', threshold: -20 },
     { stage: 'Skeptisk', threshold: -10 },
-    { stage: 'Tålende', threshold: -5 },
+    { stage: 'Mindre værd', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
     { stage: 'Nysgerrig', threshold: 15 },
     { stage: 'Venlig', threshold: 30 },
@@ -87,7 +87,7 @@ const teacherRelationshipThresholds = [
     { stage: 'Irriteret', threshold: -30 },
     { stage: 'Utilfreds', threshold: -20 },
     { stage: 'Skeptisk', threshold: -10 },
-    { stage: 'Tålende', threshold: -5 },
+    { stage: 'Mindre værd', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
     { stage: 'Observerende', threshold: 15 },
     { stage: 'Støttende', threshold: 30 },
@@ -99,6 +99,14 @@ const teacherRelationshipThresholds = [
 ];
 
 const nonDatableRelationshipThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Mindre værd', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
     { stage: 'Nysgerrig', threshold: 15 },
     { stage: 'Venlig', threshold: 30 },
@@ -221,40 +229,44 @@ const teacherCharacterData = {
 
 // Core utility functions for determining relationship stages based on percentage
 function getStageData(percentValue, thresholds) {
-    // Find current stage based on thresholds
     let currentStage = thresholds[0].stage;
-    let currentThreshold = 0;
-    let nextThreshold = 100;
     let nextStage = null;
-    
-    for (let i = 0; i < thresholds.length; i++) {
-        if (percentValue >= thresholds[i].threshold) {
-            currentStage = thresholds[i].stage;
-            currentThreshold = thresholds[i].threshold;
-            
-            // Find next stage if there is one
-            if (i < thresholds.length - 1) {
-                nextStage = thresholds[i + 1].stage;
-                nextThreshold = thresholds[i + 1].threshold;
+    let pointsNeeded = 0;
+    const isNegative = percentValue < 0;
+
+    if (isNegative) {
+        // Handle negative percentages
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (thresholds[i].threshold < 0) {
+                // Define the lower bound (previous threshold)
+                const previousThreshold = i > 0 ? thresholds[i - 1].threshold : -Infinity;
+                // Check if percentValue is in the range (previousThreshold, threshold]
+                if (percentValue > previousThreshold && percentValue <= thresholds[i].threshold) {
+                    currentStage = thresholds[i].stage;
+                    nextStage = i < thresholds.length - 1 ? thresholds[i + 1].stage : null;
+                    pointsNeeded = nextStage ? (thresholds[i + 1].threshold - percentValue) : 0;
+                    break;
+                }
             }
-        } else {
-            nextStage = thresholds[i].stage;
-            nextThreshold = thresholds[i].threshold;
-            break;
+        }
+    } else {
+        // Handle positive percentages (including 0)
+        for (let i = 0; i < thresholds.length; i++) {
+            const nextThreshold = i < thresholds.length - 1 ? thresholds[i + 1].threshold : Infinity;
+            if (percentValue >= thresholds[i].threshold && percentValue < nextThreshold) {
+                currentStage = thresholds[i].stage;
+                nextStage = i < thresholds.length - 1 ? thresholds[i + 1].stage : null;
+                pointsNeeded = nextStage ? (thresholds[i + 1].threshold - percentValue) : 0;
+                break;
+            }
         }
     }
-    
-    // Calculate how much more needed for next stage
-    const pointsNeeded = nextStage ? (nextThreshold - percentValue) : 0;
-    
-    // Determine if this is a negative relationship
-    const isNegative = percentValue < 0;
-    
+
     return {
         currentStage,
-        progress: percentValue, // Raw percentage 
-        progressBarWidth: isNegative ? Math.abs(percentValue) : percentValue, // Absolute value for width
-        isNegative, // Flag for styling
+        progress: percentValue,
+        progressBarWidth: isNegative ? Math.abs(percentValue) : percentValue,
+        isNegative,
         nextStage,
         pointsNeeded
     };
@@ -264,7 +276,14 @@ function getStageData(percentValue, thresholds) {
 function renderHearts(percentValue, thresholds, icon = '❤️') {
     // Determine if the relationship is negative
     const isNegative = percentValue < 0;
-    const totalHearts = isNegative ? 8 : 12;
+    
+    // Set appropriate total emoji count based on icon type and relationship
+    let totalHearts;
+    if (icon === '📚' || icon === '🤝') {
+        totalHearts = 8; // Always show 8 emojis for teachers and boys
+    } else {
+        totalHearts = isNegative ? 8 : 12; // Only hearts vary (8 for negative, 12 for positive)
+    }
 
     // Find the neutral index to split positive and negative stages
     const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
@@ -290,7 +309,9 @@ function renderHearts(percentValue, thresholds, icon = '❤️') {
         }
     } else {
         // For positive relationships, calculate filled hearts proportionally
-        filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / 200))));
+        // Adjust the denominator based on icon type
+        const denominator = (icon === '📚' || icon === '🤝') ? 100 : 200;
+        filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / denominator))));
     }
 
     // Generate hearts HTML
@@ -464,10 +485,48 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
 function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions) {
     let html = '<div class="stages-container">';
     
+    // Find the neutral index
+    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    if (neutralIndex === -1) {
+        console.error('Neutral stage not found in thresholds');
+        return '<div>Error: Neutral stage not found</div>';
+    }
+    
+    // Find current stage index
+    const currentStageIndex = thresholds.findIndex(t => t.stage === currentStage);
+    
+    // Determine if we're in a negative relationship state
+    const isNegativeRelationship = currentPercentage < 0;
+    
     thresholds.forEach((threshold, index) => {
-        const isCurrentStage = threshold.stage === currentStage;
-        const isPastStage = currentPercentage >= threshold.threshold;
-        const stageClass = isCurrentStage ? 'current' : (isPastStage ? 'completed' : 'future');
+        // Calculate stage number relative to neutral (0)
+        const stageNumber = index - neutralIndex;
+        
+        const isCurrentStage = index === currentStageIndex;
+        
+        // Check if this is a negative threshold or neutral in a negative relationship
+        const isNegativeStage = threshold.threshold < 0 || 
+                               (threshold.stage === 'Neutral' && isNegativeRelationship);
+        
+        // Determine if a stage is "past" (completed)
+        let isPastStage = false;
+        
+        if (isNegativeRelationship) {
+            // For negative values: complete stages between current stage and Neutral (inclusive)
+            isPastStage = (index >= currentStageIndex && index <= neutralIndex);
+        } else {
+            // For positive values: complete stages between Neutral and current stage (inclusive)
+            isPastStage = (index >= neutralIndex && index <= currentStageIndex);
+        }
+        
+        // Determine the stage class based on whether it's current, completed, and negative/positive
+        let stageClass = 'future'; // Default - not reached
+        
+        if (isCurrentStage) {
+            stageClass = isNegativeStage ? 'current-negative' : 'current';
+        } else if (isPastStage) {
+            stageClass = isNegativeStage ? 'completed-negative' : 'completed';
+        }
         
         const nextThreshold = index < thresholds.length - 1 ? thresholds[index + 1].threshold : 100;
         const stageWidth = index < thresholds.length - 1 ? 
@@ -478,7 +537,7 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
             <div class="stage-item ${stageClass}" 
                  style="--stage-width: ${stageWidth};">
                 <div class="stage-marker">
-                    <span class="stage-number">${index + 1}</span>
+                    <span class="stage-number">${stageNumber}</span>
                 </div>
                 <div class="stage-info">
                     <div class="stage-name">${threshold.stage}</div>
