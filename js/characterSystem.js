@@ -734,7 +734,7 @@ function createCharacterStatusUI() {
             
             <!-- Search -->
             <div class="characters-search">
-                <input type="text" class="search-input" placeholder="Search characters...">
+                <input type="text" class="search-input" placeholder="Søg efter en karakter...">
             </div>
             
             <!-- Characters grid -->
