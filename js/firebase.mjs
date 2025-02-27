@@ -15,15 +15,82 @@ const firebaseConfig = {
     measurementId: "G-6C2XTJ44TV"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const firebaseConfigSingle = {
+    apiKey: "AIzaSyCENG1rfaoxspHPBZ8_YMicR6hm7PqOsEk",
+    authDomain: "visualnovelsingle.firebaseapp.com",
+    databaseURL: "https://visualnovelsingle-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "visualnovelsingle",
+    storageBucket: "visualnovelsingle.firebasestorage.app",
+    messagingSenderId: "968465504382",
+    appId: "1:968465504382:web:525c275983566d1a4a602f",
+    measurementId: "G-SK0SW5KNGP"
+};
+
+// Firebase app instances with different names
+let sharedApp = null;
+let singleApp = null;
+let db;
+let activeListeners = [];
+let currentMode = 'shared'; // Default mode
+
+// Initialize Firebase with the appropriate config
+function initializeFirebase(mode = 'shared') {
+    // Clear any existing listeners
+    if (activeListeners.length > 0) {
+        console.log(`Clearing ${activeListeners.length} listeners`);
+        activeListeners.forEach(listener => listener());
+        activeListeners = [];
+    }
+    
+    try {
+        let currentApp;
+        
+        // Use named apps to avoid conflicts
+        if (mode === 'shared') {
+            // Create the shared app if it doesn't exist yet
+            if (!sharedApp) {
+                console.log('Creating new shared app instance');
+                sharedApp = initializeApp(firebaseConfig, 'admin-shared-app');
+            }
+            currentApp = sharedApp;
+        } else {
+            // Create the single user app if it doesn't exist yet
+            if (!singleApp) {
+                console.log('Creating new single user app instance');
+                singleApp = initializeApp(firebaseConfigSingle, 'admin-single-app');
+            }
+            currentApp = singleApp;
+        }
+        
+        // Get database for the current app
+        db = getDatabase(currentApp);
+        
+        // Store the current mode
+        currentMode = mode;
+        
+        // Set up scene listener
+        setupSceneListener();
+        
+        console.log(`Admin panel initialized Firebase in ${mode} mode`);
+    } catch (error) {
+        console.error('Error initializing Firebase:', error);
+    }
+}
+
+// Setup scene listener
+function setupSceneListener() {
+    const sceneRef = ref(db, 'currentScene');
+    const sceneListener = onValue(sceneRef, (snapshot) => {
+        const data = snapshot.val();
+        console.log('Current scene data:', data);
+        updateDisplay(data);
+    });
+    activeListeners.push(() => sceneListener());
+}
 
 // Global state
 let selectedCharacter = null;
 let selectedEmotion = null;
-
-
 
 // Background Control
 window.updateBackground = function(backgroundId) {
@@ -227,17 +294,290 @@ function updateDisplay(sceneData) {
     }
 }
 
-// Initialize scene listener
-const sceneRef = ref(db, 'currentScene');
-onValue(sceneRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log('Current scene data:', data);
-    updateDisplay(data);
-});
+// Create database mode indicator
+function createDatabaseModeIndicator() {
+    // Create container
+    const container = document.createElement('div');
+    container.className = 'db-mode-indicator';
+    container.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 10px;
+        z-index: 1000;
+        backdrop-filter: blur(3px);
+        border: 1px solid rgba(255, 192, 203, 0.4);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    `;
+    
+    // Add label
+    const label = document.createElement('div');
+    label.textContent = 'Database Mode';
+    label.style.cssText = `
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    `;
+    container.appendChild(label);
+    
+    // Add button group
+    const buttonGroup = document.createElement('div');
+    buttonGroup.style.cssText = `
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    `;
+    
+    // Create shared button
+    const sharedButton = document.createElement('button');
+    sharedButton.id = 'admin-db-shared';
+    sharedButton.textContent = 'Fælles';
+    sharedButton.style.cssText = `
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 20px;
+        background-color: #ff9ec5;
+        color: #800033;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        outline: none;
+        font-size: 12px;
+    `;
+    
+    // Create single button
+    const singleButton = document.createElement('button');
+    singleButton.id = 'admin-db-single';
+    singleButton.textContent = 'Jacob';
+    singleButton.style.cssText = `
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 20px;
+        background-color: #ff9ec5;
+        color: #800033;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        outline: none;
+        font-size: 12px;
+    `;
+    
+    // Add buttons to group
+    buttonGroup.appendChild(sharedButton);
+    buttonGroup.appendChild(singleButton);
+    container.appendChild(buttonGroup);
+    
+    // Add container to body
+    document.body.appendChild(container);
+    
+    // Set up button event listeners
+    sharedButton.addEventListener('click', () => {
+        updateDatabaseMode('shared');
+        updateButtonStyles(sharedButton, singleButton);
+    });
+    
+    singleButton.addEventListener('click', () => {
+        updateDatabaseMode('single');
+        updateButtonStyles(singleButton, sharedButton);
+    });
+    
+    // Add hover effects
+    [sharedButton, singleButton].forEach(button => {
+        button.addEventListener('mouseover', () => {
+            if (button.style.backgroundColor !== 'rgb(255, 94, 153)') {
+                button.style.backgroundColor = '#ffb2d0';
+                button.style.transform = 'translateY(-2px)';
+                button.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+            }
+        });
+        
+        button.addEventListener('mouseout', () => {
+            if (button.style.backgroundColor !== 'rgb(255, 94, 153)') {
+                button.style.backgroundColor = '#ff9ec5';
+                button.style.transform = 'translateY(0)';
+                button.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+            }
+        });
+    });
+    
+    // Set initial active button based on localStorage
+    const savedMode = localStorage.getItem('databaseMode') || 'shared';
+    if (savedMode === 'shared') {
+        updateButtonStyles(sharedButton, singleButton);
+    } else {
+        updateButtonStyles(singleButton, sharedButton);
+    }
+    
+    return { sharedButton, singleButton };
+}
 
+function updateButtonStyles(activeButton, inactiveButton) {
+    activeButton.style.backgroundColor = '#ff5e99';
+    activeButton.style.color = 'white';
+    activeButton.style.boxShadow = '0 0 12px #ff5e99, 0 0 20px rgba(255, 105, 180, 0.4)';
+    activeButton.classList.add('active-db-button');
+    
+    inactiveButton.style.backgroundColor = '#ff9ec5';
+    inactiveButton.style.color = '#800033';
+    inactiveButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+    inactiveButton.classList.remove('active-db-button');
+}
+
+// Update database mode and reinitialize
+function updateDatabaseMode(mode) {
+    localStorage.setItem('databaseMode', mode);
+    initializeFirebase(mode);
+}
+
+// Add heartbeat animation to the active button
+function addHeartbeatAnimation() {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.05); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.05); }
+            60% { transform: scale(1); }
+        }
+        
+        .active-db-button {
+            animation: heartbeat 2s infinite;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Initialize everything on DOM content loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.bgm-buttons');
-    if (container && bgm) {
+    // Initialize with mode from localStorage
+    const savedMode = localStorage.getItem('databaseMode') || 'shared';
+    initializeFirebase(savedMode);
+    
+    // Create database mode indicator
+    const { sharedButton, singleButton } = createDatabaseModeIndicator();
+    
+    // Add heartbeat animation
+    addHeartbeatAnimation();
+    
+    // Listen for mode changes from other tabs/windows
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'databaseMode') {
+            if (event.newValue !== currentMode) {
+                initializeFirebase(event.newValue);
+                
+                // Update button display
+                if (event.newValue === 'shared') {
+                    updateButtonStyles(sharedButton, singleButton);
+                } else {
+                    updateButtonStyles(singleButton, sharedButton);
+                }
+            }
+        }
+    });
+    
+    // Create search functionality for characters
+    const characterControls = document.querySelector('.character-controls');
+    if (characterControls) {
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.id = 'character-search';
+        searchInput.placeholder = 'Search characters...';
+        
+        searchContainer.appendChild(searchInput);
+        characterControls.parentNode.insertBefore(searchContainer, characterControls);
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const characterSections = document.querySelectorAll('.character-section');
+
+            characterSections.forEach(section => {
+                const characterName = section.querySelector('h3').textContent.toLowerCase();
+                if (characterName.includes(searchTerm)) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        });
+    }
+    
+    // Create background search and buttons
+    const controlsDiv = document.querySelector('.controls');
+    if (controlsDiv) {
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.id = 'background-search';
+        searchInput.placeholder = 'Search backgrounds...';
+        
+        searchContainer.appendChild(searchInput);
+        const backgroundButtons = document.querySelector('.background-buttons');
+        if (backgroundButtons) {
+            controlsDiv.insertBefore(searchContainer, backgroundButtons);
+
+            // Create background buttons
+            // Clear existing buttons
+            backgroundButtons.innerHTML = '';
+            
+            // Create new button-preview pairs
+            Object.entries(backgrounds).forEach(([backgroundId, backgroundUrl]) => {
+                const item = document.createElement('div');
+                item.className = 'background-item';
+                
+                // Create button
+                const button = document.createElement('button');
+                button.textContent = backgroundId.replace(/_/g, ' ');
+                button.onclick = () => updateBackground(backgroundId);
+                
+                // Create preview div
+                const preview = document.createElement('div');
+                preview.className = 'background-preview';
+                preview.style.backgroundImage = `url(${backgroundUrl})`;
+                
+                // Add button and preview to item container
+                item.appendChild(button);
+                item.appendChild(preview);
+                backgroundButtons.appendChild(item);
+            });
+
+            // Add search functionality
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const backgroundItems = document.querySelectorAll('.background-item');
+                
+                backgroundItems.forEach(item => {
+                    const buttonText = item.querySelector('button').textContent.toLowerCase();
+                    if (buttonText.includes(searchTerm)) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+            });
+        }
+    }
+    
+    // Create BGM buttons
+    const bgmContainer = document.querySelector('.bgm-buttons');
+    if (bgmContainer && bgm) {
+        bgmContainer.innerHTML = '';
         Object.keys(bgm).forEach(songId => {
             const button = document.createElement('button');
             button.textContent = songId.replace(/_/g, ' ').toUpperCase();
@@ -248,100 +588,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             button.onclick = () => playBGM(songId);
-            container.appendChild(button);
+            bgmContainer.appendChild(button);
         });
     }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Add search input before character controls
-    const characterControls = document.querySelector('.character-controls');
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
     
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.id = 'character-search';
-    searchInput.placeholder = 'Search characters...';
-    
-    searchContainer.appendChild(searchInput);
-    characterControls.parentNode.insertBefore(searchContainer, characterControls);
-
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const characterSections = document.querySelectorAll('.character-section');
-
-        characterSections.forEach(section => {
-            const characterName = section.querySelector('h3').textContent.toLowerCase();
-            if (characterName.includes(searchTerm)) {
-                section.classList.remove('hidden');
-            } else {
-                section.classList.add('hidden');
-            }
-        });
-    });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Create search bar
-    const controlsDiv = document.querySelector('.controls');
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
-    
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.id = 'background-search';
-    searchInput.placeholder = 'Search backgrounds...';
-    
-    searchContainer.appendChild(searchInput);
-    controlsDiv.insertBefore(searchContainer, document.querySelector('.background-buttons'));
-
-    // Create background buttons
-    const container = document.querySelector('.background-buttons');
-    if (container) {
-        // Clear existing buttons
-        container.innerHTML = '';
-        
-        // Create new button-preview pairs
-        Object.entries(backgrounds).forEach(([backgroundId, backgroundUrl]) => {
-            const item = document.createElement('div');
-            item.className = 'background-item';
-            
-            // Create button
-            const button = document.createElement('button');
-            button.textContent = backgroundId.replace(/_/g, ' ');
-            button.onclick = () => updateBackground(backgroundId);
-            
-            // Create preview div
-            const preview = document.createElement('div');
-            preview.className = 'background-preview';
-            preview.style.backgroundImage = `url(${backgroundUrl})`;
-            
-            // Add button and preview to item container
-            item.appendChild(button);
-            item.appendChild(preview);
-            container.appendChild(item);
-        });
-    }
-
-    // Add search functionality
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const backgroundItems = document.querySelectorAll('.background-item');
-        
-        backgroundItems.forEach(item => {
-            const buttonText = item.querySelector('button').textContent.toLowerCase();
-            if (buttonText.includes(searchTerm)) {
-                item.classList.remove('hidden');
-            } else {
-                item.classList.add('hidden');
-            }
-        });
-    });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
     // Create floating navigation
     const nav = document.createElement('div');
     nav.className = 'floating-nav';
@@ -385,3 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add navigation to the page
     document.body.appendChild(nav);
 });
+
+// Export necessary functions for external use
+export {
+    db,
+    ref,
+    set,
+    onValue
+};
