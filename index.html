@@ -5,82 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Novel</title>
     <link rel="stylesheet" href="/LiveVisualNovel/styles/userStyle.css">
-    <style>
-        .db-toggle-container {
-            position: fixed;
-            top: 10px;
-            right: 50%;
-            transform: translateX(50%);
-            z-index: 1000;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(3px);
-            border: 1px solid rgba(255, 192, 203, 0.4);
-        }
-        
-        .db-toggle-label {
-            color: white;
-            margin-bottom: 8px;
-            font-size: 14px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        .db-button-group {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-        
-        .db-button {
-            flex: 1;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 20px;
-            background-color: #ff9ec5;
-            color: #800033;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            outline: none;
-            font-size: 12px;
-        }
-        
-        .db-button:hover {
-            background-color: #ffb2d0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .db-button.active {
-            background-color: #ff5e99;
-            color: white;
-            box-shadow: 0 0 12px #ff5e99, 0 0 20px rgba(255, 105, 180, 0.4);
-            transform: translateY(-1px);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Make sure character menu container is properly displayed */
-        #character-menu-container {
-            display: block;
-            margin-top: 10px;
-        }
-    </style>
 </head>
 <body>
-    <!-- Database Toggle Buttons -->
-    <div class="db-toggle-container">
-        <div class="db-toggle-label">Database Mode</div>
-        <div class="db-button-group">
-            <button class="db-button active" id="db-shared">Fælles</button>
-            <button class="db-button" id="db-single">Jacob</button>
-        </div>
-    </div>
 
     <!-- Character Container -->
     <div id="character-container">
@@ -131,8 +57,8 @@
                 <p id="dialogue-text">Place holder</p>
             </div>
             <div id="character-menu-container">
-                <div id="character-menu">
-                    <!-- Character menu will be populated here -->
+                <div id="">
+        
                 </div>
             </div>
         </div>

@@ -13,375 +13,16 @@ const firebaseConfig = {
     measurementId: "G-6C2XTJ44TV"
 };
 
-const firebaseConfigSingle = {
-    apiKey: "AIzaSyCENG1rfaoxspHPBZ8_YMicR6hm7PqOsEk",
-    authDomain: "visualnovelsingle.firebaseapp.com",
-    databaseURL: "https://visualnovelsingle-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "visualnovelsingle",
-    storageBucket: "visualnovelsingle.firebasestorage.app",
-    messagingSenderId: "968465504382",
-    appId: "1:968465504382:web:525c275983566d1a4a602f",
-    measurementId: "G-SK0SW5KNGP"
-};
-
-// Firebase app instances with different names
-let sharedApp = null;
-let singleApp = null;
-let db;
-let activeListeners = [];
-let currentMode = 'shared'; // Default mode
-
-// Initialize Firebase with the appropriate config
-function initializeFirebase(mode = 'shared') {
-    // Clear any existing listeners
-    if (activeListeners.length > 0) {
-        console.log(`Clearing ${activeListeners.length} listeners`);
-        activeListeners.forEach(listener => listener());
-        activeListeners = [];
-    }
-    
-    try {
-        let currentApp;
-        
-        // Use named apps to avoid conflicts
-        if (mode === 'shared') {
-            // Create the shared app if it doesn't exist yet
-            if (!sharedApp) {
-                console.log('Creating new shared app instance');
-                sharedApp = initializeApp(firebaseConfig, 'shared-app');
-            }
-            currentApp = sharedApp;
-        } else {
-            // Create the single user app if it doesn't exist yet
-            if (!singleApp) {
-                console.log('Creating new single user app instance');
-                singleApp = initializeApp(firebaseConfigSingle, 'single-app');
-            }
-            currentApp = singleApp;
-        }
-        
-        // Get database for the current app
-        db = getDatabase(currentApp);
-        
-        // Update UI to show active mode
-        updateActiveButton(mode);
-        
-        // Store the current mode
-        currentMode = mode;
-        localStorage.setItem('databaseMode', mode);
-        
-        // Set up all the listeners again
-        setupAllListeners();
-        
-        // Ensure the character system is re-initialized
-        if (typeof window.initializeCharacterSystem === 'function') {
-            console.log('Re-initializing character system after database switch');
-            window.initializeCharacterSystem();
-        }
-        
-        console.log(`Successfully initialized Firebase in ${mode} mode`);
-    } catch (error) {
-        console.error('Error initializing Firebase:', error);
-    }
-}
-
-// Update active button UI
-function updateActiveButton(mode) {
-    const sharedButton = document.getElementById('db-shared');
-    const singleButton = document.getElementById('db-single');
-    
-    if (sharedButton && singleButton) {
-        if (mode === 'shared') {
-            sharedButton.classList.add('active');
-            singleButton.classList.remove('active');
-        } else {
-            sharedButton.classList.remove('active');
-            singleButton.classList.add('active');
-        }
-    }
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 // Global audio state
 let currentAudio = null;
 let currentBgmId = null;
 
-// Setup all the Firebase listeners
-function setupAllListeners() {
-    // Scene listener
-    const sceneRef = ref(db, 'currentScene');
-    const sceneListener = onValue(sceneRef, (snapshot) => {
-        const data = snapshot.val();
-        console.log('Scene data received:', data);
-        
-        // Update scene display
-        updateSceneDisplay(data);
-        
-        // Handle BGM changes
-        handleBgmChange(data);
-        
-        // Check for character menu data
-        if (data && data.characterMenu) {
-            updateCharacterMenu(data.characterMenu);
-        }
-    });
-    activeListeners.push(() => sceneListener());
-    
-    // Game state listeners
-    const kaikoPointsRef = ref(db, 'gameState/points/kaiko');
-    const kaikoListener = onValue(kaikoPointsRef, (snapshot) => {
-        const points = snapshot.val() || 1250;
-        const kaikoInput = document.getElementById('kaiko-points');
-        if (kaikoInput) kaikoInput.value = points;
-    });
-    activeListeners.push(() => kaikoListener());
-    
-    const jamesPointsRef = ref(db, 'gameState/points/james');
-    const jamesListener = onValue(jamesPointsRef, (snapshot) => {
-        const points = snapshot.val() || 1250;
-        const jamesInput = document.getElementById('james-points');
-        if (jamesInput) jamesInput.value = points;
-    });
-    activeListeners.push(() => jamesListener());
-    
-    const currentDayRef = ref(db, 'gameState/currentDay');
-    const dayListener = onValue(currentDayRef, (snapshot) => {
-        const day = snapshot.val() || 'ONSDAG';
-        const dayDisplay = document.getElementById('current-day');
-        if (dayDisplay) dayDisplay.textContent = day;
-    });
-    activeListeners.push(() => dayListener());
-    
-    const corruptionRef = ref(db, 'gameState/corruption');
-    const corruptionListener = onValue(corruptionRef, (snapshot) => {
-        const corruption = snapshot.val() || 'Corruption 55%';
-        const corruptionDisplay = document.getElementById('current-corrupt');
-        if (corruptionDisplay) corruptionDisplay.textContent = corruption;
-    });
-    activeListeners.push(() => corruptionListener());
-    
-    const timeRef = ref(db, 'gameState/time');
-    const timeListener = onValue(timeRef, (snapshot) => {
-        const time = snapshot.val() || '07:30';
-        const timeDisplay = document.getElementById('current-time');
-        if (timeDisplay) timeDisplay.textContent = time;
-    });
-    activeListeners.push(() => timeListener());
-    
-    // Character menu listener (if available)
-    const characterMenuRef = ref(db, 'currentScene/characterMenu');
-    const characterMenuListener = onValue(characterMenuRef, (snapshot) => {
-        const menuData = snapshot.val();
-        if (menuData) {
-            updateCharacterMenu(menuData);
-        }
-    });
-    activeListeners.push(() => characterMenuListener());
-    
-    // Time speed listener
-    const timeSpeedRef = ref(db, 'gameState/timeSpeedMultiplier');
-    const timeSpeedListener = onValue(timeSpeedRef, (snapshot) => {
-        const newTimeSpeed = snapshot.val() || 45;
-        if (newTimeSpeed !== currentTimeSpeed) {
-            currentTimeSpeed = newTimeSpeed;
-            console.log('Time speed updated to:', currentTimeSpeed);
-            
-            // Restart timer if it's running to apply new speed
-            if (isTimerRunning) {
-                clearInterval(timeInterval);
-                timeInterval = setInterval(updateTime, currentTimeSpeed * 1000);
-            }
-        }
-    });
-    activeListeners.push(() => timeSpeedListener());
-    
-    // Timer state listener
-    const timerStateRef = ref(db, 'gameState/timerState');
-    const timerStateListener = onValue(timerStateRef, (snapshot) => {
-        const timerState = snapshot.val() || 'paused';
-        handleTimerStateChange(timerState === 'running');
-    });
-    activeListeners.push(() => timerStateListener());
-    
-    // Setup points change events
-    setupPointsChangeEvents();
-}
-
-// Setup points change events
-function setupPointsChangeEvents() {
-    const kaikoInput = document.getElementById('kaiko-points');
-    const jamesInput = document.getElementById('james-points');
-    
-    if (kaikoInput) {
-        kaikoInput.onchange = (e) => {
-            const points = parseInt(e.target.value) || 0;
-            const kaikoPointsRef = ref(db, 'gameState/points/kaiko');
-            set(kaikoPointsRef, points);
-        };
-    }
-    
-    if (jamesInput) {
-        jamesInput.onchange = (e) => {
-            const points = parseInt(e.target.value) || 0;
-            const jamesPointsRef = ref(db, 'gameState/points/james');
-            set(jamesPointsRef, points);
-        };
-    }
-}
-
-// Update character menu
-function updateCharacterMenu(menuData) {
-    const menuContainer = document.getElementById('character-menu');
-    if (!menuContainer) return;
-    
-    // Clear existing menu
-    menuContainer.innerHTML = '';
-    
-    // If no menu data, hide container
-    if (!menuData || !Array.isArray(menuData) || menuData.length === 0) {
-        const parentContainer = document.getElementById('character-menu-container');
-        if (parentContainer) {
-            parentContainer.style.display = 'none';
-        }
-        return;
-    }
-    
-    // Show the container
-    const parentContainer = document.getElementById('character-menu-container');
-    if (parentContainer) {
-        parentContainer.style.display = 'block';
-    }
-    
-    // Create buttons for each menu item
-    menuData.forEach(item => {
-        if (!item.text) return;
-        
-        const button = document.createElement('button');
-        button.className = 'character-menu-option';
-        button.textContent = item.text;
-        
-        // Add special styling if indicated
-        if (item.special) {
-            button.classList.add('special-option');
-        }
-        
-        // Add click handler
-        button.addEventListener('click', () => {
-            if (item.action) {
-                handleMenuAction(item.action, item.text);
-            } else {
-                // Default action is to set dialogue
-                handleSendMenuResponse(item.text);
-            }
-        });
-        
-        menuContainer.appendChild(button);
-    });
-}
-
-// Handle menu action
-function handleMenuAction(action, text) {
-    console.log(`Menu action: ${action}, text: ${text}`);
-    
-    // Handle different action types
-    switch(action) {
-        case 'dialogue':
-            handleSendMenuResponse(text);
-            break;
-        case 'clearMenu':
-            clearCharacterMenu();
-            break;
-        default:
-            // For custom actions, update the database with the selection
-            const actionRef = ref(db, 'gameState/lastAction');
-            set(actionRef, {
-                type: action,
-                text: text,
-                timestamp: Date.now()
-            });
-            break;
-    }
-}
-
-// Send a menu response
-function handleSendMenuResponse(text) {
-    const userWriteAs = document.getElementById('user-write-as');
-    const writeAs = userWriteAs ? userWriteAs.value.trim() : '';
-    
-    // Update the database with the selected dialogue option
-    const sceneRef = ref(db, 'currentScene');
-    
-    // First get current scene data
-    onValue(sceneRef, (snapshot) => {
-        const currentData = snapshot.val();
-        
-        // Update dialogue fields
-        const updatedData = {
-            ...currentData,
-            playerText: text,
-            dialogue: {
-                ...currentData.dialogue,
-                speaker: writeAs,
-                text: text
-            }
-        };
-        
-        // Remove the menu if it exists in the data
-        if (updatedData.characterMenu) {
-            delete updatedData.characterMenu;
-        }
-        
-        // Set the updated data back to Firebase
-        set(sceneRef, updatedData)
-            .then(() => {
-                console.log('Menu response sent successfully');
-                clearCharacterMenu();
-            })
-            .catch((error) => {
-                console.error('Error sending menu response:', error);
-            });
-    }, {
-        onlyOnce: true
-    });
-}
-
-// Clear the character menu
-function clearCharacterMenu() {
-    const characterMenuRef = ref(db, 'currentScene/characterMenu');
-    set(characterMenuRef, null)
-        .then(() => console.log('Character menu cleared'))
-        .catch(error => console.error('Error clearing menu:', error));
-}
-
-// Initialize database buttons and other elements
+// Initialize volume control
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize database buttons
-    const sharedButton = document.getElementById('db-shared');
-    const singleButton = document.getElementById('db-single');
-    
-    if (sharedButton && singleButton) {
-        // Check localStorage for saved preference
-        const savedMode = localStorage.getItem('databaseMode') || 'shared';
-        
-        // Initialize Firebase with saved mode
-        initializeFirebase(savedMode);
-        
-        // Add click event listeners
-        sharedButton.addEventListener('click', () => {
-            if (currentMode !== 'shared') {
-                initializeFirebase('shared');
-            }
-        });
-        
-        singleButton.addEventListener('click', () => {
-            if (currentMode !== 'single') {
-                initializeFirebase('single');
-            }
-        });
-    } else {
-        // Just initialize with default if buttons don't exist
-        initializeFirebase();
-    }
-    
     const volumeSlider = document.getElementById('volume-slider');
     if (volumeSlider) {
         // Set initial volume from localStorage or default to 50
@@ -402,84 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendButton) {
         sendButton.addEventListener('click', handleSendMessage);
     }
-    
-    // Initialize time system
-    initializeTimeSystem();
-    
-    // Add a heartbeat animation for extra romantic feel
-    addHeartbeatAnimation();
-    
-    // Add styles for character menu options
-    addCharacterMenuStyles();
 });
-
-// Add character menu styles
-function addCharacterMenuStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        #character-menu-container {
-            margin-top: 10px;
-            padding: 5px;
-            text-align: center;
-        }
-        
-        #character-menu {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .character-menu-option {
-            padding: 10px 15px;
-            background-color: rgba(255, 158, 197, 0.8);
-            color: #800033;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .character-menu-option:hover {
-            background-color: rgba(255, 94, 153, 0.9);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .character-menu-option.special-option {
-            background-color: rgba(255, 215, 0, 0.8);
-            color: #8B4513;
-        }
-        
-        .character-menu-option.special-option:hover {
-            background-color: rgba(255, 215, 0, 0.9);
-            color: #5C2F0E;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// Add heartbeat animation to active button
-function addHeartbeatAnimation() {
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            15% { transform: scale(1.05); }
-            30% { transform: scale(1); }
-            45% { transform: scale(1.05); }
-            60% { transform: scale(1); }
-        }
-        
-        .db-button.active {
-            animation: heartbeat 2s infinite;
-        }
-    `;
-    document.head.appendChild(style);
-}
 
 // Handle send button click
 function handleSendMessage() {
@@ -618,6 +182,19 @@ function updateSceneDisplay(data) {
     }
 }
 
+// Listen for scene changes
+const sceneRef = ref(db, 'currentScene');
+onValue(sceneRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log('Scene data received:', data);
+    
+    // Update scene display
+    updateSceneDisplay(data);
+    
+    // Handle BGM changes
+    handleBgmChange(data);
+});
+
 // Add keyboard event listener for Enter key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -629,7 +206,68 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Update Firebase references to match new structure
+const kaikoPointsRef = ref(db, 'gameState/points/kaiko');
+const jamesPointsRef = ref(db, 'gameState/points/james');
+const currentDayRef = ref(db, 'gameState/currentDay');
+const corruptionRef = ref(db, 'gameState/corruption');
+const timeRef = ref(db, 'gameState/time');
+
+// Initialize points and day listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const kaikoInput = document.getElementById('kaiko-points');
+    const jamesInput = document.getElementById('james-points');
+    const dayDisplay = document.getElementById('current-day');
+    const corruptionDisplay = document.getElementById('current-corrupt');
+    const currentTime = document.getElementById('current-time');
+
+    // Listen for Kaiko points changes
+    onValue(kaikoPointsRef, (snapshot) => {
+        const points = snapshot.val() || 1250;
+        kaikoInput.value = points;
+    });
+
+    // Listen for James points changes
+    onValue(jamesPointsRef, (snapshot) => {
+        const points = snapshot.val() || 1250;
+        jamesInput.value = points;
+    });
+
+    // Listen for day changes
+    onValue(currentDayRef, (snapshot) => {
+        const day = snapshot.val() || 'ONSDAG';
+        dayDisplay.textContent = day;
+    });
+
+    // corruptionRef
+    onValue(corruptionRef, (snapshot) => {
+        const day = snapshot.val() || 'Corruption 55%';
+        corruptionDisplay.textContent = day;
+    });
+
+    // timeRef
+    onValue(timeRef, (snapshot) => {
+        const day = snapshot.val() || '07:30';
+        currentTime.textContent = day;
+    });
+
+    // Update points when input changes
+    kaikoInput.addEventListener('change', (e) => {
+        const points = parseInt(e.target.value) || 0;
+        set(kaikoPointsRef, points);
+    });
+
+    jamesInput.addEventListener('change', (e) => {
+        const points = parseInt(e.target.value) || 0;
+        set(jamesPointsRef, points);
+    });
+});
+
+// Add these functions after your existing Firebase initialization code
 // Time control state
+// Add new reference for time speed multiplier
+const timeSpeedRef = ref(db, 'gameState/timeSpeedMultiplier');
+const timerStateRef = ref(db, 'gameState/timerState');
 let timeInterval = null;
 let isTimerRunning = false;
 let currentTimeSpeed = 45;
@@ -655,7 +293,6 @@ function addMinutesToTime(timeString, minutesToAdd) {
 }
 
 function updateTime() {
-    const timeRef = ref(db, 'gameState/time');
     onValue(timeRef, (snapshot) => {
         const currentTime = snapshot.val() || '07:30';
         const newTime = addMinutesToTime(currentTime, 5);
@@ -669,7 +306,6 @@ function updateTime() {
 
 function startTimer() {
     // Update Firebase timer state
-    const timerStateRef = ref(db, 'gameState/timerState');
     set(timerStateRef, 'running')
         .then(() => {
             console.log('Timer state updated to running');
@@ -679,7 +315,6 @@ function startTimer() {
 
 function pauseTimer() {
     // Update Firebase timer state
-    const timerStateRef = ref(db, 'gameState/timerState');
     set(timerStateRef, 'paused')
         .then(() => {
             console.log('Timer state updated to paused');
@@ -691,23 +326,46 @@ function handleTimerStateChange(isRunning) {
     if (isRunning) {
         isTimerRunning = true;
         timeInterval = setInterval(updateTime, currentTimeSpeed * 1000);
-        const startButton = document.getElementById('start-timer');
-        const pauseButton = document.getElementById('pause-timer');
-        if (startButton) startButton.disabled = true;
-        if (pauseButton) pauseButton.disabled = false;
+        document.getElementById('start-timer').disabled = true;
+        document.getElementById('pause-timer').disabled = false;
         console.log('Timer started with speed multiplier:', currentTimeSpeed);
     } else {
         isTimerRunning = false;
         clearInterval(timeInterval);
-        const startButton = document.getElementById('start-timer');
-        const pauseButton = document.getElementById('pause-timer');
-        if (startButton) startButton.disabled = false;
-        if (pauseButton) pauseButton.disabled = true;
+        document.getElementById('start-timer').disabled = false;
+        document.getElementById('pause-timer').disabled = true;
         console.log('Timer paused');
     }
 }
 
+// Listen for changes to time speed multiplier
+function initializeTimeSpeedListener() {
+    onValue(timeSpeedRef, (snapshot) => {
+        const newTimeSpeed = snapshot.val() || 45;
+        if (newTimeSpeed !== currentTimeSpeed) {
+            currentTimeSpeed = newTimeSpeed;
+            console.log('Time speed updated to:', currentTimeSpeed);
+            
+            // Restart timer if it's running to apply new speed
+            if (isTimerRunning) {
+                clearInterval(timeInterval);
+                timeInterval = setInterval(updateTime, currentTimeSpeed * 1000);
+            }
+        }
+    });
+}
+
+
 function initializeTimeSystem() {
+    // Initialize time speed listener
+    initializeTimeSpeedListener();
+    
+    // Listen for timer state changes
+    onValue(timerStateRef, (snapshot) => {
+        const timerState = snapshot.val() || 'paused';
+        handleTimerStateChange(timerState === 'running');
+    });
+    
     // Create timer controls
     const controlsContainer = document.createElement('div');
     controlsContainer.id = 'timer-controls';
@@ -750,10 +408,7 @@ const styles = document.createElement('style');
 
 document.head.appendChild(styles);
 
-// Export functions for use in other modules
-export {
-    db,
-    ref,
-    set,
-    onValue
-};
+// Initialize when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeTimeSystem();
+});
