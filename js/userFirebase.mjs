@@ -747,39 +747,7 @@ function initializeTimeSystem() {
 
 // Add styles to the document
 const styles = document.createElement('style');
-styles.textContent = `
-.time-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
 
-.timer-controls {
-    display: flex;
-    gap: 10px;
-}
-
-.timer-controls button {
-    padding: 4px 12px;
-    border: none;
-    border-radius: 4px;
-    background-color: #333;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 0.9em;
-}
-
-.timer-controls button:hover {
-    background-color: #444;
-}
-
-.timer-controls button:disabled {
-    background-color: #666;
-    cursor: not-allowed;
-}
-`;
 document.head.appendChild(styles);
 
 // Export functions for use in other modules

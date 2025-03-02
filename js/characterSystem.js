@@ -1,128 +1,178 @@
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
-// Relationship stage descriptions
+// Keep your relationship stage descriptions for tooltips
 const relationshipStageDescriptions = {
-    'Neutral': 'Karakteren viser ingen særlig interesse i dig. De hilser måske, men glemmer dig hurtigt.',
-    'Nysgerrig': 'Karakteren vil gerne lære mere om dig, og er villig til at stille dig spørgsmål',
-    'Venlig': 'Karakteren smiler til dig, og kan godt lide at snakke med dig',
-    'Venskab': 'Karakteren vil gerne være sammen med dig, personen deler personlige historier og stoler på dig',
-    'Interesseret': 'Karakteren ligger mere mærke til dig, giver dig komplimenter og finder undskyldinger for at være sammen med dig',
-    'Tiltrukket': 'Karakteren opfører sig mere nervøst eller energisk omkring dig, personen griner mere af dine vittigheder og finder måder at røre dig let på',
-    'Forelsket': 'Karakteren er blevet forelsket i dig, og vil beskytte dig og føle at du er det vigtigste for dem om alt andet',
-    'Kærlighed': 'En dyb og ægte kærlighed er opstået mellem jer.',
-    'Eneste ene': 'Karakteren ser dig som deres eneste ene, og planlægger sin fremtid i hemmelighed sammen med dig.',
-    'Besættelse': 'Karakteren har svært ved at acceptere afstand. De vil altid vide, hvor du er, og kan reagere stærkt på, hvis du trækker dig væk',
-    'Yandere': 'Karakteren vil gøre ALT for at holde dig for sig selv – hun vik skubbe andre væk, manipulere situationer eller i værste fald bruge ekstreme midler for at sikre, at du aldrig forlader hende. Hun vil endda skade andre eller slå ijhel'
+    'Hadefuld': 'Hader dig intenst, og kan blive farligt',
+    'Fjendtlig': 'Ser dig som en fjende, vil gerne straffe dig',
+    'Meget negativ': 'Har stærke negative følelser for dig',
+    'Negativ': 'Kan slet ikke lide dig',
+    'Irriteret': 'Finder dig irriterende',
+    'Utilfreds': 'Kan ikke lide dig',
+    'Skeptisk': 'Stoler ikke på dig',
+    'Mindre værd': 'Tillader at du er i samme rum',
+    'Neutral': 'Kender dig næsten ikke',
+    'Nysgerrig': 'vil gerne lære dig bedre at kende',
+    'Venlig': 'Er glad for at snakke med dig',
+    'Venskab': 'Deler mere personlige ting med dig',
+    'Bedste ven': 'Ser dig som sin bedste ven',
+    'Interesseret': 'Synes du er sød og vil være sammen med dig',
+    'Tiltrukket': 'Vil gerne være tæt på dig hele tiden',
+    'Forelsket': 'Er blevet forelsket i dig',
+    'Kærlighed': 'Føler dybt forelsket i dig',
+    'Eneste ene': 'Ser dig som den eneste ene',
+    'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
+    'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
 };
 
 const teacherRelationshipDescriptions = {
-    'Neutral': 'Et almindeligt lærer-elev forhold.',
-    'Observerende': 'Læreren har bemærket dit potentiale.',
-    'Støttende': 'Læreren ønsker aktivt at hjælpe dig med at udvikle dig.',
-    'Respekteret': 'Du har vundet lærerens professionelle respekt.',
-    'Stolt': 'Læreren er stolt af din udvikling og præstationer.',
-    'Favorit': 'Du er blevet en af lærerens foretrukne elever.',
-    'Beskyttende': 'Læreren føler et særligt ansvar for din trivsel.',
-    'Overbeskyttende': 'Læreren er ekstremt fokuseret på din succes og sikkerhed.'
+    'Hadefuld': 'Vil forsøge at få dig smidt ud',
+    'Fjendtlig': 'Ønsker at straffe dig ofte',
+    'Meget negativ': 'Ser dig som person som et problem',
+    'Negativ': 'Vil helst undgå dig',
+    'Irriteret': 'Finder dig irriterende',
+    'Utilfreds': 'Er utilfreds med dig',
+    'Skeptisk': 'Stoler ikke på dig',
+    'Mindre værd': 'Kan lide dig mindre end de andre',
+    'Neutral': 'Ser dig som alle de andre elever',
+    'Observerende': 'Ligger mere mærke til dig end de andre elever',
+    'Støttende': 'Ønsker at hjælpe dig med at blive bedre.',
+    'Respekteret': 'Respektere dig faktisk.',
+    'Stolt': 'Stolt af dig, og stoler på dig',
+    'Favorit': 'Du er en af lærerens yndlings elever.',
+    'Beskyttende': 'Vil passe godt på dig.',
+    'Overbeskyttende': 'Vil altid vælge din side'
 };
 
 const nonDatableRelationshipDescriptions = {
-    'Neutral': 'I kender knap nok hinanden.',
-    'Nysgerrig': 'Der er en begyndende interesse for venskab.',
-    'Venlig': 'En behagelig og afslappet relation er opstået.',
-    'Venskab': 'Et ægte venskab er under udvikling.',
-    'Tæt Venskab': 'I stoler på hinanden og deler personlige tanker.',
-    'Loyal': 'En ubetinget loyalitet er opstået mellem jer.',
-    'Broderskab': 'I ser hinanden som brødre/søstre.',
-    'Bedste ven': 'Det stærkeste venskabsbånd er smedet mellem jer.'
+    'Neutral': 'Kender dig næsten ikke.',
+    'Nysgerrig': 'Vil gerne snakke mere med dig.',
+    'Venlig': 'Venlig over for dig, og er glad for at se dig.',
+    'Venskab': 'Stoler på dig.',
+    'Tæt Venskab': 'Deler personlige ting om sig selv',
+    'Loyal': 'Er der altid for dig, når du har brug for det',
+    'Broderskab': 'I ser hinanden som bror/søster.',
+    'Bedste ven': 'Det stærkeste venskab.'
 };
 
-// Constants for student relationship stages
-const relationshipStagePoints = {
-    'Neutral': 0,
-    'Nysgerrig': 50,
-    'Venlig': 150,
-    'Venskab': 200,
-    'Interesseret': 250,
-    'Tiltrukket': 400,
-    'Forelsket': 800,
-    'Kærlighed': 1200,
-    'Eneste ene': 3000,
-    'Besættelse': 4000,
-    'Yandere': 5000
-};
+// Stage thresholds for heart progression - these values will be used for determining stages
+// but the actual progress will be directly calculated from the percentage (0-100)
+const relationshipStageThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Mindre værd', threshold: -5 },
+    { stage: 'Neutral', threshold: 0 },
+    { stage: 'Nysgerrig', threshold: 15 },
+    { stage: 'Venlig', threshold: 30 },
+    { stage: 'Venskab', threshold: 40 },
+    { stage: 'Bedste ven', threshold: 50 },
+    { stage: 'Interesseret', threshold: 60 },
+    { stage: 'Tiltrukket', threshold: 70 },
+    { stage: 'Forelsket', threshold: 80 },
+    { stage: 'Kærlighed', threshold: 90 },
+    { stage: 'Eneste ene', threshold: 100 },
+    { stage: 'Besættelse', threshold: 150 },
+    { stage: 'Yandere', threshold: 200 }
+];
 
-// Constants for teacher relationship stages
-const teacherRelationshipStagePoints = {
-    'Neutral': 0,
-    'Observerende': 50,
-    'Støttende': 150,
-    'Respekteret': 400,
-    'Stolt': 800,
-    'Favorit': 1200,
-    'Beskyttende': 3000,
-    'Overbeskyttende': 4000
-};
+const teacherRelationshipThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Mindre værd', threshold: -5 },
+    { stage: 'Neutral', threshold: 0 },
+    { stage: 'Observerende', threshold: 15 },
+    { stage: 'Støttende', threshold: 30 },
+    { stage: 'Respekteret', threshold: 45 },
+    { stage: 'Stolt', threshold: 60 },
+    { stage: 'Favorit', threshold: 75 },
+    { stage: 'Beskyttende', threshold: 85 },
+    { stage: 'Overbeskyttende', threshold: 100 }
+];
 
-const nonDatableRelationshipStagePoints = {
-    'Neutral': 0,
-    'Nysgerrig': 50,
-    'Venlig': 150,
-    'Venskab': 250,
-    'Tæt Venskab': 400,
-    'Loyal': 800,
-    'Broderskab': 1200,
-    'Bedste ven': 3000
-};
+const nonDatableRelationshipThresholds = [
+    { stage: 'Hadefuld', threshold: -100 },
+    { stage: 'Fjendtlig', threshold: -80 },
+    { stage: 'Meget negativ', threshold: -60 },
+    { stage: 'Negativ', threshold: -45 },
+    { stage: 'Irriteret', threshold: -30 },
+    { stage: 'Utilfreds', threshold: -20 },
+    { stage: 'Skeptisk', threshold: -10 },
+    { stage: 'Mindre værd', threshold: -5 },
+    { stage: 'Neutral', threshold: 0 },
+    { stage: 'Nysgerrig', threshold: 15 },
+    { stage: 'Venlig', threshold: 30 },
+    { stage: 'Venskab', threshold: 45 },
+    { stage: 'Tæt Venskab', threshold: 60 },
+    { stage: 'Loyal', threshold: 75 },
+    { stage: 'Broderskab', threshold: 90 },
+    { stage: 'Bedste ven', threshold: 100 }
+];
 
-// Character data
+// Character data unchanged
 const characterData = {
     akira: {
         name: "Akira",
-        image: "./assets/characters/akira/flirt1.png"
+        image: "./assets/characters/akira/head.png"
     },
-    mika: {
-        name: "Mika",
-        image: "./assets/characters/mika/idle1.png"
-    },
-    sakura: {
-        name: "Sakura",
-        image: "./assets/characters/sakura/idle1.png"
+    akemi: {
+        name: "Mia",
+        image: "./assets/characters/akemi/head.png"
     },
     aiko: {
         name: "Aiko",
-        image: "./assets/characters/aiko/heart.png"
+        image: "./assets/characters/aiko/head.png"
+    },
+    aya: {
+        name: "Aya",
+        image: "./assets/characters/aya/head.png"
     },
     ayano: {
         name: "Ayano",
-        image: "./assets/characters/ayano/shy1.png"
+        image: "./assets/characters/ayano/head.png"
+    },
+    mika: {
+        name: "Mika",
+        image: "./assets/characters/mika/head.png"
     },
     minako: {
         name: "Minako",
-        image: "./assets/characters/minako/ohReally1.png"
+        image: "./assets/characters/minako/head.png"
     },
     monika: {
         name: "Monika",
-        image: "./assets/characters/monika/flirt.png"
-    },
-    sayori: {
-        name: "Sayori",
-        image: "./assets/characters/sayori/glad.png"
+        image: "./assets/characters/monika/head.png"
     },
     natsuki: {
         name: "Natsuki",
-        image: "./assets/characters/natsuki/smil.png"
+        image: "./assets/characters/natsuki/head.png"
+    },
+    sakura: {
+        name: "Sakura",
+        image: "./assets/characters/sakura/head.png"
+    },
+    sayori: {
+        name: "Sayori",
+        image: "./assets/characters/sayori/head.png"
     }
 };
 
 const nonDatableCharacterData = {
     eddy: {
         name: "Eddy",
-        image: "./assets/characters/eddy/eddyHappy.png"
+        image: "./assets/characters/eddy/head.png"
     },
     vanny: {
         name: "Vanny",
-        image: "./assets/characters/vanny/vanny.png"
+        image: "./assets/characters/vanny/head.png"
     },
     funtimefoxy: {
         name: "Funtime Foxy",
@@ -130,11 +180,11 @@ const nonDatableCharacterData = {
     },
     helpy: {
         name: "Helpy",
-        image: "./assets/characters/helpy/helpydc.png"
+        image: "./assets/characters/helpy/head.png"
     },
     bg: {
         name: "Bedste mor gris",
-        image: "./assets/characters/bedste/bgLaugh.png"
+        image: "./assets/characters/bedste/head.png"
     }
 };
 
@@ -145,7 +195,7 @@ const teacherCharacterData = {
     },
     freddy: {
         name: "Freddy",
-        image: "./assets/characters/freddy/freddyNeutral.png"
+        image: "./assets/characters/freddy/head.png"
     },
     toyfreddy: {
         name: "Toy Freddy",
@@ -165,9 +215,9 @@ const teacherCharacterData = {
     },
     glitchtrap: {
         name: "Glitchtrap",
-        image: "./assets/characters/glitchtrap/glitchtrap.png"
+        image: "./assets/characters/glitchtrap/head.png"
     },
-    glitchtrap: {
+    baldi: {
         name: "Baldi",
         image: "./assets/characters/baldi/idle.png"
     },
@@ -177,345 +227,479 @@ const teacherCharacterData = {
     }
 };
 
-// Utility functions for student relationships
-function getCurrentStageIndex(points) {
-    let currentStage = 0;
-    const stages = Object.keys(relationshipStagePoints);
-    stages.forEach((stage, index) => {
-        if (points >= relationshipStagePoints[stage]) {
-            currentStage = index;
-        }
-    });
-    return currentStage;
-}
+// Core utility functions for determining relationship stages based on percentage
+function getStageData(percentValue, thresholds) {
+    let currentStage = thresholds[0].stage;
+    let nextStage = null;
+    let pointsNeeded = 0;
+    const isNegative = percentValue < 0;
 
-function calculateProgress(points) {
-    const stages = Object.keys(relationshipStagePoints);
-    const currentStageIndex = getCurrentStageIndex(points);
-    
-    if (currentStageIndex === stages.length - 1) {
-        return 100;
+    if (isNegative) {
+        // Handle negative percentages
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (thresholds[i].threshold < 0) {
+                // Define the lower bound (previous threshold)
+                const previousThreshold = i > 0 ? thresholds[i - 1].threshold : -Infinity;
+                // Check if percentValue is in the range (previousThreshold, threshold]
+                if (percentValue > previousThreshold && percentValue <= thresholds[i].threshold) {
+                    currentStage = thresholds[i].stage;
+                    nextStage = i < thresholds.length - 1 ? thresholds[i + 1].stage : null;
+                    pointsNeeded = nextStage ? (thresholds[i + 1].threshold - percentValue) : 0;
+                    break;
+                }
+            }
+        }
+    } else {
+        // Handle positive percentages (including 0)
+        for (let i = 0; i < thresholds.length; i++) {
+            const nextThreshold = i < thresholds.length - 1 ? thresholds[i + 1].threshold : Infinity;
+            if (percentValue >= thresholds[i].threshold && percentValue < nextThreshold) {
+                currentStage = thresholds[i].stage;
+                nextStage = i < thresholds.length - 1 ? thresholds[i + 1].stage : null;
+                pointsNeeded = nextStage ? (thresholds[i + 1].threshold - percentValue) : 0;
+                break;
+            }
+        }
     }
 
-    const currentStagePoints = relationshipStagePoints[stages[currentStageIndex]];
-    const nextStagePoints = relationshipStagePoints[stages[currentStageIndex + 1]];
-    const pointsInCurrentStage = points - currentStagePoints;
-    const pointsNeededForNextStage = nextStagePoints - currentStagePoints;
-
-    const segmentProgress = pointsInCurrentStage / pointsNeededForNextStage;
-    const baseProgress = (currentStageIndex / (stages.length - 1)) * 90;
-    const additionalProgress = (segmentProgress / (stages.length - 1)) * 90;
-
-    return Math.min(baseProgress + additionalProgress + 5, 100);
+    return {
+        currentStage,
+        progress: percentValue,
+        progressBarWidth: isNegative ? Math.abs(percentValue) : percentValue,
+        isNegative,
+        nextStage,
+        pointsNeeded
+    };
 }
 
-// Utility functions for teacher relationships
-function getTeacherStageIndex(points) {
-    let currentStage = 0;
-    const stages = Object.keys(teacherRelationshipStagePoints);
-    stages.forEach((stage, index) => {
-        if (points >= teacherRelationshipStagePoints[stage]) {
-            currentStage = index;
-        }
-    });
-    return currentStage;
-}
-
-function calculateTeacherProgress(points) {
-    const stages = Object.keys(teacherRelationshipStagePoints);
-    const currentStageIndex = getTeacherStageIndex(points);
+// Renders active/inactive hearts based on the percentage value
+function renderHearts(percentValue, thresholds, icon = '❤️') {
+    // Determine if the relationship is negative
+    const isNegative = percentValue < 0;
     
-    if (currentStageIndex === stages.length - 1) {
-        return 100;
+    // Set appropriate total emoji count based on icon type and relationship
+    let totalHearts;
+    if (icon === '📚' || icon === '🤝') {
+        totalHearts = 8; // Always show 8 emojis for teachers and boys
+    } else {
+        totalHearts = isNegative ? 8 : 12; // Only hearts vary (8 for negative, 12 for positive)
     }
 
-    const currentStagePoints = teacherRelationshipStagePoints[stages[currentStageIndex]];
-    const nextStagePoints = teacherRelationshipStagePoints[stages[currentStageIndex + 1]];
-    const pointsInCurrentStage = points - currentStagePoints;
-    const pointsNeededForNextStage = nextStagePoints - currentStagePoints;
+    // Find the neutral index to split positive and negative stages
+    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    if (neutralIndex === -1) {
+        console.error('Neutral stage not found in thresholds');
+        return '';
+    }
 
-    const segmentProgress = pointsInCurrentStage / pointsNeededForNextStage;
-    const baseProgress = (currentStageIndex / (stages.length - 1)) * 90;
-    const additionalProgress = (segmentProgress / (stages.length - 1)) * 90;
+    // Separate positive and negative thresholds
+    const negativeThresholds = thresholds.slice(0, neutralIndex).reverse(); // Most negative first
 
-    return Math.min(baseProgress + additionalProgress + 5, 100);
+    // Calculate the number of filled hearts
+    let filledHearts = 0;
+
+    if (isNegative) {
+        // For negative relationships, count how many negative stages are achieved
+        for (let i = 0; i < negativeThresholds.length; i++) {
+            if (percentValue <= negativeThresholds[i].threshold) {
+                filledHearts = i + 1;
+            } else {
+                break;
+            }
+        }
+    } else {
+        // For positive relationships, calculate filled hearts proportionally
+        // Adjust the denominator based on icon type
+        const denominator = (icon === '📚' || icon === '🤝') ? 100 : 200;
+        filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / denominator))));
+    }
+
+    // Generate hearts HTML
+    let heartsHTML = '';
+    for (let i = 0; i < totalHearts; i++) {
+        if (i < filledHearts) {
+            // Filled hearts (active)
+            const heartEmoji = isNegative ? '🖤' : icon;
+            heartsHTML += `<span class="heart active">${heartEmoji}</span>`;
+        } else {
+            // Unfilled hearts (inactive)
+            heartsHTML += `<span class="heart">${icon}</span>`;
+        }
+    }
+
+    return heartsHTML;
 }
 
-// Heart generation functions
-function createHeartWithLabel(stage, index, currentStageIndex, points, descriptions, totalStages) {
-    const filled = index <= currentStageIndex;
-    const isCurrent = index === currentStageIndex;
-    const position = index === 0 ? 'left' : index === totalStages - 1 ? 'right' : 'center';
+// New card creation functions for the grid layout
+function createCharacterCard(id, character, relationships, type) {
+    // Get the active player from the UI or default to Jakob (james)
+    const activePlayerElement = document.querySelector('.player-option.active');
+    const isJakobActive = !activePlayerElement || activePlayerElement.classList.contains('jakob');
+    const playerKey = isJakobActive ? 'james' : 'kaiko';
+    const displayName = isJakobActive ? 'Jakob' : 'Elias';
+    const playerClass = isJakobActive ? 'jakob' : 'elias';
+    
+    let percentage = {
+        kaiko: 0,
+        james: 0
+    };
+
+    if (relationships) {
+        percentage.kaiko = relationships.kaiko || 0;
+        percentage.james = relationships.james || 0;
+    }
+    
+    let thresholds, descriptions, icon;
+    
+    if (type === 'girls') {
+        thresholds = relationshipStageThresholds;
+        descriptions = relationshipStageDescriptions;
+        icon = '❤️';
+    } else if (type === 'teachers') {
+        thresholds = teacherRelationshipThresholds;
+        descriptions = teacherRelationshipDescriptions;
+        icon = '📚';
+    } else { // boys
+        thresholds = nonDatableRelationshipThresholds;
+        descriptions = nonDatableRelationshipDescriptions;
+        icon = '🤝';
+    }
+    
+    // Get relationship data for the active player
+    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
+    
+    let typeLabel;
+    if (type === 'girls') {
+        const isDatable = relationships?.datable ?? true;
+        typeLabel = isDatable ? 'Kan dates' : 'Har kæreste';
+    } else if (type === 'teachers') {
+        typeLabel = 'Lære';
+    } else {
+        typeLabel = 'Ven';
+    }
     
     return `
-        <div class="heart-container">
-            <div class="heart ${filled ? 'filled' : ''} ${isCurrent ? 'current' : ''}" data-position="${position}">
-                ❤️
-                <div class="stage-tooltip tooltip-${position}">
-                    <div class="tooltip-header">
-                        <strong>${stage}</strong>
-                        <span class="tooltip-points">${points}p</span>
-                    </div>
-                    <div class="tooltip-description">
-                        ${descriptions[stage]}
-                    </div>
-                </div>
-            </div>
-            <div class="stage-label">${stage}</div>
-        </div>
-    `;
-}
-
-function createTeacherHeartWithLabel(stage, index, currentStageIndex, points, descriptions, totalStages) {
-    const filled = index <= currentStageIndex;
-    const isCurrent = index === currentStageIndex;
-    const position = index === 0 ? 'left' : index === totalStages - 1 ? 'right' : 'center';
-
-    return `
-        <div class="heart-container">
-            <div class="heart ${filled ? 'filled' : ''} ${isCurrent ? 'current' : ''}" data-position="${position}">
-                📚
-                <div class="stage-tooltip tooltip-${position}">
-                    <div class="tooltip-header">
-                        <strong>${stage}</strong>
-                        <span class="tooltip-points">${points}p</span>
-                    </div>
-                    <div class="tooltip-description">
-                        ${descriptions[stage]}
-                    </div>
-                </div>
-            </div>
-            <div class="stage-label">${stage}</div>
-        </div>
-    `;
-}
-
-function createNonDatableHeartWithLabel(stage, index, currentStageIndex, points, descriptions, totalStages) {
-    const filled = index <= currentStageIndex;
-    const isCurrent = index === currentStageIndex;
-    const position = index === 0 ? 'left' : index === totalStages - 1 ? 'right' : 'center';
-
-    return `
-        <div class="heart-container">
-            <div class="heart ${filled ? 'filled' : ''} ${isCurrent ? 'current' : ''}" data-position="${position}">
-                🤝
-                <div class="stage-tooltip tooltip-${position}">
-                    <div class="tooltip-header">
-                        <strong>${stage}</strong>
-                        <span class="tooltip-points">${points}p</span>
-                    </div>
-                    <div class="tooltip-description">
-                        ${descriptions[stage]}
-                    </div>
-                </div>
-            </div>
-            <div class="stage-label">${stage}</div>
-        </div>
-    `;
-}
-
-// Track creation functions
-function createStudentRelationshipTrack(character, relationship, isKaiko) {
-    const points = relationship;
-    const stages = Object.keys(relationshipStagePoints);
-    const totalStages = stages.length;
-    const progress = calculateProgress(points);
-    const currentStageIndex = getCurrentStageIndex(points);
-    const currentStage = stages[currentStageIndex];
-    
-    const nextStage = stages[currentStageIndex + 1];
-    const pointsNeeded = nextStage ? 
-        relationshipStagePoints[nextStage] - points : 0;
-    
-    const playerClass = isKaiko ? 'kaiko' : 'james';
-
-    const heartsHTML = stages.map((stage, index) => 
-        createHeartWithLabel(stage, index, currentStageIndex, relationshipStagePoints[stage], relationshipStageDescriptions, totalStages)
-    ).join('');
-
-    return `
-        <div class="relationship-track ${playerClass}">
-            <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Elias' : 'Jakob'}</span>
-                <span class="current-points">${points}p (${currentStage})</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-            </div>
-            <div class="hearts-row">
-                ${heartsHTML}
-            </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    ✨ ${currentStage} ✨ (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
-
-function createTeacherRelationshipTrack(character, relationship, isKaiko) {
-    const points = relationship;
-    const stages = Object.keys(teacherRelationshipStagePoints);
-    const totalStages = stages.length;
-    const progress = calculateTeacherProgress(points);
-    const currentStageIndex = getTeacherStageIndex(points);
-    const currentStage = stages[currentStageIndex];
-    
-    const nextStage = stages[currentStageIndex + 1];
-    const pointsNeeded = nextStage ? 
-        teacherRelationshipStagePoints[nextStage] - points : 0;
-    
-    const playerClass = isKaiko ? 'kaiko' : 'james';
-
-    const heartsHTML = stages.map((stage, index) => 
-        createTeacherHeartWithLabel(stage, index, currentStageIndex, teacherRelationshipStagePoints[stage], teacherRelationshipDescriptions, totalStages)
-    ).join('');
-
-    return `
-        <div class="relationship-track ${playerClass}">
-            <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Elias' : 'Kouly'}</span>
-                <span class="current-points">${points}p (${currentStage})</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-            </div>
-            <div class="hearts-row">
-                ${heartsHTML}
-            </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    📚 ${currentStage} 📚 (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
-
-function createNonDatableRelationshipTrack(character, relationship, isKaiko) {
-    const points = relationship;
-    const stages = Object.keys(nonDatableRelationshipStagePoints);
-    const totalStages = stages.length;
-    const progress = calculateTeacherProgress(points);
-    const currentStageIndex = getTeacherStageIndex(points);
-    const currentStage = stages[currentStageIndex];
-    
-    const nextStage = stages[currentStageIndex + 1];
-    const pointsNeeded = nextStage ? 
-        nonDatableRelationshipStagePoints[nextStage] - points : 0;
-    
-    const playerClass = isKaiko ? 'kaiko' : 'james';
-
-    const heartsHTML = stages.map((stage, index) => 
-        createNonDatableHeartWithLabel(stage, index, currentStageIndex, nonDatableRelationshipStagePoints[stage], nonDatableRelationshipDescriptions, totalStages)
-    ).join('');
-
-    return `
-        <div class="relationship-track ${playerClass}">
-            <div class="track-label">
-                <span class="status-main-name">${isKaiko ? 'Elias' : 'Jakob'}</span>
-                <span class="current-points">${points}p (${currentStage})</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-            </div>
-            <div class="hearts-row">
-                ${heartsHTML}
-            </div>
-            ${nextStage ? `
-                <div class="current-stage">
-                    🤝 ${currentStage} 🤝 (${pointsNeeded} point indtil ${nextStage})
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
-
-// Card creation functions
-function createStudentCard(character, relationships) {
-    const kaikoPoints = relationships?.kaiko || 0;
-    const jamesPoints = relationships?.james || 0;
-
-    return `
-        <div class="character-card">
+        <div class="character-card" data-id="${id}" data-type="${type}">
             <div class="character-info">
-                <div class="character-header">
-                    <img src="${character.image}" alt="${character.name}" class="character-portrait">
-                    <div class="character-name">${character.name}</div>
+                <img src="${character.image}" alt="${character.name}" class="character-avatar">
+                <div class="character-details">
+                    <h3 class="character-name">${character.name}</h3>
+                    <span class="character-type">${typeLabel}</span>
                 </div>
-                ${createStudentRelationshipTrack(character, kaikoPoints, true)}
-                ${createStudentRelationshipTrack(character, jamesPoints, false)}
             </div>
+            <div class="relationship-tracks">
+                <div class="relationship-track" data-player="${playerKey}">
+                    <div class="track-header">
+                        <span class="player-name player-${playerClass}">${displayName}</span>
+                        <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar ${isNegative ? 'negative' : ''}" style="width: ${progressBarWidth}%;"></div>
+                    </div>
+                    <div class="hearts-container">
+                        ${renderHearts(percentage[playerKey], thresholds, icon)}
+                    </div>
+                </div>
+            </div>
+            <button class="expand-button" data-id="${id}" data-type="${type}">+</button>
         </div>
     `;
 }
 
-function createTeacherCard(character, relationships) {
-    const kaikoPoints = relationships?.kaiko || 0;
-    const jamesPoints = relationships?.james || 0;
+// Create detailed popup for character
+// Update createCharacterPopup function to include the player name parameter
+function createCharacterPopup(id, character, relationships, type, playerName = 'kaiko') {
+    // Convert to percentages for display
+    let percentage = {
+        kaiko: relationships?.kaiko || 0,
+        james: relationships?.james || 0
+    };
 
+    if (relationships) {
+        percentage.kaiko = relationships.kaiko || 0;
+        percentage.james = relationships.james || 0;
+    }
+    
+    let thresholds, descriptions, icon;
+    
+    if (type === 'girls') {
+        thresholds = relationshipStageThresholds;
+        descriptions = relationshipStageDescriptions;
+        icon = '❤️';
+    } else if (type === 'teachers') {
+        thresholds = teacherRelationshipThresholds;
+        descriptions = teacherRelationshipDescriptions;
+        icon = '📚';
+    } else { // boys
+        thresholds = nonDatableRelationshipThresholds;
+        descriptions = nonDatableRelationshipDescriptions;
+        icon = '🤝';
+    }
+    
+    // Get data for the selected player
+    const playerKey = playerName === 'kaiko' ? 'kaiko' : 'james';
+    const displayName = playerName === 'kaiko' ? 'Elias' : 'Jakob';
+    
+    // Current active player 
+    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
+    
+    const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
+    
+    // Create the relationship stages visualization
+    let stagesVisualization = createStagesVisualization(thresholds, currentStage, percentage[playerKey], descriptions);
+    
     return `
-        <div class="character-card">
-            <div class="character-info">
-                <div class="character-header">
-                    <img src="${character.image}" alt="${character.name}" class="character-portrait">
-                    <div class="character-name">${character.name}</div>
+        <div class="popup-header">
+            <img src="${character.image}" alt="${character.name}" class="popup-avatar" id="popupAvatar">
+            <div>
+                <h2 class="popup-name" id="popupName">${character.name}</h2>
+                <span class="character-type" id="popupType">${typeLabel}</span>
+            </div>
+        </div>
+        ${type === 'girls' && relationships?.datable === false ? '<p class="taken-note">Denne karakter er optaget og kan ikke dates.</p>' : ''}
+        <div class="relationship-details" data-player="${playerKey}">
+            <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Relation med ${displayName}</h3>
+            <div class="progress-container">
+                <div class="progress-bar ${isNegative ? 'negative' : ''}" id="popupProgress" style="width: ${progressBarWidth}%;"></div>
+            </div>
+            <div class="hearts-container large">
+                ${renderHearts(percentage[playerKey], thresholds, icon)}
+            </div>
+            <div class="current-stage-info">
+                <div class="current-level">
+                    <span class="level-label">Nuværende niveau:</span>
+                    <span class="level-value">${currentStage} (${percentage[playerKey]}%)</span>
                 </div>
-                ${createTeacherRelationshipTrack(character, kaikoPoints, true)}
-                ${createTeacherRelationshipTrack(character, jamesPoints, false)}
+                <p class="current-description">
+                    ${descriptions[currentStage]}
+                </p>
+            </div>
+            <div class="relationship-progression">
+                <h4>Forhold Progression</h4>
+                ${stagesVisualization}
             </div>
         </div>
     `;
 }
 
-function createNonDatableCard(character, relationships) {
-    const kaikoPoints = relationships?.kaiko || 0;
-    const jamesPoints = relationships?.james || 0;
-
-    return `
-        <div class="character-card">
-            <div class="character-info">
-                <div class="character-header">
-                    <img src="${character.image}" alt="${character.name}" class="character-portrait">
-                    <div class="character-name">${character.name}</div>
+function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions) {
+    let html = '<div class="stages-container">';
+    
+    // Find the neutral index
+    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    if (neutralIndex === -1) {
+        console.error('Neutral stage not found in thresholds');
+        return '<div>Error: Neutral stage not found</div>';
+    }
+    
+    // Find current stage index
+    const currentStageIndex = thresholds.findIndex(t => t.stage === currentStage);
+    
+    // Determine if we're in a negative relationship state
+    const isNegativeRelationship = currentPercentage < 0;
+    
+    thresholds.forEach((threshold, index) => {
+        // Calculate stage number relative to neutral (0)
+        const stageNumber = index - neutralIndex;
+        
+        const isCurrentStage = index === currentStageIndex;
+        
+        // Check if this is a negative threshold or neutral in a negative relationship
+        const isNegativeStage = threshold.threshold < 0 || 
+                               (threshold.stage === 'Neutral' && isNegativeRelationship);
+        
+        // Determine if a stage is "past" (completed)
+        let isPastStage = false;
+        
+        if (isNegativeRelationship) {
+            // For negative values: complete stages between current stage and Neutral (inclusive)
+            isPastStage = (index >= currentStageIndex && index <= neutralIndex);
+        } else {
+            // For positive values: complete stages between Neutral and current stage (inclusive)
+            isPastStage = (index >= neutralIndex && index <= currentStageIndex);
+        }
+        
+        // Determine the stage class based on whether it's current, completed, and negative/positive
+        let stageClass = 'future'; // Default - not reached
+        
+        if (isCurrentStage) {
+            stageClass = isNegativeStage ? 'current-negative' : 'current';
+        } else if (isPastStage) {
+            stageClass = isNegativeStage ? 'completed-negative' : 'completed';
+        }
+        
+        const nextThreshold = index < thresholds.length - 1 ? thresholds[index + 1].threshold : 100;
+        const stageWidth = index < thresholds.length - 1 ? 
+            (nextThreshold - threshold.threshold) + '%' : 
+            (100 - threshold.threshold) + '%';
+        
+        html += `
+            <div class="stage-item ${stageClass}" 
+                 style="--stage-width: ${stageWidth};">
+                <div class="stage-marker">
+                    <span class="stage-number">${stageNumber}</span>
                 </div>
-                ${createNonDatableRelationshipTrack(character, kaikoPoints, true)}
-                ${createNonDatableRelationshipTrack(character, jamesPoints, false)}
+                <div class="stage-info">
+                    <div class="stage-name">${threshold.stage}</div>
+                    <div class="stage-threshold">${threshold.threshold}%</div>
+                </div>
+                <span class="tooltip-text">${descriptions[threshold.stage]}</span>
             </div>
-        </div>
-    `;
+        `;
+    });
+    
+    html += '</div>';
+    return html;
 }
+
 
 // Display update functions
-function updateStudentDisplay(relationships) {
-    const characterWindow = document.getElementById('relations-content');
-    if (!characterWindow) return;
+function updateCharacterGridDisplay(relationships) {
+    const characterGrid = document.querySelector('.characters-grid');
+    if (!characterGrid) return;
 
-    characterWindow.innerHTML = Object.entries(characterData)
-        .map(([id, char]) => createStudentCard(char, relationships[id]))
-        .join('');
+    // Build the grid based on the active filter
+    const activeFilter = document.querySelector('.filter-button.active').getAttribute('data-filter');
+    
+    let html = '';
+    
+    if (activeFilter === 'all' || activeFilter === 'girls') {
+        Object.entries(characterData).forEach(([id, char]) => {
+            html += createCharacterCard(id, char, relationships[id], 'girls');
+        });
+    }
+    
+    if (activeFilter === 'all' || activeFilter === 'teachers') {
+        Object.entries(teacherCharacterData).forEach(([id, char]) => {
+            html += createCharacterCard(id, char, relationships[id], 'teachers');
+        });
+    }
+    
+    if (activeFilter === 'all' || activeFilter === 'boys') {
+        Object.entries(nonDatableCharacterData).forEach(([id, char]) => {
+            html += createCharacterCard(id, char, relationships[id], 'boys');
+        });
+    }
+    
+    characterGrid.innerHTML = html;
+    
+    // Add click event listeners to all expand buttons
+    document.querySelectorAll('.expand-button').forEach(button => {
+        button.addEventListener('click', event => {
+            const id = event.target.getAttribute('data-id');
+            const type = event.target.getAttribute('data-type');
+            
+            let character, characterRelationship;
+            
+            if (type === 'girls') {
+                character = characterData[id];
+            } else if (type === 'teachers') {
+                character = teacherCharacterData[id];
+            } else { // boys
+                character = nonDatableCharacterData[id];
+            }
+            
+            characterRelationship = relationships[id] || { kaiko: 0, james: 0 };
+            
+            // Get currently active player
+            const activePlayer = document.querySelector('.player-option.active').classList.contains('elias') ? 'kaiko' : 'james';
+            
+            const popup = document.getElementById('characterPopup');
+            const popupContent = popup.querySelector('.popup-content');
+            
+            popupContent.innerHTML = `
+                <button class="close-popup">&times;</button>
+                ${createCharacterPopup(id, character, characterRelationship, type, activePlayer)}
+            `;
+            
+            popup.classList.add('active');
+            
+            // Add close event listener
+            popup.querySelector('.close-popup').addEventListener('click', () => {
+                popup.classList.remove('active');
+            });
+        });
+    });
 }
 
-function updateTeacherDisplay(relationships) {
-    const teacherWindow = document.getElementById('teachers-content');
-    if (!teacherWindow) return;
-
-    teacherWindow.innerHTML = Object.entries(teacherCharacterData)
-        .map(([id, char]) => createTeacherCard(char, relationships[id]))
-        .join('');
+// Apply search filter
+function applySearchFilter(searchTerm) {
+    const characterCards = document.querySelectorAll('.character-card');
+    
+    characterCards.forEach(card => {
+        const characterName = card.querySelector('.character-name').textContent.toLowerCase();
+        
+        if (characterName.includes(searchTerm.toLowerCase())) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
 }
 
-function updateBoysDisplay(relationships) {
-    const boysWindow = document.getElementById('boys-content');
-    if (!boysWindow) return;
-
-    boysWindow.innerHTML = Object.entries(nonDatableCharacterData)
-        .map(([id, char]) => createNonDatableCard(char, relationships[id]))
-        .join('');
+// Switch active player
+function switchActivePlayer(player) {
+    // Toggle player buttons
+    document.querySelectorAll('.player-option').forEach(opt => {
+        opt.classList.remove('active');
+    });
+    document.querySelector(`.player-option.${player}`).classList.add('active');
+    
+    // Update all cards to show the selected player's relationship
+    document.querySelectorAll('.character-card').forEach(card => {
+        const id = card.getAttribute('data-id');
+        const type = card.getAttribute('data-type');
+        
+        // Get the current data from global store
+        const relationships = window.currentRelationships || {}; 
+        const relationshipData = relationships[id] || { kaiko: 0, james: 0 };
+        
+        // Convert to percentage
+        let percentage;
+        if (player === 'elias') {
+            percentage = relationshipData.kaiko || 0;
+        } else {
+            percentage = relationshipData.james || 0;
+        }
+        
+        let thresholds, icon;
+        if (type === 'girls') {
+            thresholds = relationshipStageThresholds;
+            icon = '❤️';
+        } else if (type === 'teachers') {
+            thresholds = teacherRelationshipThresholds;
+            icon = '📚';
+        } else { // boys
+            thresholds = nonDatableRelationshipThresholds;
+            icon = '🤝';
+        }
+        
+        const { currentStage, progressBarWidth, isNegative } = getStageData(percentage, thresholds);
+        
+        // Update the track element
+        const trackElement = card.querySelector('.relationship-track');
+        trackElement.setAttribute('data-player', player === 'elias' ? 'kaiko' : 'james');
+        
+        const playerNameElement = trackElement.querySelector('.player-name');
+        playerNameElement.className = `player-name player-${player}`;
+        playerNameElement.textContent = player === 'elias' ? 'Elias' : 'Jakob';
+        
+        // Update the points display
+        const pointsElement = trackElement.querySelector('.relationship-points');
+        pointsElement.innerHTML = `${percentage}% - <span class="relationship-status">${currentStage}</span>`;
+        
+        // Update the progress bar
+        const progressBar = trackElement.querySelector('.progress-bar');
+        progressBar.style.width = `${progressBarWidth}%`;
+        progressBar.className = `progress-bar ${isNegative ? 'negative' : ''}`;
+        
+        // Update hearts
+        const heartsContainer = trackElement.querySelector('.hearts-container');
+        heartsContainer.innerHTML = renderHearts(percentage, thresholds, icon);
+    });
 }
 
-// UI creation and initialization
+// Create new UI structure
 function createCharacterStatusUI() {
     const menuContainer = document.getElementById('character-menu-container').children[0];
     menuContainer.id = 'character-menu';
@@ -523,6 +707,7 @@ function createCharacterStatusUI() {
     const button = document.createElement('button');
     button.id = 'character_btn';
     button.textContent = 'Characters';
+    button.classList.add('character-button');
     menuContainer.appendChild(button);
 
     const overlay = document.createElement('div');
@@ -530,26 +715,51 @@ function createCharacterStatusUI() {
     overlay.classList.add('hidden');
     
     overlay.innerHTML = `
-        <div id="character-status-window">
-            <div class="tabs">
-                <button class="tab-button active" data-tab="relations">Pige relationer</button>
-                <button class="tab-button" data-tab="teachers">Lære Relationer</button>
-                <button class="tab-button" data-tab="boys">Drenge Relationer</button>
+        <div class="container">
+            <h1>💕 Sweet Pink Dating Sim - Relationship Tracker 💕</h1>
+            
+            <!-- Player switcher - Note Jakob is active by default -->
+            <div class="player-switch">
+                <button class="player-option elias">Elias</button>
+                <button class="player-option jakob active">Jakob</button>
             </div>
-            <div class="tab-content">
-                <div id="relations-content" class="tab-pane active">
-                    <!-- Character cards will be dynamically inserted here -->
-                </div>
-                <div id="teachers-content" class="tab-pane">
-                    <!-- Teacher cards will be dynamically inserted here -->
-                </div>
-                <div id="boys-content" class="tab-pane">
-                    <!-- Boys cards will be dynamically inserted here -->
-                </div>
+            
+            <!-- Filter controls -->
+            <div class="filter-controls">
+                <button class="filter-button" data-filter="all">All Characters</button>
+                <button class="filter-button active" data-filter="girls">Girls</button>
+                <button class="filter-button" data-filter="teachers">Teachers</button>
+                <button class="filter-button" data-filter="boys">Boys</button>
+            </div>
+            
+            <!-- Search -->
+            <div class="characters-search">
+                <input type="text" class="search-input" placeholder="Søg efter en karakter...">
+            </div>
+            
+            <!-- Characters grid -->
+            <div class="characters-grid">
+                <!-- Characters will be dynamically inserted here -->
+            </div>
+            
+            <div class="footer">
+                Sweet Pink Dating Sim © 2025 - Relationship Tracker v2.0
+            </div>
+        </div>
+        
+        <!-- Character Details Popup -->
+        <div class="character-details-popup" id="characterPopup">
+            <div class="popup-content">
+                <button class="close-popup">&times;</button>
+                <!-- Character details will be dynamically inserted here -->
             </div>
         </div>
     `;
     
+    // Rest of the function remains the same
+    const styleElement = document.createElement('style');
+    
+    document.head.appendChild(styleElement);
     document.body.appendChild(overlay);
 
     // Event Listeners
@@ -557,36 +767,66 @@ function createCharacterStatusUI() {
         overlay.classList.remove('hidden');
     });
 
+    // Close on clicking outside container
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
             overlay.classList.add('hidden');
         }
     });
 
-    // Tab switching functionality
-    const tabButtons = overlay.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
+    // Filter functionality
+    const filterButtons = overlay.querySelectorAll('.filter-button');
+    filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
             button.classList.add('active');
             
-            const tabId = button.getAttribute('data-tab');
-            const tabPanes = overlay.querySelectorAll('.tab-pane');
-            tabPanes.forEach(pane => pane.classList.remove('active'));
-            
-            if (tabId === 'relations') {
-                overlay.querySelector('#relations-content').classList.add('active');
-            } 
-            else if (tabId === 'teachers') {
-                overlay.querySelector('#teachers-content').classList.add('active');
-            } 
-            else if (tabId === 'boys') {
-                overlay.querySelector('#boys-content').classList.add('active');
-            }
+            // Update grid based on database values (happens in updateCharacterGridDisplay)
+            const db = getDatabase();
+            const feelingsRef = ref(db, 'gameState/feelings');
+            onValue(feelingsRef, (snapshot) => {
+                updateCharacterGridDisplay(snapshot.val());
+            }, { onlyOnce: true });
         });
+    });
+    
+    // Search functionality
+    const searchInput = overlay.querySelector('.search-input');
+    searchInput.addEventListener('input', () => {
+        applySearchFilter(searchInput.value);
+    });
+    
+    // Player switcher
+    const playerOptions = overlay.querySelectorAll('.player-option');
+    playerOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const player = option.classList.contains('elias') ? 'elias' : 'jakob';
+            switchActivePlayer(player);
+        });
+    });
+    
+    // Initialize popup click outside to close
+    const popup = overlay.querySelector('.character-details-popup');
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            popup.classList.remove('active');
+        }
     });
 }
 
+// Helper function to update a character's relationship value in the database
+function updateRelationshipValue(characterId, player, percentValue) {
+    // Store the percentage directly - no conversion needed
+    const db = getDatabase();
+    const feelingRef = ref(db, `gameState/feelings/${characterId}/${player === 'elias' ? 'kaiko' : 'james'}`);
+    
+    set(feelingRef, percentValue);
+}
+
+// Initialize the character system
 function initializeCharacterSystem() {
     const db = getDatabase();
     const feelingsRef = ref(db, 'gameState/feelings');
@@ -595,9 +835,9 @@ function initializeCharacterSystem() {
 
     onValue(feelingsRef, (snapshot) => {
         const relationships = snapshot.val();
-        updateStudentDisplay(relationships);
-        updateTeacherDisplay(relationships);
-        updateBoysDisplay(relationships);
+        // Store relationships for use in player switching
+        window.currentRelationships = relationships;
+        updateCharacterGridDisplay(relationships);
     });
 }
 

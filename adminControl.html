@@ -76,6 +76,35 @@
 
     <!-- Sakura -->
     <div class="character-section">
+        <h3>Mia</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('mia', 'embarrased_closed')">embarrased_closed</button>
+            <button onclick="selectEmotion('mia', 'embarrased_lookaway')">embarrased_lookaway</button>
+            <button onclick="selectEmotion('mia', 'embarrased_sad')">embarrased_sad</button>
+            <button onclick="selectEmotion('mia', 'embarrased_smile')">embarrased_smile</button>
+            <button onclick="selectEmotion('mia', 'happy1')">happy1</button>
+            <button onclick="selectEmotion('mia', 'happy2')">happy2</button>
+            <button onclick="selectEmotion('mia', 'nervous1')">nervous1</button>
+            <button onclick="selectEmotion('mia', 'nervous2')">nervous2</button>
+            <button onclick="selectEmotion('mia', 'nervous3')">nervous3</button>
+            <button onclick="selectEmotion('mia', 'nervous4')">nervous4</button>
+            <button onclick="selectEmotion('mia', 'sad1')">sad1</button>
+            <button onclick="selectEmotion('mia', 'smile1')">smile1</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('mia')">Remove Mia</button>
+    </div>
+
+    <!-- Sakura -->
+    <div class="character-section">
         <h3>Sakura</h3>
         <!-- Emotions -->
         <div class="emotion-buttons">
@@ -675,6 +704,72 @@
         <button id="removeCharacter" onclick="removeCharacter('bonnie')">Remove Bonnie</button>
     </div>
 
+    <!-- Toy Bonnie -->
+    <div class="character-section">
+        <h3>Toy Bonnie</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('toybonnie', 'idle')">idle</button>
+            <button onclick="selectEmotion('toybonnie', 'think')">think</button>
+            <button onclick="selectEmotion('toybonnie', 'point')">point</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('toybonnie')">Remove Bonnie</button>
+    </div>
+
+    <!-- Puppet -->
+    <div class="character-section">
+        <h3>Puppet</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('puppet', 'idle')">idle</button>
+            <button onclick="selectEmotion('puppet', 'idle2')">idle2</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('puppet')">Remove Bonnie</button>
+    </div>
+
+    <!-- Elias -->
+    <div class="character-section">
+        <h3>Elias</h3>
+        <!-- Emotions -->
+        <div class="emotion-buttons">
+            <h4>Emotions</h4>
+            <button onclick="selectEmotion('elias', 'excited')">excited</button>
+            <button onclick="selectEmotion('elias', 'idle')">idle</button>
+            <button onclick="selectEmotion('elias', 'relaxsmile')">relaxsmile</button>
+            <button onclick="selectEmotion('elias', 'revange')">revange</button>
+            <button onclick="selectEmotion('elias', 'sadlookaway')">sadlookaway</button>
+            <button onclick="selectEmotion('elias', 'sadlookaway2')">sadlookaway2</button>
+            <button onclick="selectEmotion('elias', 'sadlistening')">sadlistening</button>
+            <button onclick="selectEmotion('elias', 'sad')">sad</button>
+            <button onclick="selectEmotion('elias', 'shylookaway')">shylookaway</button>
+            <button onclick="selectEmotion('elias', 'shy')">shy</button>
+        </div>
+        <!-- Positions -->
+        <div class="position-buttons">
+            <h4>Positions</h4>
+            <button onclick="placeCharacter('left')">Left</button>
+            <button onclick="placeCharacter('center')">Center</button>
+            <button onclick="placeCharacter('right')">Right</button>
+        </div>
+        <button id="removeCharacter" onclick="removeCharacter('elias')">Remove Bonnie</button>
+    </div>
+
         <!-- Add this after your other controls -->
     <h2>Background Music</h2>
     <div class="bgm-controls">
@@ -689,7 +784,7 @@
             <div class="dialogue-controls">
                 <select id="speakerSelect">
                     <option value="">Select Speaker</option>
-                    <option value="">Lasse</option>
+                    <option value="lasse">Lasse</option>
                     <option value="freddy">Freddy</option>
                     <option value="toyfreddy">Toy Freddy</option>
                     <option value="baldi">Baldi</option>
@@ -716,8 +811,6 @@
             <div class="scene-controls">
                 <button onclick="clearCharacters()">Clear All Characters</button>
             </div>
-
-            <h1 id="user-response">Wow</h1>
         </div>
     
         <div id="status">Waiting for data...</div>
