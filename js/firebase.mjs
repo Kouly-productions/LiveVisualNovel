@@ -3,6 +3,7 @@ import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebase
 import { backgrounds } from './backgrounds.js';
 import { characters } from './characters.js';
 import { bgm } from './bgm.js';
+import { sfx } from './sfx.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
@@ -163,6 +164,26 @@ window.stopBGM = function() {
         .catch(handleError);
 }
 
+// BGM Control
+window.playSFX = function(sfxId) {
+    if (!sfx[sfxId]) {
+        console.error(`SFX ${sfxId} not found!`);
+        return;
+    }
+
+    const sfxRef = ref(db, 'currentScene/sfx');
+    set(sfxRef, sfxId)
+        .then(() => updateStatus(`Now playing: ${sfxId}`))
+        .catch(handleError);
+}
+
+window.stopSFX = function() {
+    const sfxRef = ref(db, 'currentScene/sfx');
+    set(sfxRef, null)
+        .then(() => updateStatus('SFX stopped'))
+        .catch(handleError);
+}
+
 // Utility Functions
 function updateStatus(message) {
     const statusElement = document.getElementById('status');
@@ -269,6 +290,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.sfx-buttons');
+    if (container && sfx) {
+        Object.keys(sfx).forEach(songId => {
+            const button = document.createElement('button');
+            button.textContent = songId.replace(/_/g, ' ').toUpperCase();
+            
+            // Check if the button text contains 'dark' and add the theme class
+            if (button.textContent.toLowerCase().includes('dark')) {
+                button.classList.add('dark-theme');
+            }
+
+            // Check if the button text contains 'orange' and add the theme class
+            if (button.textContent.toLowerCase().includes('theme')) {
+                button.classList.add('orange-theme');
+            }
+
+            // Check if the button text contains 'dark_green' and add the theme class
+            if (button.textContent.toLowerCase().includes('sv')) {
+                button.classList.add('dark_green-theme');
+            }
+
+            // Check if the button text contains 'dark_pinkt' and add the theme class
+            if (button.textContent.toLowerCase().includes('doki')) {
+                button.classList.add('dark_pink-theme');
+            }
+            
+            button.onclick = () => playSFX(songId);
+            container.appendChild(button);
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     // Add search input before character controls
     const characterControls = document.querySelector('.character-controls');
     const searchContainer = document.createElement('div');
@@ -366,6 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { title: 'Backgrounds', selector: '.background-buttons' },
         { title: 'Characters', selector: '.character-controls' },
         { title: 'Music', selector: '.bgm-controls' },
+        { title: 'Sfx', selector: '.sfx-controls' },
     ];
 
     // Create buttons for each section

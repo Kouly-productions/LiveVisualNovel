@@ -101,7 +101,7 @@ select, input {
     margin-top: 20px;
 }
 
-.bgm-buttons {
+.bgm-buttons, .sfx-buttons {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 10px;

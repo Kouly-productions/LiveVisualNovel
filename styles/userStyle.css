@@ -88,6 +88,8 @@ body {
     display: flex;
     position: relative;
     overflow: hidden;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 #dialogue-inner-container {
@@ -912,8 +914,8 @@ h1 {
 /* Expand button */
 .expand-button {
     position: absolute;
-    bottom: 15px;
-    right: 15px;
+    bottom: 155px;
+    right: 5px;
     background-color: var(--primary);
     color: white;
     border: none;
@@ -1277,4 +1279,101 @@ h1 {
 .stage-item.completed-negative .stage-threshold,
 .stage-item.current-negative .stage-threshold {
     color: white;
+}
+/* Animation for perfect relationship (100%) - Now applied to track instead of card */
+@keyframes pinkGlow {
+    0% {
+        box-shadow: 0 4px 8px rgba(255, 102, 178, 0.2);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(255, 102, 178, 0.7), 0 0 8px rgba(255, 102, 178, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(255, 102, 178, 0.2);
+    }
+}
+
+@keyframes borderPulse {
+    0% {
+        border: 2px solid rgba(255, 102, 178, 0.7);
+    }
+    50% {
+        border: 2px solid rgba(255, 102, 178, 1);
+    }
+    100% {
+        border: 2px solid rgba(255, 102, 178, 0.7);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* Apply animations to the perfect relationship TRACK instead of the whole card */
+.relationship-track.perfect-relationship {
+    position: relative;
+    border: 2px solid rgba(255, 102, 178, 0.7);
+    border-radius: 12px;
+    padding: 8px;
+    margin: -8px;
+    animation: borderPulse 2s infinite ease-in-out, pinkGlow 2s infinite ease-in-out;
+    overflow: hidden;
+}
+
+/* Create the shimmering effect overlay with improved animation */
+.relationship-track.perfect-relationship::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 25%,
+        rgba(255, 192, 203, 0.3) 50%,
+        rgba(255, 192, 203, 0.2) 75%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite linear;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 10px;
+}
+
+/* Make sure content remains above the shimmer effect */
+.relationship-track.perfect-relationship > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Add a special effect to hearts for perfect relationship */
+.relationship-track.perfect-relationship .heart.active {
+    animation: heartbeat 1.5s infinite ease-in-out;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* Modify the switchActivePlayer function to handle the perfect relationship class properly */
+.heart.special {
+    font-size: 130%;
+}
+  
+.heart.special.active {
+    filter: drop-shadow(0 0 4px hotpink);
 }

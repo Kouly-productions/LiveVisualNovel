@@ -133,7 +133,6 @@ export const characters = {
         closeUpReally: "./assets/characters/akira/closeUpReally.png",
         closeUpSmile: "./assets/characters/akira/closeUpSmile.png",
         closeUpSad: "./assets/characters/akira/closeUpSad.png",
-        princess: "./assets/characters/akira/princess.png",
         special1: "./assets/characters/akira/special1.png",
         special2: "./assets/characters/akira/special2.png",
         special3: "./assets/characters/akira/special3.png",

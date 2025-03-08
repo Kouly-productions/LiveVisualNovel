@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { bgm } from './bgm.js';
+import { sfx } from './sfx.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
@@ -18,8 +19,10 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // Global audio state
-let currentAudio = null;
+let currentBgmAudio = null;
+let currentSfxAudio = null;
 let currentBgmId = null;
+let currentSfxId = null;
 
 // Initialize volume control
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,12 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedVolume = localStorage.getItem('audioVolume') || '50';
         volumeSlider.value = savedVolume;
         
+        // Apply initial volume
+        applyVolume(parseInt(savedVolume));
+        
+        // Handle volume changes
         volumeSlider.addEventListener('input', (e) => {
-            const volume = e.target.value / 100;
-            if (currentAudio) {
-                currentAudio.volume = volume;
-            }
-            localStorage.setItem('audioVolume', e.target.value);
+            const sliderValue = parseInt(e.target.value);
+            applyVolume(sliderValue);
+            localStorage.setItem('audioVolume', sliderValue);
         });
     }
 
@@ -44,6 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
         sendButton.addEventListener('click', handleSendMessage);
     }
 });
+
+const SFX_VOLUME_MULTIPLIER = 2.0; // 2x louder than BGM
+
+// Function to apply volume settings
+function applyVolume(sliderValue) {
+    const bgmVolume = sliderValue / 100;
+    
+    // Apply multiplier to SFX but cap at 1.0 (max volume)
+    const sfxVolume = Math.min(bgmVolume * SFX_VOLUME_MULTIPLIER, 1.0);
+    
+    if (currentBgmAudio) {
+        currentBgmAudio.volume = bgmVolume;
+    }
+    if (currentSfxAudio) {
+        currentSfxAudio.volume = sfxVolume;
+    }
+}
 
 // Handle send button click
 function handleSendMessage() {
@@ -86,7 +108,7 @@ function handleSendMessage() {
     }
 }
 
-// Handle BGM changes
+// Update the handleBgmChange function to use its own audio instance
 function handleBgmChange(data) {
     const newBgmId = data && data.bgm;
     
@@ -95,43 +117,102 @@ function handleBgmChange(data) {
         if (newBgmId !== currentBgmId) {
             console.log('Switching to new BGM:', newBgmId);
             
-            // Stop current audio if it exists
-            if (currentAudio) {
-                currentAudio.pause();
+            // Stop current BGM audio if it exists
+            if (currentBgmAudio) {
+                currentBgmAudio.pause();
             }
 
             // Create new audio for the new BGM
             const bgmPath = bgm[newBgmId];
-            currentAudio = new Audio(bgmPath);
-            currentAudio.loop = true;
-            
-            // Set volume from slider
-            const volumeSlider = document.getElementById('volume-slider');
-            if (volumeSlider) {
-                currentAudio.volume = volumeSlider.value / 100;
+            if (!bgmPath) {
+                console.error('BGM not found:', newBgmId);
+                return;
             }
             
-            currentAudio.play().catch(error => {
-                console.error('Audio playback failed:', error);
+            currentBgmAudio = new Audio(bgmPath);
+            currentBgmAudio.loop = true;
+            
+            // Set volume based on slider
+            const volumeSlider = document.getElementById('volume-slider');
+            if (volumeSlider) {
+                currentBgmAudio.volume = parseInt(volumeSlider.value) / 100;
+            }
+            
+            currentBgmAudio.play().catch(error => {
+                console.error('BGM playback failed:', error);
             });
             
             // Update current BGM ID
             currentBgmId = newBgmId;
         }
         // If the BGM is the same, just ensure it's playing
-        else if (currentAudio && currentAudio.paused) {
-            currentAudio.play().catch(error => {
-                console.error('Audio playback failed:', error);
+        else if (currentBgmAudio && currentBgmAudio.paused) {
+            currentBgmAudio.play().catch(error => {
+                console.error('BGM playback failed:', error);
             });
         }
     } 
-    // If there's no BGM in the data, stop any playing audio
-    else if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
+    // If there's no BGM in the data, stop any playing BGM audio
+    else if (currentBgmAudio) {
+        currentBgmAudio.pause();
+        currentBgmAudio = null;
         currentBgmId = null;
     }
 }
+
+// Update handleSfxChange to use the new volume system
+function handleSfxChange(data) {
+    const newSfxId = data && data.sfx;
+    
+    if (newSfxId) {
+        // Only create new audio if the SFX has actually changed
+        if (newSfxId !== currentSfxId) {
+            console.log('Playing new SFX:', newSfxId);
+            
+            // Stop current SFX audio if it exists
+            if (currentSfxAudio) {
+                currentSfxAudio.pause();
+            }
+
+            // Create new audio for the new SFX
+            const sfxPath = sfx[newSfxId];
+            if (!sfxPath) {
+                console.error('SFX not found:', newSfxId);
+                return;
+            }
+            
+            currentSfxAudio = new Audio(sfxPath);
+            currentSfxAudio.loop = true;
+            
+            // Set volume based on slider with the multiplier
+            const volumeSlider = document.getElementById('volume-slider');
+            if (volumeSlider) {
+                const baseVolume = parseInt(volumeSlider.value) / 100;
+                currentSfxAudio.volume = Math.min(baseVolume * SFX_VOLUME_MULTIPLIER, 1.0);
+            }
+            
+            currentSfxAudio.play().catch(error => {
+                console.error('SFX playback failed:', error);
+            });
+            
+            // Update current SFX ID
+            currentSfxId = newSfxId;
+        }
+        // If the SFX is the same, just ensure it's playing
+        else if (currentSfxAudio && currentSfxAudio.paused) {
+            currentSfxAudio.play().catch(error => {
+                console.error('SFX playback failed:', error);
+            });
+        }
+    } 
+    // If there's no SFX in the data, stop any playing SFX audio
+    else if (currentSfxAudio) {
+        currentSfxAudio.pause();
+        currentSfxAudio = null;
+        currentSfxId = null;
+    }
+}
+
 
 // Update scene display elements
 function updateSceneDisplay(data) {
@@ -193,6 +274,7 @@ onValue(sceneRef, (snapshot) => {
     
     // Handle BGM changes
     handleBgmChange(data);
+    handleSfxChange(data);
 });
 
 // Add keyboard event listener for Enter key

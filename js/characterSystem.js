@@ -19,7 +19,7 @@ const relationshipStageDescriptions = {
     'Tiltrukket': 'Vil gerne være tæt på dig hele tiden',
     'Forelsket': 'Er blevet forelsket i dig',
     'Kærlighed': 'Føler dybt forelsket i dig',
-    'Eneste ene': 'Ser dig som den eneste ene',
+    'Kæreste': 'Ser dig som sin kæreste (Eller i er kærester)',
     'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
     'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
 };
@@ -74,7 +74,7 @@ const relationshipStageThresholds = [
     { stage: 'Tiltrukket', threshold: 70 },
     { stage: 'Forelsket', threshold: 80 },
     { stage: 'Kærlighed', threshold: 90 },
-    { stage: 'Eneste ene', threshold: 100 },
+    { stage: 'Kæreste', threshold: 100 },
     { stage: 'Besættelse', threshold: 150 },
     { stage: 'Yandere', threshold: 200 }
 ];
@@ -146,10 +146,6 @@ const characterData = {
     minako: {
         name: "Minako",
         image: "./assets/characters/minako/head.png"
-    },
-    monika: {
-        name: "Monika",
-        image: "./assets/characters/monika/head.png"
     },
     natsuki: {
         name: "Natsuki",
@@ -310,7 +306,7 @@ function renderHearts(percentValue, thresholds, icon = '❤️') {
     } else {
         // For positive relationships, calculate filled hearts proportionally
         // Adjust the denominator based on icon type
-        const denominator = (icon === '📚' || icon === '🤝') ? 100 : 200;
+        const denominator = 100;
         filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / denominator))));
     }
 
@@ -331,6 +327,7 @@ function renderHearts(percentValue, thresholds, icon = '❤️') {
 }
 
 // New card creation functions for the grid layout
+// Modify the createCharacterCard function to make the perfect relationship animation player-specific
 function createCharacterCard(id, character, relationships, type) {
     // Get the active player from the UI or default to Jakob (james)
     const activePlayerElement = document.querySelector('.player-option.active');
@@ -368,6 +365,9 @@ function createCharacterCard(id, character, relationships, type) {
     // Get relationship data for the active player
     const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
     
+    // Check if THIS PARTICULAR PLAYER has 100% relationship (Kæreste stage)
+    const isPerfectRelationship = type === 'girls' && percentage[playerKey] === 100;
+    
     let typeLabel;
     if (type === 'girls') {
         const isDatable = relationships?.datable ?? true;
@@ -388,7 +388,7 @@ function createCharacterCard(id, character, relationships, type) {
                 </div>
             </div>
             <div class="relationship-tracks">
-                <div class="relationship-track" data-player="${playerKey}">
+                <div class="relationship-track ${isPerfectRelationship ? 'perfect-relationship' : ''}" data-player="${playerKey}">
                     <div class="track-header">
                         <span class="player-name player-${playerClass}">${displayName}</span>
                         <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
@@ -676,9 +676,19 @@ function switchActivePlayer(player) {
         
         const { currentStage, progressBarWidth, isNegative } = getStageData(percentage, thresholds);
         
+        // Check if the current player has a perfect relationship with this character
+        const isPerfectRelationship = type === 'girls' && percentage === 100;
+        
         // Update the track element
         const trackElement = card.querySelector('.relationship-track');
         trackElement.setAttribute('data-player', player === 'elias' ? 'kaiko' : 'james');
+        
+        // Update perfect relationship class
+        if (isPerfectRelationship) {
+            trackElement.classList.add('perfect-relationship');
+        } else {
+            trackElement.classList.remove('perfect-relationship');
+        }
         
         const playerNameElement = trackElement.querySelector('.player-name');
         playerNameElement.className = `player-name player-${player}`;
