@@ -181,6 +181,10 @@ const nonDatableCharacterData = {
     bg: {
         name: "Bedste mor gris",
         image: "./assets/characters/bedste/head.png"
+    },
+    spongebob: {
+        name: "Svampebob",
+        image: "./assets/characters/spongebob/head.png"
     }
 };
 

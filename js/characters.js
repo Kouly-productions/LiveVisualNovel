@@ -437,5 +437,12 @@ export const characters = {
         idle2: "./assets/characters/puppet/puppet_idle2.png",
       },
     },
+    spongebob: {
+      name: "Svampe bob",
+      expressions: {
+        idle: "./assets/characters/spongebob/idle.png",
+        kig_til_venstre: "./assets/characters/spongebob/kig_til_venstre.png",
+      },
+    },
   };
   
