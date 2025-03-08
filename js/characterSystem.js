@@ -269,9 +269,13 @@ function getStageData(percentValue, thresholds) {
 }
 
 // Renders active/inactive hearts based on the percentage value
+// Renders active/inactive hearts based on the percentage value
 function renderHearts(percentValue, thresholds, icon = '❤️') {
     // Determine if the relationship is negative
     const isNegative = percentValue < 0;
+    
+    // Check if this is a high-level relationship (Besættelse or Yandere)
+    const isHighLevel = percentValue > 100;
     
     // Set appropriate total emoji count based on icon type and relationship
     let totalHearts;
@@ -316,7 +320,9 @@ function renderHearts(percentValue, thresholds, icon = '❤️') {
         if (i < filledHearts) {
             // Filled hearts (active)
             const heartEmoji = isNegative ? '🖤' : icon;
-            heartsHTML += `<span class="heart active">${heartEmoji}</span>`;
+            // Add 'obsession-heart' class for hearts in relationships above 100%
+            const highLevelClass = isHighLevel ? 'obsession-heart' : '';
+            heartsHTML += `<span class="heart active ${highLevelClass}">${heartEmoji}</span>`;
         } else {
             // Unfilled hearts (inactive)
             heartsHTML += `<span class="heart">${icon}</span>`;
@@ -365,8 +371,15 @@ function createCharacterCard(id, character, relationships, type) {
     // Get relationship data for the active player
     const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
     
-    // Check if THIS PARTICULAR PLAYER has 100% relationship (Kæreste stage)
-    const isPerfectRelationship = type === 'girls' && percentage[playerKey] === 100;
+    // Get relationship class based on percentage
+    let relationshipClass = '';
+    if (type === 'girls') {
+        if (percentage[playerKey] === 100) {
+            relationshipClass = 'perfect-relationship';
+        } else if (percentage[playerKey] > 100) {
+            relationshipClass = 'above-perfect-relationship';
+        }
+    }
     
     let typeLabel;
     if (type === 'girls') {
@@ -388,7 +401,7 @@ function createCharacterCard(id, character, relationships, type) {
                 </div>
             </div>
             <div class="relationship-tracks">
-                <div class="relationship-track ${isPerfectRelationship ? 'perfect-relationship' : ''}" data-player="${playerKey}">
+                <div class="relationship-track ${relationshipClass}" data-player="${playerKey}">
                     <div class="track-header">
                         <span class="player-name player-${playerClass}">${displayName}</span>
                         <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
@@ -458,21 +471,11 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
         </div>
         ${type === 'girls' && relationships?.datable === false ? '<p class="taken-note">Denne karakter er optaget og kan ikke dates.</p>' : ''}
         <div class="relationship-details" data-player="${playerKey}">
-            <h3 class="player-name player-${playerName === 'kaiko' ? 'elias' : 'jakob'}">Relation med ${displayName}</h3>
             <div class="progress-container">
                 <div class="progress-bar ${isNegative ? 'negative' : ''}" id="popupProgress" style="width: ${progressBarWidth}%;"></div>
             </div>
             <div class="hearts-container large">
                 ${renderHearts(percentage[playerKey], thresholds, icon)}
-            </div>
-            <div class="current-stage-info">
-                <div class="current-level">
-                    <span class="level-label">Nuværende niveau:</span>
-                    <span class="level-value">${currentStage} (${percentage[playerKey]}%)</span>
-                </div>
-                <p class="current-description">
-                    ${descriptions[currentStage]}
-                </p>
             </div>
             <div class="relationship-progression">
                 <h4>Forhold Progression</h4>
@@ -638,6 +641,7 @@ function applySearchFilter(searchTerm) {
 }
 
 // Switch active player
+// Switch active player
 function switchActivePlayer(player) {
     // Toggle player buttons
     document.querySelectorAll('.player-option').forEach(opt => {
@@ -676,18 +680,21 @@ function switchActivePlayer(player) {
         
         const { currentStage, progressBarWidth, isNegative } = getStageData(percentage, thresholds);
         
-        // Check if the current player has a perfect relationship with this character
-        const isPerfectRelationship = type === 'girls' && percentage === 100;
-        
         // Update the track element
         const trackElement = card.querySelector('.relationship-track');
         trackElement.setAttribute('data-player', player === 'elias' ? 'kaiko' : 'james');
         
-        // Update perfect relationship class
-        if (isPerfectRelationship) {
-            trackElement.classList.add('perfect-relationship');
-        } else {
-            trackElement.classList.remove('perfect-relationship');
+        // Remove both relationship classes first
+        trackElement.classList.remove('perfect-relationship');
+        trackElement.classList.remove('above-perfect-relationship');
+        
+        // Check relationship percentage and add appropriate class
+        if (type === 'girls') {
+            if (percentage === 100) {
+                trackElement.classList.add('perfect-relationship');
+            } else if (percentage > 100) {
+                trackElement.classList.add('above-perfect-relationship');
+            }
         }
         
         const playerNameElement = trackElement.querySelector('.player-name');

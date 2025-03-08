@@ -898,6 +898,7 @@ h1 {
     justify-content: center;
     gap: 10px;
     margin: 15px 0;
+    font-size: 25px;
 }
 
 .heart {
@@ -1376,4 +1377,125 @@ h1 {
   
 .heart.special.active {
     filter: drop-shadow(0 0 4px hotpink);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@keyframes pinkGlow {
+    0% {
+        box-shadow: 0 4px 8px rgba(40, 2, 49, 0.2);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(212, 0, 255, 0.7), 0 0 8px rgba(255, 102, 178, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(40, 2, 49, 0.2);
+    }
+}
+
+@keyframes borderPulse {
+    0% {
+        box-shadow: 0 4px 8px rgba(40, 2, 49, 0.2);
+    }
+    50% {
+        border: 2px solid rgb(174, 0, 255);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(40, 2, 49, 0.2);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* Above-perfect relationship styling */
+.relationship-track.above-perfect-relationship {
+    position: relative;
+    border: 2px solid rgba(212, 0, 255, 0.7);
+    border-radius: 12px;
+    padding: 8px;
+    margin: -8px;
+    animation: purpleBorderPulse 2s infinite ease-in-out, purpleGlow 2s infinite ease-in-out;
+    overflow: hidden;
+}
+
+/* Purple shimmer effect */
+.relationship-track.above-perfect-relationship::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(132, 0, 255, 0) 0%,
+        rgba(111, 0, 255, 0.2) 25%,
+        rgba(180, 0, 255, 0.3) 50%,
+        rgba(132, 0, 255, 0.2) 75%,
+        rgba(132, 0, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite linear;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 10px;
+}
+
+/* Make content stay above the shimmer */
+.relationship-track.above-perfect-relationship > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Turn the hearts purple using CSS filters */
+.relationship-track.above-perfect-relationship .heart.active {
+    animation: heartbeat 1.5s infinite ease-in-out;
+    filter: hue-rotate(280deg) saturate(1.2); /* Convert red to purple */
+}
+
+/* Add a purple glow to the hearts */
+.relationship-track.above-perfect-relationship .heart.active {
+    filter: hue-rotate(280deg) saturate(1.2) drop-shadow(0 0 4px rgba(180, 0, 255, 0.8));
+}
+
+/* Special effect for above-perfect hearts */
+.relationship-track.above-perfect-relationship .hearts-container {
+    position: relative;
+}
+
+/* Add a subtle particle effect behind the hearts */
+.relationship-track.above-perfect-relationship .hearts-container::before {
+    content: "✦ ✧ ✦";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    color: rgba(180, 0, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    animation: twinkle 1.5s infinite alternate ease-in-out;
+    z-index: -1;
 }
