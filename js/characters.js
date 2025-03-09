@@ -183,6 +183,10 @@ export const characters = {
         shySad: "./assets/characters/aya/shySad.png",
         sideWave: "./assets/characters/aya/sideWave.png",
         think: "./assets/characters/aya/Think.png",
+        aya_smile_close_hug: "./assets/characters/aya/aya_smile_close_hug.png",
+        aya_smile_closed_hug: "./assets/characters/aya/aya_smile_closed_hug.png",
+        aya_smile_hug: "./assets/characters/aya/aya_smile_hug.png",
+        kiss: "./assets/characters/aya/kiss.png",
       },
     },
     gfreddy: {
