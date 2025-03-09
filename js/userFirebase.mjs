@@ -377,7 +377,7 @@ function addMinutesToTime(timeString, minutesToAdd) {
 function updateTime() {
     onValue(timeRef, (snapshot) => {
         const currentTime = snapshot.val() || '07:30';
-        const newTime = addMinutesToTime(currentTime, 5);
+        const newTime = addMinutesToTime(currentTime, 1);
         set(timeRef, newTime)
             .then(() => console.log('Time updated to:', newTime))
             .catch(error => console.error('Error updating time:', error));
