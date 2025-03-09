@@ -77,5 +77,6 @@ export const backgrounds = {
     mia_freddy_sad: "./assets/backgrounds/mia_freddy_sad.png",
     mia_freddy_sad_lookdown: "./assets/backgrounds/mia_freddy_sad_lookdown.png",
     daycare: "./assets/backgrounds/daycare.png",
+    class_dark: "./assets/backgrounds/class_dark.png",
   };
   

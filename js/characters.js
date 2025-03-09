@@ -444,5 +444,23 @@ export const characters = {
         kig_til_venstre: "./assets/characters/spongebob/kig_til_venstre.png",
       },
     },
+    pumbaa: {
+      name: "Pumbaa",
+      expressions: {
+        kig_til_højre: "./assets/characters/pumbaa/kig_til_højre.png",
+        kig_til_venstre: "./assets/characters/pumbaa/kig_til_venstre.png",
+      },
+    },
+    sun: {
+      name: "Sun",
+      expressions: {
+        idle: "./assets/characters/sun/idle.png",
+        point: "./assets/characters/sun/point.png",
+        side: "./assets/characters/sun/side.png",
+        no_fun: "./assets/characters/sun/no_fun.png",
+        chance: "./assets/characters/sun/chance.png",
+        creepy: "./assets/characters/sun/creepy.png",
+      },
+    },
   };
   

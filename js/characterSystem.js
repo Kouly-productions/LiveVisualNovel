@@ -185,6 +185,10 @@ const nonDatableCharacterData = {
     spongebob: {
         name: "Svampebob",
         image: "./assets/characters/spongebob/head.png"
+    },
+    pumbaa: {
+        name: "Pumbaa",
+        image: "./assets/characters/pumbaa/head.png"
     }
 };
 
@@ -220,6 +224,10 @@ const teacherCharacterData = {
     baldi: {
         name: "Baldi",
         image: "./assets/characters/baldi/idle.png"
+    },
+    sun: {
+        name: "Sun",
+        image: "./assets/characters/sun/head.png"
     },
     bonnie: {
         name: "Bonnie",
