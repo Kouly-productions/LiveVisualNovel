@@ -80,4 +80,5 @@ export const bgm = {
     sv_town: "./assets/bgm/sv_town.mp3",
     mia_theme: "./assets/bgm/mia_theme.mp3",
     yuri_death: "./assets/bgm/yuri_death.mp3",
+    daycare: "./assets/bgm/daycare.mp3",
 };
