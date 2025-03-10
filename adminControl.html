@@ -3,893 +3,1612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin panel</title>
-    <link rel="stylesheet" href="/LiveVisualNovel/styles/styles.css">
+    <title>Live Visual Novel - Admin Panel</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #81C784;
+            --primary-dark: #388E3C;
+            --secondary: #7E57C2;
+            --text: #4a4a4a;
+            --text-light: #ffffff;
+            --panel-bg: #f5f8f5;
+            --card-bg: #ffffff;
+            --shadow: rgba(76, 175, 80, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--panel-bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: var(--text-light);
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            background-color: var(--primary-light);
+            color: var(--text-light);
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .nav-tab:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .nav-tab.active {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px 20px;
+            padding-left: 50px;
+            border: 2px solid var(--primary-light);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 8px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .search-bar::before {
+            content: '🔍';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px var(--shadow);
+        }
+
+        .card h3 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .card h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary-light);
+            border-radius: 3px;
+        }
+
+        .preview {
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            object-fit: cover;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .character-preview {
+            width: 100%;
+            height: 200px;
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .emotions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .emotion-btn {
+            padding: 8px;
+            background-color: var(--primary-light);
+            color: var(--text-light);
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .emotion-btn:hover {
+            background-color: var(--primary);
+        }
+
+        .emotion-btn.active {
+            background-color: var(--primary-dark);
+            font-weight: bold;
+        }
+
+        .positions {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+
+        .position-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .position-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(126, 87, 194, 0.3);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: var(--text-light);
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .dialogue-box {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 16px var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .dialogue-flex {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .dialogue-select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid var(--primary-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+        }
+
+        .dialogue-input {
+            flex: 3;
+            padding: 12px 15px;
+            border: 2px solid var(--primary-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+        }
+
+        .dialogue-select:focus, .dialogue-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .scene-preview {
+            width: 100%;
+            height: 300px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 16px var(--shadow);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .character-position {
+            position: absolute;
+            bottom: 0;
+            width: 33%;
+            height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .left-position {
+            left: 0;
+        }
+
+        .center-position {
+            left: 33.5%;
+        }
+
+        .right-position {
+            right: 0;
+        }
+
+        .preview-character {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .preview-dialogue {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 0 20px;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .character-name {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .music-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .music-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .music-title {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 -4px 10px var(--shadow);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--panel-bg);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Floating action button */
+        .fab {
+            position: fixed;
+            bottom: 70px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-dark);
+            border-radius: 50%;
+            box-shadow: 0 6px 10px var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow);
+        }
+
+        /* Quick actions menu */
+        .quick-actions {
+            position: fixed;
+            bottom: 140px;
+            right: 30px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px var(--shadow);
+            padding: 15px;
+            z-index: 99;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 200px;
+        }
+
+        .quick-actions.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .quick-action-btn {
+            padding: 10px;
+            background-color: var(--primary-light);
+            color: var(--text-light);
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        /* Class for BGM button themes */
+        .bgm-buttons button.dark-theme {
+            background: #2c2c2c;
+            color: #fff;
+        }
+
+        .bgm-buttons button.orange-theme {
+            background: #da7e16;
+            color: #fff;
+        }
+
+        .bgm-buttons button.dark_green-theme {
+            background: #0c6418;
+            color: #fff;
+        }
+
+        .bgm-buttons button.dark_pink-theme {
+            background: #86146a;
+            color: #fff;
+        }
+
+        .stop-bgm {
+            background-color: #ff4444 !important;
+        }
+
+        .stop-bgm:hover {
+            background-color: #cc0000 !important;
+        }
+    </style>
 </head>
 <body>
-    <div class="controls">
-        <h2>Backgrounds</h2>
-        <div class="background-buttons">
+    <div class="header">
+        <h1>🎮 Live Visual Novel 🎮</h1>
+        <p>Admin Control Panel</p>
+    </div>
 
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="backgrounds">Backgrounds</button>
+            <button class="nav-tab" data-tab="characters">Characters</button>
+            <button class="nav-tab" data-tab="music">Music</button>
+            <button class="nav-tab" data-tab="sfx">Sound Effects</button>
+            <button class="nav-tab" data-tab="dialogue">Dialogue</button>
+            <button class="nav-tab" data-tab="scene">Scene Preview</button>
         </div>
-        
 
-        <h2>Characters</h2>
-        <div class="character-controls">
+        <!-- Backgrounds Tab -->
+        <div class="tab-content active" id="backgrounds-tab">
+            <div class="search-bar">
+                <input type="text" id="background-search" placeholder="Search backgrounds...">
+            </div>
+            <div class="grid" id="backgrounds-grid">
+                <!-- Background items will be populated dynamically via JavaScript -->
+            </div>
+        </div>
+
+<!-- Characters Tab -->
+<div class="tab-content" id="characters-tab">
+    <div class="search-bar">
+        <input type="text" id="character-search" placeholder="Search characters...">
+    </div>
+    <div class="grid" id="characters-grid">
         <!-- Akira -->
-        <div class="character-section">
+        <div class="card character-card" data-character="akira">
             <h3>Akira</h3>
-            <!-- Emotions -->
-            <div class="emotion-buttons">
-                <h4>Emotions</h4>
-                <button onclick="selectEmotion('akira', 'angry1')">Angry1</button>
-                <button onclick="selectEmotion('akira', 'angry2')">Angry2</button>
-                <button onclick="selectEmotion('akira', 'concerned')">Concerned</button>
-                <button onclick="selectEmotion('akira', 'flirt1')">Flirt1</button>
-                <button onclick="selectEmotion('akira', 'flirt2')">Flirt2</button>
-                <button onclick="selectEmotion('akira', 'flirtIdle')">FlirtIdle</button>
-                <button onclick="selectEmotion('akira', 'happyIdle')">HappyIdle</button>
-                <button onclick="selectEmotion('akira', 'idle')">Idle</button>
-                <button onclick="selectEmotion('akira', 'ohReally')">OhReally</button>
-                <button onclick="selectEmotion('akira', 'really')">Really</button>
-                <button onclick="selectEmotion('akira', 'really2')">Really2</button>
-                <button onclick="selectEmotion('akira', 'really3')">Really3</button>
-                <button onclick="selectEmotion('akira', 'really4')">Really4</button>
-                <button onclick="selectEmotion('akira', 'sad')">Sad</button>
-                <button onclick="selectEmotion('akira', 'weCanDoIt')">WeCanDoIt</button>
-                <button onclick="selectEmotion('akira', 'closeUpFlirt')">CloseUpFlirt</button>
-                <button onclick="selectEmotion('akira', 'closeUpFlirtSide')">CloseUpFlirtSide</button>
-                <button onclick="selectEmotion('akira', 'closeUpIdle')">CloseUpIdle</button>
-                <button onclick="selectEmotion('akira', 'closeUpReally')">CloseUpReally</button>
-                <button onclick="selectEmotion('akira', 'closeUpSmile')">CloseUpSmile</button>
-                <button onclick="selectEmotion('akira', 'closeUpSad')">CloseUpSad</button>
-                <button onclick="selectEmotion('akira', 'princess')">Princess</button>
-                <button onclick="selectEmotion('akira', 'special1')">Special1</button>
-                <button onclick="selectEmotion('akira', 'special2')">Special2</button>
-                <button onclick="selectEmotion('akira', 'special3')">Special3</button>
-                <button onclick="selectEmotion('akira', 'special4')">Special4</button>
-                <button onclick="selectEmotion('akira', 'special5')">Special5</button>
-                <button onclick="selectEmotion('akira', 'hug')">Hug</button>
-                <button onclick="selectEmotion('akira', 'hugV2')">HugV2</button>
-                <button onclick="selectEmotion('akira', 'hug_forgive_me')">Hug_forgive_me</button>
-                <button onclick="selectEmotion('akira', 'hug_sad')">Hug_sad</button>
-                <button onclick="selectEmotion('akira', 'hug_smile')">Hug_smile</button>
-                <button onclick="selectEmotion('akira', 'hug_worried')">Hug_worried</button>
-                <button onclick="selectEmotion('akira', 'hug_smile_small')">Hug_smile_small</button>
-                <button onclick="selectEmotion('akira', 'shy')">Shy</button>
-                <button onclick="selectEmotion('akira', 'evilHappy1')">EvilHappy1</button>
-                <button onclick="selectEmotion('akira', 'evilAngry1')">EvilAngry1</button>
-                <button onclick="selectEmotion('akira', 'evilAnnoyed1')">EvilAnnoyed1</button>
-                <button onclick="selectEmotion('akira', 'evilAnnoyed2')">EvilAnnoyed2</button>
-                <button onclick="selectEmotion('akira', 'evilAnnoyed3')">EvilAnnoyed3</button>
+            <div class="character-preview" id="akira-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
             </div>
-            <!-- Positions -->
-            <div class="position-buttons">
-                <h4>Positions</h4>
-                <button onclick="placeCharacter('left')">Left</button>
-                <button onclick="placeCharacter('center')">Center</button>
-                <button onclick="placeCharacter('right')">Right</button>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
             </div>
-            <button id="removeCharacter" onclick="removeCharacter('akira')">Remove Akira</button>
+            <button class="action-btn" onclick="removeCharacter('akira')">Remove Character</button>
         </div>
-    </div>
 
-    <!-- Sakura -->
-    <div class="character-section">
-        <h3>Mia</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('mia', 'embarrased_closed')">embarrased_closed</button>
-            <button onclick="selectEmotion('mia', 'embarrased_lookaway')">embarrased_lookaway</button>
-            <button onclick="selectEmotion('mia', 'embarrased_sad')">embarrased_sad</button>
-            <button onclick="selectEmotion('mia', 'embarrased_smile')">embarrased_smile</button>
-            <button onclick="selectEmotion('mia', 'happy1')">happy1</button>
-            <button onclick="selectEmotion('mia', 'happy2')">happy2</button>
-            <button onclick="selectEmotion('mia', 'nervous1')">nervous1</button>
-            <button onclick="selectEmotion('mia', 'nervous2')">nervous2</button>
-            <button onclick="selectEmotion('mia', 'nervous3')">nervous3</button>
-            <button onclick="selectEmotion('mia', 'nervous4')">nervous4</button>
-            <button onclick="selectEmotion('mia', 'sad1')">sad1</button>
-            <button onclick="selectEmotion('mia', 'smile1')">smile1</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('mia')">Remove Mia</button>
-    </div>
-
-    <!-- Sakura -->
-    <div class="character-section">
-        <h3>Sakura</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('sakura', 'blink1')">blink1</button>
-            <button onclick="selectEmotion('sakura', 'dissapointed1')">dissapointed1</button>
-            <button onclick="selectEmotion('sakura', 'happy1')">happy1</button>
-            <button onclick="selectEmotion('sakura', 'happy2')">happy2</button>
-            <button onclick="selectEmotion('sakura', 'happy3')">happy3</button>
-            <button onclick="selectEmotion('sakura', 'idle1')">idle1</button>
-            <button onclick="selectEmotion('sakura', 'idle2')">idle2</button>
-            <button onclick="selectEmotion('sakura', 'sad1')">sad1</button>
-            <button onclick="selectEmotion('sakura', 'sad2')">sad2</button>
-            <button onclick="selectEmotion('sakura', 'sad3')">sad3</button>
-            <button onclick="selectEmotion('sakura', 'hand')">hand</button>
-            <button onclick="selectEmotion('sakura', 'scared1')">scared1</button>
-            <button onclick="selectEmotion('sakura', 'special1')">special1</button>
-            <button onclick="selectEmotion('sakura', 'special2')">special2</button>
-            <button onclick="selectEmotion('sakura', 'special3')">special3</button>
-            <button onclick="selectEmotion('sakura', 'special4')">special4</button>
-            <button onclick="selectEmotion('sakura', 'special5')">special5</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('sakura')">Remove Sakura</button>
-    </div>
-
-    <!-- Ayano -->
-    <div class="character-section">
-        <h3>Ayano</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('ayano', 'angry1')">angry1</button>
-            <button onclick="selectEmotion('ayano', 'angry2')">angry2</button>
-            <button onclick="selectEmotion('ayano', 'idle1')">idle1</button>
-            <button onclick="selectEmotion('ayano', 'laugh')">laugh</button>
-            <button onclick="selectEmotion('ayano', 'sad1')">sad1</button>
-            <button onclick="selectEmotion('ayano', 'shy1')">shy1</button>
-            <button onclick="selectEmotion('ayano', 'shy2')">shy2</button>
-            <button onclick="selectEmotion('ayano', 'smile1')">smile1</button>
-            <button onclick="selectEmotion('ayano', 'smile2')">smile2</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('ayano')">Remove Ayano</button>
-    </div>
-
-    <!-- Aya -->
-    <div class="character-section">
-        <h3>Aya</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('aya', 'angry1')">angry1</button>
-            <button onclick="selectEmotion('aya', 'angry2')">angry2</button>
-            <button onclick="selectEmotion('aya', 'bow')">bow</button>
-            <button onclick="selectEmotion('aya', 'embarrasedSmile')">embarrasedSmile</button>
-            <button onclick="selectEmotion('aya', 'embarrasedSmileLookAway')">embarrasedSmileLookAway</button>
-            <button onclick="selectEmotion('aya', 'happy1')">happy1</button>
-            <button onclick="selectEmotion('aya', 'idleSmile')">idleSmile</button>
-            <button onclick="selectEmotion('aya', 'idleSmile2')">idleSmile2</button>
-            <button onclick="selectEmotion('aya', 'sad1')">sad1</button>
-            <button onclick="selectEmotion('aya', 'sad2')">sad2</button>
-            <button onclick="selectEmotion('aya', 'shySad')">shySad</button>
-            <button onclick="selectEmotion('aya', 'sideWave')">sideWave</button>
-            <button onclick="selectEmotion('aya', 'think')">think</button>
-            <button onclick="selectEmotion('aya', 'aya_smile_close_hug')">aya_smile_close_hug</button>
-            <button onclick="selectEmotion('aya', 'aya_smile_closed_hug')">aya_smile_closed_hug</button>
-            <button onclick="selectEmotion('aya', 'aya_smile_hug')">aya_smile_hug</button>
-            <button onclick="selectEmotion('aya', 'kiss')">kiss</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('aya')">Remove Aya</button>
-    </div>
-
-    <!-- Eddy -->
-    <div class="character-section">
-        <h3>Eddy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('eddy', 'eddyNeutral')">Neutral</button>
-            <button onclick="selectEmotion('eddy', 'eddyLookAway')">LookAway</button>
-            <button onclick="selectEmotion('eddy', 'eddyEvil')">Evil</button>
-            <button onclick="selectEmotion('eddy', 'eddyHappy')">Happy</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('eddy')">Remove Eddy</button>
-    </div>
-
-    <!-- Helpy -->
-    <div class="character-section">
-        <h3>Helpy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('helpy', 'helpyThinking')">Thinking</button>
-            <button onclick="selectEmotion('helpy', 'helpyAngry')">Angry</button>
-            <button onclick="selectEmotion('helpy', 'helpydc')">Dc</button>
-            <button onclick="selectEmotion('helpy', 'helpydcLookAway')">DcLookAway</button>
-            <button onclick="selectEmotion('helpy', 'helpyHappy')">Happy</button>
-            <button onclick="selectEmotion('helpy', 'helpyIdlepng')">Idle</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('helpy')">Remove Helpy</button>
-    </div>
-
-    <!-- Freddy -->
-    <div class="character-section">
-        <h3>Freddy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('freddy', 'freddyAngry')">Angry</button>
-            <button onclick="selectEmotion('freddy', 'freddyConfused')">Confused</button>
-            <button onclick="selectEmotion('freddy', 'freddyGood')">Good</button>
-            <button onclick="selectEmotion('freddy', 'freddyNeutral')">Neutral</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('freddy')">Remove Freddy</button>
-    </div>
-
-    <!-- Toy Freddy -->
-    <div class="character-section">
-        <h3>Toy Freddy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('toyfreddy', 'toyfreddyNeutral')">Neutral</button>
-            <button onclick="selectEmotion('toyfreddy', 'toyfreddyPoint')">Point</button>
-            <button onclick="selectEmotion('toyfreddy', 'toyfreddyConfused')">Confused</button>
-            <button onclick="selectEmotion('toyfreddy', 'toyfreddyHappy')">Happy</button>
-            <button onclick="selectEmotion('toyfreddy', 'toyfreddyAngry')">Angry</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('toyfreddy')">Remove Toy Freddy</button>
-    </div>
-
-    <!-- Golden Freddy -->
-    <div class="character-section">
-        <h3>Golden Freddy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('gfreddy', 'angry')">angry1</button>
-            <button onclick="selectEmotion('gfreddy', 'angryPoint')">angryPoint</button>
-            <button onclick="selectEmotion('gfreddy', 'confused')">confused</button>
-            <button onclick="selectEmotion('gfreddy', 'happy')">happy</button>
-            <button onclick="selectEmotion('gfreddy', 'idle')">idle</button>
-            <button onclick="selectEmotion('gfreddy', 'lookingDown')">lookingDown</button>
-            <button onclick="selectEmotion('gfreddy', 'point')">point</button>
-            <button onclick="selectEmotion('gfreddy', 'sad')">sad</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('gfreddy')">Remove Golden Freddy</button>
-    </div>
-
-    <!-- Foxy -->
-    <div class="character-section">
-        <h3>Foxy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('foxy', 'angry')">angry</button>
-            <button onclick="selectEmotion('foxy', 'angry')">dc</button>
-            <button onclick="selectEmotion('foxy', 'idle')">idle</button>
-            <button onclick="selectEmotion('foxy', 'sad')">sad</button>
-            <button onclick="selectEmotion('foxy', 'superAngry')">superAngry</button>
-            <button onclick="selectEmotion('foxy', 'whatever')">whatever</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('foxy')">Remove Foxy </button>
-    </div>
-
-    <!-- Bedste mor gris -->
-    <div class="character-section">
-        <h3>Bedste mor gris</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('bedste', 'bgAngry')">Angry</button>
-            <button onclick="selectEmotion('bedste', 'bgConfused')">bgConfused</button>
-            <button onclick="selectEmotion('bedste', 'bgIdle')">bgIdle</button>
-            <button onclick="selectEmotion('bedste', 'bgLaugh')">bgLaugh</button>
-            <button onclick="selectEmotion('bedste', 'bgLookAway')">bgLookAway</button>
-            <button onclick="selectEmotion('bedste', 'bgLooking')">bgLooking</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('bedste')">Remove Bedste mor gris</button>
-    </div>
-
-    <!-- Funtime Foxy -->
-    <div class="character-section">
-        <h3>Funtime Foxy</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('FT', 'FTThinking')">Thinking</button>
-            <button onclick="selectEmotion('FT', 'FTPoint')">Point</button>
-            <button onclick="selectEmotion('FT', 'FTHappy')">Happy</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('FT')">Remove Funtime Foxy</button>
-    </div>
-
-    <!-- Baldi -->
-    <div class="character-section">
-        <h3>Baldi</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('baldi', 'idleHappy')">IdleHappy</button>
-            <button onclick="selectEmotion('baldi', 'idle')">Idle</button>
-            <button onclick="selectEmotion('baldi', 'angry')">Angry</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('baldi')">Remove Baldi</button>
-    </div>
-
-    <!-- Jacob -->
-    <div class="character-section">
-        <h3>Jacob</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('jacob', 'idle')">idle</button>
-            <button onclick="selectEmotion('jacob', 'annoyed')">annoyed</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('jacob')">Remove Jacob</button>
-    </div>
-
-    <!-- Blækvard -->
-    <div class="character-section">
-        <h3>Blækvard</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('squidward', 'squidwardAngry')">Angry</button>
-            <button onclick="selectEmotion('squidward', 'squidwardDC')">DC</button>
-            <button onclick="selectEmotion('squidward', 'squidwardHappy')">Happy</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('squidward')">Remove Squidward</button>
-    </div>
-
-    <!-- Mika -->
-    <div class="character-section">
-        <h3>Mika</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('mika', 'angry1')">Angry1</button>
-            <button onclick="selectEmotion('mika', 'angry2')">Angry2</button>
-            <button onclick="selectEmotion('mika', 'bow')">Bow</button>
-            <button onclick="selectEmotion('mika', 'happy1')">Happy1</button>
-            <button onclick="selectEmotion('mika', 'happy2')">Happy2</button>
-            <button onclick="selectEmotion('mika', 'happy3')">Happy3</button>
-            <button onclick="selectEmotion('mika', 'happyIdle1')">HappyIdle1</button>
-            <button onclick="selectEmotion('mika', 'listening')">Listening</button>
-            <button onclick="selectEmotion('mika', 'idle1')">Idle1</button>
-            <button onclick="selectEmotion('mika', 'ohReally1')">OhReally1</button>
-            <button onclick="selectEmotion('mika', 'ohReally2')">OhReally2</button>
-            <button onclick="selectEmotion('mika', 'ohReally3')">OhReally3</button>
-            <button onclick="selectEmotion('mika', 'ohReally4')">OhReally4</button>
-            <button onclick="selectEmotion('mika', 'onIt')">OnIt</button>
-            <button onclick="selectEmotion('mika', 'sad1')">Sad1</button>
-            <button onclick="selectEmotion('mika', 'sadLookAway')">SadLookAway</button>
-            <button onclick="selectEmotion('mika', 'suprised')">Suprised</button>
-            <button onclick="selectEmotion('mika', 'think2')">Think2</button>
-            <button onclick="selectEmotion('mika', 'think3')">Think3</button>
-            <button onclick="selectEmotion('mika', 'think4')">Think4</button>
-            <button onclick="selectEmotion('mika', 'hug')">Hug</button>
-            <button onclick="selectEmotion('mika', 'hugClosed')">HugClosed</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('mika')">Remove Mika</button>
-    </div>
-
-    <!-- Minako -->
-    <div class="character-section">
-        <h3>Minako</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('minako', 'angry1')">Angry1</button>
-            <button onclick="selectEmotion('minako', 'angry2')">Angry2</button>
-            <button onclick="selectEmotion('minako', 'bow1')">Bow1</button>
-            <button onclick="selectEmotion('minako', 'demand1')">Demand1</button>
-            <button onclick="selectEmotion('minako', 'fight1')">Fight1</button>
-            <button onclick="selectEmotion('minako', 'flirt1')">Flirt1</button>
-            <button onclick="selectEmotion('minako', 'flirt2')">Flirt2</button>
-            <button onclick="selectEmotion('minako', 'happy1')">Happy1</button>
-            <button onclick="selectEmotion('minako', 'happy2')">Happy2</button>
-            <button onclick="selectEmotion('minako', 'happy3')">Happy3</button>
-            <button onclick="selectEmotion('minako', 'ignore1')">Ignore1</button>
-            <button onclick="selectEmotion('minako', 'ohReally1')">OhReally1</button>
-            <button onclick="selectEmotion('minako', 'ohReally2')">OhReally2</button>
-            <button onclick="selectEmotion('minako', 'ohReally3')">OhReally3</button>
-            <button onclick="selectEmotion('minako', 'onIt1')">OnIt1</button>
-            <button onclick="selectEmotion('minako', 'proud1')">Proud1</button>
-            <button onclick="selectEmotion('minako', 'proud2')">Proud2</button>
-            <button onclick="selectEmotion('minako', 'sad1')">Sad1</button>
-            <button onclick="selectEmotion('minako', 'sad2')">Sad2</button>
-            <button onclick="selectEmotion('minako', 'confused')">Confused</button>
-            <button onclick="selectEmotion('minako', 'ohRight')">OhRight</button>
-            <button onclick="selectEmotion('minako', 'ohRight2')">OhRight2</button>
-            <button onclick="selectEmotion('minako', 'dark_cloth')">Dark_cloth</button>
-            <button onclick="selectEmotion('minako', 'blue_cloth')">Blue_cloth</button>
-            <button onclick="selectEmotion('minako', 'hug')">Hug</button>
-            <button onclick="selectEmotion('minako', 'sit_sad')">Sit_sad</button>
-            <button onclick="selectEmotion('minako', 'sit_sad_lookaway')">Sit_sad_lookaway</button>
-            <button onclick="selectEmotion('minako', 'sit_smile')">Sit_smile</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('minako')">Remove Minako</button>
-    </div>
-
-    <!-- Aiko -->
-    <div class="character-section">
-        <h3>Aiko</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('aiko', 'angry_hiding1')">Angry_hiding1</button>
-            <button onclick="selectEmotion('aiko', 'angry_hiding1_close')">angry_hiding1_close</button>
-            <button onclick="selectEmotion('aiko', 'annoyed')">Annoyed</button>
-            <button onclick="selectEmotion('aiko', 'annoyed_close')">Annoyed_close</button>
-            <button onclick="selectEmotion('aiko', 'cry')">Cry</button>
-            <button onclick="selectEmotion('aiko', 'happy1')">Happy1</button>
-            <button onclick="selectEmotion('aiko', 'happy2')">Happy2</button>
-            <button onclick="selectEmotion('aiko', 'happy3')">Happy3</button>
-            <button onclick="selectEmotion('aiko', 'happy1_close')">Happy1_close</button>
-            <button onclick="selectEmotion('aiko', 'obsessed_happy1')">Obsessed_happy1</button>
-            <button onclick="selectEmotion('aiko', 'obsessed_sad1')">Obsessed_sad1</button>
-            <button onclick="selectEmotion('aiko', 'obsessed_sad2')">Obsessed_sad2</button>
-            <button onclick="selectEmotion('aiko', 'obsessed_suprised1')">Obsessed_suprised1</button>
-            <button onclick="selectEmotion('aiko', 'obsessed_think1')">Obsessed_think1</button>
-            <button onclick="selectEmotion('aiko', 'obsessed1')">Obsessed1</button>
-            <button onclick="selectEmotion('aiko', 'obsessed1_close')">Obsessed1_close</button>
-            <button onclick="selectEmotion('aiko', 'sad1')">Sad1</button>
-            <button onclick="selectEmotion('aiko', 'sad2')">Sad2</button>
-            <button onclick="selectEmotion('aiko', 'sweet')">Sweet</button>
-            <button onclick="selectEmotion('aiko', 'heart')">Heart</button>
-            <button onclick="selectEmotion('aiko', 'hug')">hug</button>
-            <button onclick="selectEmotion('aiko', 'hug_closed')">hug_closed</button>
-            <button onclick="selectEmotion('aiko', 'hug_flirt')">hug_flirt</button>
-            <button onclick="selectEmotion('aiko', 'hug_sad')">hug_sad</button>
-            <button onclick="selectEmotion('aiko', 'kiss_open')">kiss_open</button>
-            <button onclick="selectEmotion('aiko', 'kiss_closed')">kiss_closed</button>
-            <button onclick="selectEmotion('aiko', 'close_yandere_smile')">close_yandere_smile</button>
-            <button onclick="selectEmotion('aiko', 'close_yandere_flirt')">close_yandere_flirt</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('aiko')">Remove Aiko</button>
-    </div>
-
-    <!-- Vanny -->
-    <div class="character-section">
-        <h3>Vanny</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('vanny', 'vanny')">Vanny</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('vanny')">Remove Vanny</button>
-    </div>
-
-    <!-- Glitchtrap -->
-    <div class="character-section">
-        <h3>Glitchtrap</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('glitchtrap', 'glitchtrap')">Idle</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('glitchtrap')">Remove Glitchtrap</button>
-    </div>
-
-    <!-- Natsuki -->
-    <div class="character-section">
-        <h3>Natsuki</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('natsuki', 'genert')">genert</button>
-            <button onclick="selectEmotion('natsuki', 'lille_smil')">lille_smil</button>
-            <button onclick="selectEmotion('natsuki', 'neutral')">neutral</button>
-            <button onclick="selectEmotion('natsuki', 'skeptisk')">skeptisk</button>
-            <button onclick="selectEmotion('natsuki', 'smil')">smil</button>
-            <button onclick="selectEmotion('natsuki', 'smiler')">smiler</button>
-            <button onclick="selectEmotion('natsuki', 'spil_smart')">spil_smart</button>
-            <button onclick="selectEmotion('natsuki', 'sur')">sur</button>
-            <button onclick="selectEmotion('natsuki', 'trist')">trist</button>
-            <button onclick="selectEmotion('natsuki', 'vred')">vred</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('natsuki')">Remove Natsuki</button>
-    </div>
-
-    <!-- Sayori -->
-    <div class="character-section">
-        <h3>Sayori</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('sayori', 'forvirret')">forvirret</button>
-            <button onclick="selectEmotion('sayori', 'genert')">genert</button>
-            <button onclick="selectEmotion('sayori', 'glad')">glad</button>
-            <button onclick="selectEmotion('sayori', 'neutral')">neutral</button>
-            <button onclick="selectEmotion('sayori', 'panik')">panik</button>
-            <button onclick="selectEmotion('sayori', 'skuffet')">skuffet</button>
-            <button onclick="selectEmotion('sayori', 'smil_med_åbne_øjne_og_mund')">smil_med_åbne_øjne_og_mund</button>
-            <button onclick="selectEmotion('sayori', 'smil_med_lukkede_øjne')">smil_med_lukkede_øjne</button>
-            <button onclick="selectEmotion('sayori', 'stort_smil_med_lukkede_øjne')">stort_smil_med_lukkede_øjne</button>
-            <button onclick="selectEmotion('sayori', 'sur')">sur</button>
-            <button onclick="selectEmotion('sayori', 'trist')">trist</button>
-            <button onclick="selectEmotion('sayori', 'utilpas')">utilpas</button>
-            <button onclick="selectEmotion('sayori', 'varmt_smil')">varmt_smil</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('sayori')">Remove Sayori</button>
-    </div>
-
-    <!-- Monika -->
-    <div class="character-section">
-        <h3>Monika</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('monika', 'flirt')">flirt</button>
-            <button onclick="selectEmotion('monika', 'genert')">genert</button>
-            <button onclick="selectEmotion('monika', 'griner')">griner</button>
-            <button onclick="selectEmotion('monika', 'neutral')">neutral</button>
-            <button onclick="selectEmotion('monika', 'smiler')">smiler</button>
-            <button onclick="selectEmotion('monika', 'sur')">sur</button>
-            <button onclick="selectEmotion('monika', 'trist')">trist</button>
-            <button onclick="selectEmotion('monika', 'varmt_smil')">varmt_smil</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('monika')">Remove Monika</button>
-    </div>
-
-    <!-- Bonnie -->
-    <div class="character-section">
-        <h3>Bonnie</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('bonnie', 'chok')">chok</button>
-            <button onclick="selectEmotion('bonnie', 'forvirret')">forvirret</button>
-            <button onclick="selectEmotion('bonnie', 'glad')">glad</button>
-            <button onclick="selectEmotion('bonnie', 'meget_glad')">meget_glad</button>
-            <button onclick="selectEmotion('bonnie', 'nervøs')">nervøs</button>
-            <button onclick="selectEmotion('bonnie', 'neutral')">neutral</button>
-            <button onclick="selectEmotion('bonnie', 'sur')">sur</button>
-            <button onclick="selectEmotion('bonnie', 'tænker')">tænker</button>
-            <button onclick="selectEmotion('bonnie', 'trist_kig_væk')">trist_kig_væk</button>
-            <button onclick="selectEmotion('bonnie', 'trist')">trist</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('bonnie')">Remove Bonnie</button>
-    </div>
-
-    <!-- Toy Bonnie -->
-    <div class="character-section">
-        <h3>Toy Bonnie</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('toybonnie', 'idle')">idle</button>
-            <button onclick="selectEmotion('toybonnie', 'think')">think</button>
-            <button onclick="selectEmotion('toybonnie', 'point')">point</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('toybonnie')">Remove Bonnie</button>
-    </div>
-
-    <!-- Puppet -->
-    <div class="character-section">
-        <h3>Puppet</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('puppet', 'idle')">idle</button>
-            <button onclick="selectEmotion('puppet', 'idle2')">idle2</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('puppet')">Remove Bonnie</button>
-    </div>
-
-    <!-- Elias -->
-    <div class="character-section">
-        <h3>Elias</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('elias', 'excited')">excited</button>
-            <button onclick="selectEmotion('elias', 'idle')">idle</button>
-            <button onclick="selectEmotion('elias', 'relaxsmile')">relaxsmile</button>
-            <button onclick="selectEmotion('elias', 'revange')">revange</button>
-            <button onclick="selectEmotion('elias', 'sadlookaway')">sadlookaway</button>
-            <button onclick="selectEmotion('elias', 'sadlookaway2')">sadlookaway2</button>
-            <button onclick="selectEmotion('elias', 'sadlistening')">sadlistening</button>
-            <button onclick="selectEmotion('elias', 'sad')">sad</button>
-            <button onclick="selectEmotion('elias', 'shylookaway')">shylookaway</button>
-            <button onclick="selectEmotion('elias', 'shy')">shy</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('elias')">Remove Elias</button>
-    </div>
-
-    <!-- Svampebob -->
-    <div class="character-section">
-        <h3>Svampebob</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('spongebob', 'idle')">idle</button>
-            <button onclick="selectEmotion('spongebob', 'kig_til_venstre')">kig_til_venstre</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('spongebob')">Remove Svampebob</button>
-    </div>
-
-    <!-- Pumbaa -->
-    <div class="character-section">
-        <h3>Pumbaa</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('pumbaa', 'kig_til_højre')">kig_til_højre</button>
-            <button onclick="selectEmotion('pumbaa', 'kig_til_venstre')">kig_til_venstre</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('pumbaa')">Remove Pumbaa</button>
-    </div>
-
-    <!-- Sun -->
-    <div class="character-section">
-        <h3>Sun</h3>
-        <!-- Emotions -->
-        <div class="emotion-buttons">
-            <h4>Emotions</h4>
-            <button onclick="selectEmotion('sun', 'idle')">idle</button>
-            <button onclick="selectEmotion('sun', 'point')">point</button>
-            <button onclick="selectEmotion('sun', 'side')">side</button>
-            <button onclick="selectEmotion('sun', 'no_fun')">no_fun</button>
-            <button onclick="selectEmotion('sun', 'chance')">chance</button>
-            <button onclick="selectEmotion('sun', 'creepy')">creepy</button>
-        </div>
-        <!-- Positions -->
-        <div class="position-buttons">
-            <h4>Positions</h4>
-            <button onclick="placeCharacter('left')">Left</button>
-            <button onclick="placeCharacter('center')">Center</button>
-            <button onclick="placeCharacter('right')">Right</button>
-        </div>
-        <button id="removeCharacter" onclick="removeCharacter('sun')">Remove Sun</button>
-    </div>
-
-        <!-- Add this after your other controls -->
-    <h2>Background Music</h2>
-    <div class="bgm-controls">
-        <div class="bgm-buttons">
-            <!-- BGM buttons will be populated dynamically -->
-        </div>
-        <button onclick="stopBGM()" class="stop-bgm">Stop Music</button>
-    </div>
-
-    <h2>SFX</h2>
-    <div class="sfx-controls">
-        <div class="sfx-buttons">
-            <!-- SFX buttons will be populated dynamically -->
-        </div>
-        <button onclick="stopSFX()" class="stop-sfx">Stop SFX</button>
-    </div>
-    
-
-            <h2>Dialogue</h2>
-            <div class="dialogue-controls">
-                <select id="speakerSelect">
-                    <option value="">Select Speaker</option>
-                    <option value="lasse">Lasse</option>
-                    <option value="freddy">Freddy</option>
-                    <option value="toyfreddy">Toy Freddy</option>
-                    <option value="baldi">Baldi</option>
-                    <option value="gfreddy">Golden Freddy</option>
-                    <option value="akira">Akira</option>
-                    <option value="mika">Mika</option>
-                    <option value="minako">Minako</option>
-                    <option value="aiko">Aiko</option>
-                    <option value="sakura">Sakura</option>
-                    <option value="ayano">Ayano</option>
-                    <option value="helpy">Helpy</option>
-                    <option value="eddy">Eddy</option>
-                    <option value="sakura">Sakura</option>
-                    <option value="bedste">Bedste mor gris</option>
-                    <option value="FT">Funtime Foxy</option>
-                </select>
-                <input type="text" id="dialogueText" placeholder="Enter dialogue...">
-                <button onclick="setDialogue(document.getElementById('speakerSelect').value, document.getElementById('dialogueText').value)">
-                    Set Dialogue
-                </button>
+        <!-- Mia -->
+        <div class="card character-card" data-character="mia">
+            <h3>Mia</h3>
+            <div class="character-preview" id="mia-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
             </div>
-    
-            <h2>Scene Controls</h2>
-            <div class="scene-controls">
-                <button onclick="clearCharacters()">Clear All Characters</button>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('mia')">Remove Character</button>
+        </div>
+
+        <!-- Sakura -->
+        <div class="card character-card" data-character="sakura">
+            <h3>Sakura</h3>
+            <div class="character-preview" id="sakura-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('sakura')">Remove Character</button>
+        </div>
+
+        <!-- Ayano -->
+        <div class="card character-card" data-character="ayano">
+            <h3>Ayano</h3>
+            <div class="character-preview" id="ayano-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('ayano')">Remove Character</button>
+        </div>
+
+        <!-- Aya -->
+        <div class="card character-card" data-character="aya">
+            <h3>Aya</h3>
+            <div class="character-preview" id="aya-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('aya')">Remove Character</button>
+        </div>
+
+        <!-- Eddy -->
+        <div class="card character-card" data-character="eddy">
+            <h3>Eddy</h3>
+            <div class="character-preview" id="eddy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('eddy')">Remove Character</button>
+        </div>
+
+        <!-- Helpy -->
+        <div class="card character-card" data-character="helpy">
+            <h3>Helpy</h3>
+            <div class="character-preview" id="helpy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('helpy')">Remove Character</button>
+        </div>
+
+        <!-- Freddy -->
+        <div class="card character-card" data-character="freddy">
+            <h3>Freddy</h3>
+            <div class="character-preview" id="freddy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('freddy')">Remove Character</button>
+        </div>
+
+        <!-- Toy Freddy -->
+        <div class="card character-card" data-character="toyfreddy">
+            <h3>Toy Freddy</h3>
+            <div class="character-preview" id="toyfreddy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('toyfreddy')">Remove Character</button>
+        </div>
+
+        <!-- Golden Freddy -->
+        <div class="card character-card" data-character="gfreddy">
+            <h3>Golden Freddy</h3>
+            <div class="character-preview" id="gfreddy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('gfreddy')">Remove Character</button>
+        </div>
+
+        <!-- Foxy -->
+        <div class="card character-card" data-character="foxy">
+            <h3>Foxy</h3>
+            <div class="character-preview" id="foxy-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('foxy')">Remove Character</button>
+        </div>
+
+        <!-- Bedste mor gris -->
+        <div class="card character-card" data-character="bedste">
+            <h3>Bedste mor gris</h3>
+            <div class="character-preview" id="bedste-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('bedste')">Remove Character</button>
+        </div>
+
+        <!-- Funtime Foxy -->
+        <div class="card character-card" data-character="FT">
+            <h3>Funtime Foxy</h3>
+            <div class="character-preview" id="FT-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('FT')">Remove Character</button>
+        </div>
+
+        <!-- Baldi -->
+        <div class="card character-card" data-character="baldi">
+            <h3>Baldi</h3>
+            <div class="character-preview" id="baldi-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('baldi')">Remove Character</button>
+        </div>
+
+        <!-- Jacob -->
+        <div class="card character-card" data-character="jacob">
+            <h3>Jacob</h3>
+            <div class="character-preview" id="jacob-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('jacob')">Remove Character</button>
+        </div>
+
+        <!-- Blækvard (Squidward) -->
+        <div class="card character-card" data-character="squidward">
+            <h3>Blækvard</h3>
+            <div class="character-preview" id="squidward-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('squidward')">Remove Character</button>
+        </div>
+
+        <!-- Mika -->
+        <div class="card character-card" data-character="mika">
+            <h3>Mika</h3>
+            <div class="character-preview" id="mika-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('mika')">Remove Character</button>
+        </div>
+
+        <!-- Minako -->
+        <div class="card character-card" data-character="minako">
+            <h3>Minako</h3>
+            <div class="character-preview" id="minako-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('minako')">Remove Character</button>
+        </div>
+
+        <!-- Aiko -->
+        <div class="card character-card" data-character="aiko">
+            <h3>Aiko</h3>
+            <div class="character-preview" id="aiko-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('aiko')">Remove Character</button>
+        </div>
+
+        <!-- Vanny -->
+        <div class="card character-card" data-character="vanny">
+            <h3>Vanny</h3>
+            <div class="character-preview" id="vanny-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('vanny')">Remove Character</button>
+        </div>
+
+        <!-- Glitchtrap -->
+        <div class="card character-card" data-character="glitchtrap">
+            <h3>Glitchtrap</h3>
+            <div class="character-preview" id="glitchtrap-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('glitchtrap')">Remove Character</button>
+        </div>
+
+        <!-- Natsuki -->
+        <div class="card character-card" data-character="natsuki">
+            <h3>Natsuki</h3>
+            <div class="character-preview" id="natsuki-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('natsuki')">Remove Character</button>
+        </div>
+
+        <!-- Sayori -->
+        <div class="card character-card" data-character="sayori">
+            <h3>Sayori</h3>
+            <div class="character-preview" id="sayori-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('sayori')">Remove Character</button>
+        </div>
+
+        <!-- Monika -->
+        <div class="card character-card" data-character="monika">
+            <h3>Monika</h3>
+            <div class="character-preview" id="monika-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('monika')">Remove Character</button>
+        </div>
+
+        <!-- Bonnie -->
+        <div class="card character-card" data-character="bonnie">
+            <h3>Bonnie</h3>
+            <div class="character-preview" id="bonnie-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('bonnie')">Remove Character</button>
+        </div>
+
+        <!-- Toy Bonnie -->
+        <div class="card character-card" data-character="toybonnie">
+            <h3>Toy Bonnie</h3>
+            <div class="character-preview" id="toybonnie-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('toybonnie')">Remove Character</button>
+        </div>
+
+        <!-- Puppet -->
+        <div class="card character-card" data-character="puppet">
+            <h3>Puppet</h3>
+            <div class="character-preview" id="puppet-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('puppet')">Remove Character</button>
+        </div>
+
+        <!-- Elias -->
+        <div class="card character-card" data-character="elias">
+            <h3>Elias</h3>
+            <div class="character-preview" id="elias-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('elias')">Remove Character</button>
+        </div>
+
+        <!-- Svampebob (Spongebob) -->
+        <div class="card character-card" data-character="spongebob">
+            <h3>Svampebob</h3>
+            <div class="character-preview" id="spongebob-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('spongebob')">Remove Character</button>
+        </div>
+
+        <!-- Pumbaa -->
+        <div class="card character-card" data-character="pumbaa">
+            <h3>Pumbaa</h3>
+            <div class="character-preview" id="pumbaa-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('pumbaa')">Remove Character</button>
+        </div>
+
+        <!-- Sun -->
+        <div class="card character-card" data-character="sun">
+            <h3>Sun</h3>
+            <div class="character-preview" id="sun-preview"></div>
+            <div class="emotions-grid">
+                <!-- Emotions will be populated here -->
+            </div>
+            <div class="positions">
+                <button class="position-btn" onclick="placeCharacter('left')">Left</button>
+                <button class="position-btn" onclick="placeCharacter('center')">Center</button>
+                <button class="position-btn" onclick="placeCharacter('right')">Right</button>
+            </div>
+            <button class="action-btn" onclick="removeCharacter('sun')">Remove Character</button>
+        </div>
+    </div>
+</div>
+
+        <!-- Music Tab -->
+        <div class="tab-content" id="music-tab">
+            <div class="search-bar">
+                <input type="text" id="music-search" placeholder="Search background music...">
+            </div>
+            <div class="grid" id="music-grid">
+                <!-- BGM cards will be populated dynamically -->
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="action-btn stop-bgm" style="max-width: 300px; margin: 0 auto;" onclick="stopBGM()">Stop Music</button>
             </div>
         </div>
-    
-        <div id="status">Waiting for data...</div>
+
+        <!-- SFX Tab -->
+        <div class="tab-content" id="sfx-tab">
+            <div class="search-bar">
+                <input type="text" id="sfx-search" placeholder="Search sound effects...">
+            </div>
+            <div class="grid" id="sfx-grid">
+                <!-- SFX cards will be populated dynamically -->
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="action-btn stop-bgm" style="max-width: 300px; margin: 0 auto;" onclick="stopSFX()">Stop SFX</button>
+            </div>
         </div>
 
+        <!-- Dialogue Tab -->
+        <div class="tab-content" id="dialogue-tab">
+            <div class="dialogue-box">
+                <h3 style="margin-bottom: 20px; color: var(--primary-dark);">Set Dialogue</h3>
+                <div class="dialogue-flex">
+                    <select class="dialogue-select" id="speakerSelect">
+                        <option value="">Select Speaker</option>
+                        <option value="lasse">Lasse</option>
+                        <option value="freddy">Freddy</option>
+                        <option value="toyfreddy">Toy Freddy</option>
+                        <option value="baldi">Baldi</option>
+                        <option value="gfreddy">Golden Freddy</option>
+                        <option value="akira">Akira</option>
+                        <option value="mia">Mia</option>
+                        <option value="minako">Minako</option>
+                        <option value="aiko">Aiko</option>
+                        <option value="sakura">Sakura</option>
+                        <option value="ayano">Ayano</option>
+                        <option value="helpy">Helpy</option>
+                        <option value="eddy">Eddy</option>
+                        <option value="bedste">Bedste mor gris</option>
+                        <option value="FT">Funtime Foxy</option>
+                    </select>
+                    <input type="text" class="dialogue-input" id="dialogueText" placeholder="Enter dialogue...">
+                </div>
+                <button class="action-btn" onclick="setDialogue(document.getElementById('speakerSelect').value, document.getElementById('dialogueText').value)">Set Dialogue</button>
+            </div>
+        </div>
 
-    <script type="module" src="/LiveVisualNovel/js/firebase.mjs"></script>
+        <!-- Scene Preview Tab -->
+        <div class="tab-content" id="scene-tab">
+            <div class="scene-preview" id="scene-preview-bg">
+                <div class="character-position left-position" id="left-char-preview"></div>
+                <div class="character-position center-position" id="center-char-preview"></div>
+                <div class="character-position right-position" id="right-char-preview"></div>
+                <div class="preview-dialogue">
+                    <div class="character-name" id="preview-speaker">Character</div>
+                    <div id="preview-text">Dialogue will appear here...</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="action-btn" style="max-width: 300px; margin: 0 auto;" onclick="clearCharacters()">Clear All Characters</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar" id="status">Ready to create scenes!</div>
+
+    <div class="fab" id="quick-action-btn">+</div>
+    <div class="quick-actions" id="quick-actions">
+        <button class="quick-action-btn" onclick="clearCharacters()">Clear Characters</button>
+        <button class="quick-action-btn" onclick="stopBGM()">Stop Music</button>
+        <button class="quick-action-btn" onclick="stopSFX()">Stop SFX</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+        import { backgrounds } from '/LiveVisualNovel/js/backgrounds.js';
+        import { characters } from '/LiveVisualNovel/js/characters.js';
+        import { bgm } from '/LiveVisualNovel/js/bgm.js';
+        import { sfx } from '/LiveVisualNovel/js/sfx.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
+            authDomain: "visualnovel-9c891.firebaseapp.com",
+            databaseURL: "https://visualnovel-9c891-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "visualnovel-9c891",
+            storageBucket: "visualnovel-9c891.firebasestorage.app",
+            messagingSenderId: "1059758683909",
+            appId: "1:1059758683909:web:50aba578a246923d67696c",
+            measurementId: "G-6C2XTJ44TV"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Global state
+        let selectedCharacter = null;
+        let selectedEmotion = null;
+
+        // Background Control
+        window.updateBackground = function(backgroundId) {
+            if (!backgrounds[backgroundId]) {
+                console.error(`Background ${backgroundId} not found!`);
+                return;
+            }
+
+            const sceneRef = ref(db, 'currentScene/background');
+            set(sceneRef, backgrounds[backgroundId])
+                .then(() => {
+                    updateStatus('Background updated successfully!');
+                    // Update preview
+                    document.getElementById('scene-preview-bg').style.backgroundImage = `url(${backgrounds[backgroundId]})`;
+                })
+                .catch(handleError);
+        };
+
+        // Character Control
+        window.selectEmotion = function(characterId, emotion) {
+            selectedCharacter = characterId;
+            selectedEmotion = emotion;
+            
+            // Update visual feedback
+            document.querySelectorAll(`.character-card[data-character="${characterId}"] .emotion-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateStatus(`Selected ${characterId} with ${emotion} emotion`);
+        };
+
+        window.placeCharacter = function(position) {
+            if (!selectedCharacter || !selectedEmotion) {
+                updateStatus('Please select a character and emotion first!');
+                return;
+            }
+
+            updateCharacter(selectedCharacter, selectedEmotion, position);
+        };
+
+        window.updateCharacter = function(characterId, emotion, position) {
+            if (!characters[characterId]) {
+                console.error(`Character ${characterId} not found!`);
+                return;
+            }
+
+            const characterSprite = characters[characterId].expressions[emotion];
+            if (!characterSprite) {
+                console.error(`Expression ${emotion} not found for character ${characterId}!`);
+                return;
+            }
+
+            const characterRef = ref(db, `currentScene/characters/${position}`);
+            set(characterRef, characterSprite)
+                .then(() => {
+                    updateStatus(`${characterId} with ${emotion} placed at ${position}!`);
+                    // Update scene preview
+                    updateCharacterPreview(characterId, characterSprite, position);
+                })
+                .catch(handleError);
+        };
+
+        function getSpriteUrlsForCharacter(characterId) {
+            if (!characters[characterId]) return [];
+            return Object.values(characters[characterId].expressions);
+        }
+
+        window.removeCharacter = function(characterId) {
+            // Get all possible sprite URLs for this character
+            const characterSprites = getSpriteUrlsForCharacter(characterId);
+            
+            // Check each position
+            ['left', 'center', 'right'].forEach(position => {
+                const characterRef = ref(db, `currentScene/characters/${position}`);
+                
+                // Get the current sprite at this position
+                onValue(characterRef, (snapshot) => {
+                    const currentSprite = snapshot.val();
+                    
+                    // Only remove if this position contains one of this character's sprites
+                    if (currentSprite && characterSprites.includes(currentSprite)) {
+                        set(characterRef, "")
+                            .then(() => {
+                                updateStatus(`${characterId} removed from ${position}!`);
+                                // Clear preview
+                                document.getElementById(`${position}-char-preview`).innerHTML = '';
+                            })
+                            .catch(handleError);
+                    }
+                }, {
+                    onlyOnce: true // We only need to check once
+                });
+            });
+        };
+
+        window.clearCharacters = function() {
+            const charactersRef = ref(db, 'currentScene/characters');
+            set(charactersRef, {
+                left: "",
+                center: "",
+                right: ""
+            })
+                .then(() => {
+                    updateStatus('All characters cleared!');
+                    // Clear previews
+                    document.querySelectorAll('.character-position').forEach(el => {
+                        el.innerHTML = '';
+                    });
+                })
+                .catch(handleError);
+        };
+
+        // Dialogue Control
+        window.setDialogue = function(speakerId, text) {
+            if (speakerId && !characters[speakerId]) {
+                console.error(`Character ${speakerId} not found!`);
+                return;
+            }
+
+            const dialogueRef = ref(db, 'currentScene/dialogue');
+            set(dialogueRef, {
+                speaker: speakerId ? characters[speakerId].name : '',
+                text: text
+            })
+                .then(() => {
+                    // Update preview
+                    document.getElementById('preview-speaker').textContent = speakerId ? characters[speakerId].name : 'Narrator';
+                    document.getElementById('preview-text').textContent = text;
+                    document.getElementById('preview-speaker').style.display = speakerId ? 'inline-block' : 'none';
+                    updateStatus(`Dialogue set for ${speakerId ? characters[speakerId].name : 'Narrator'}`);
+                })
+                .catch(handleError);
+        };
+
+        // BGM Control
+        window.playBGM = function(songId) {
+            if (!bgm[songId]) {
+                console.error(`BGM ${songId} not found!`);
+                return;
+            }
+
+            const bgmRef = ref(db, 'currentScene/bgm');
+            set(bgmRef, songId)
+                .then(() => updateStatus(`Now playing: ${songId}`))
+                .catch(handleError);
+        };
+
+        window.stopBGM = function() {
+            const bgmRef = ref(db, 'currentScene/bgm');
+            set(bgmRef, null)
+                .then(() => updateStatus('Music stopped'))
+                .catch(handleError);
+        };
+
+        // SFX Control
+        window.playSFX = function(sfxId) {
+            if (!sfx[sfxId]) {
+                console.error(`SFX ${sfxId} not found!`);
+                return;
+            }
+
+            const sfxRef = ref(db, 'currentScene/sfx');
+            set(sfxRef, sfxId)
+                .then(() => updateStatus(`Sound effect playing: ${sfxId}`))
+                .catch(handleError);
+        };
+
+        window.stopSFX = function() {
+            const sfxRef = ref(db, 'currentScene/sfx');
+            set(sfxRef, null)
+                .then(() => updateStatus('Sound effects stopped'))
+                .catch(handleError);
+        };
+
+        // Utility Functions
+        function updateStatus(message) {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                
+                // Flash effect
+                statusElement.style.backgroundColor = 'var(--secondary)';
+                setTimeout(() => {
+                    statusElement.style.backgroundColor = 'var(--primary-dark)';
+                }, 300);
+            }
+        }
+
+        function handleError(error) {
+            console.error('Error:', error);
+            updateStatus('Error: ' + error.message);
+        }
+
+        // Update character preview in scene preview tab
+        function updateCharacterPreview(characterId, spriteUrl, position) {
+            const posElement = document.getElementById(`${position}-char-preview`);
+            posElement.innerHTML = `<img src="${spriteUrl}" class="preview-character">`;
+            posElement.dataset.character = characterId;
+        }
+
+        // Scene Update Handler
+        function updateDisplay(sceneData) {
+            if (!sceneData) return;
+
+            // Update background preview
+            if (sceneData.background) {
+                document.getElementById('scene-preview-bg').style.backgroundImage = `url(${sceneData.background})`;
+            }
+
+            // Update character previews
+            if (sceneData.characters) {
+                ['left', 'center', 'right'].forEach(position => {
+                    const container = document.getElementById(`${position}-char-preview`);
+                    if (container) {
+                        container.innerHTML = '';
+                        
+                        const imageUrl = sceneData.characters[position];
+                        if (imageUrl && imageUrl !== "") {
+                            const img = document.createElement('img');
+                            img.src = imageUrl;
+                            img.className = 'preview-character';
+                            container.appendChild(img);
+                        }
+                    }
+                });
+            }
+
+            // Update dialogue preview
+            if (sceneData.dialogue) {
+                const speakerElement = document.getElementById('preview-speaker');
+                const dialogueText = document.getElementById('preview-text');
+                
+                if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
+                if (speakerElement) {
+                    speakerElement.textContent = sceneData.dialogue.speaker;
+                    speakerElement.style.display = sceneData.dialogue.speaker ? 'inline-block' : 'none';
+                }
+            }
+        }
+
+        // Initialize scene listener
+        const sceneRef = ref(db, 'currentScene');
+        onValue(sceneRef, (snapshot) => {
+            const data = snapshot.val();
+            console.log('Current scene data:', data);
+            updateDisplay(data);
+        });
+
+        // Populate background cards
+        function populateBackgrounds() {
+            const container = document.getElementById('backgrounds-grid');
+            if (container && backgrounds) {
+                Object.entries(backgrounds).forEach(([backgroundId, backgroundUrl]) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    // Create title
+                    const title = document.createElement('h3');
+                    title.textContent = backgroundId.replace(/_/g, ' ');
+                    
+                    // Create preview
+                    const preview = document.createElement('div');
+                    preview.className = 'preview';
+                    preview.style.backgroundImage = `url(${backgroundUrl})`;
+                    
+                    // Create button
+                    const button = document.createElement('button');
+                    button.className = 'action-btn';
+                    button.textContent = 'Set Background';
+                    button.onclick = () => updateBackground(backgroundId);
+                    
+                    // Add all elements to card
+                    card.appendChild(title);
+                    card.appendChild(preview);
+                    card.appendChild(button);
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Populate character emotions
+        function populateCharacterEmotions() {
+            Object.entries(characters).forEach(([characterId, character]) => {
+                const container = document.querySelector(`.character-card[data-character="${characterId}"] .emotions-grid`);
+                if (container) {
+                    // Clear container
+                    container.innerHTML = '';
+                    
+                    // Add emotion buttons
+                    Object.keys(character.expressions).forEach(emotion => {
+                        const button = document.createElement('button');
+                        button.className = 'emotion-btn';
+                        button.textContent = emotion;
+                        button.onclick = () => selectEmotion(characterId, emotion);
+                        container.appendChild(button);
+                    });
+
+                    // Update preview
+                    const previewContainer = document.getElementById(`${characterId}-preview`);
+                    if (previewContainer) {
+                        const firstEmotion = Object.keys(character.expressions)[0];
+                        if (firstEmotion) {
+                            previewContainer.style.backgroundImage = `url(${character.expressions[firstEmotion]})`;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate music cards
+        function populateMusicCards() {
+            const container = document.getElementById('music-grid');
+            if (container && bgm) {
+                Object.keys(bgm).forEach(songId => {
+                    const card = document.createElement('div');
+                    card.className = 'card music-card';
+                    
+                    // Icon
+                    const icon = document.createElement('div');
+                    icon.className = 'music-icon';
+                    icon.textContent = '🎵';
+                    
+                    // Title
+                    const title = document.createElement('div');
+                    title.className = 'music-title';
+                    title.textContent = songId.replace(/_/g, ' ').toUpperCase();
+                    
+                    // Button
+                    const button = document.createElement('button');
+                    button.className = 'action-btn';
+                    button.textContent = 'Play Music';
+                    button.onclick = () => playBGM(songId);
+                    
+                    // Add theme classes
+                    if (songId.toLowerCase().includes('dark')) {
+                        button.classList.add('dark-theme');
+                    }
+                    if (songId.toLowerCase().includes('theme')) {
+                        button.classList.add('orange-theme');
+                    }
+                    if (songId.toLowerCase().includes('sv')) {
+                        button.classList.add('dark_green-theme');
+                    }
+                    if (songId.toLowerCase().includes('doki')) {
+                        button.classList.add('dark_pink-theme');
+                    }
+                    
+                    // Add all elements to card
+                    card.appendChild(icon);
+                    card.appendChild(title);
+                    card.appendChild(button);
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Populate SFX cards
+        function populateSfxCards() {
+            const container = document.getElementById('sfx-grid');
+            if (container && sfx) {
+                Object.keys(sfx).forEach(sfxId => {
+                    const card = document.createElement('div');
+                    card.className = 'card music-card';
+                    
+                    // Icon
+                    const icon = document.createElement('div');
+                    icon.className = 'music-icon';
+                    icon.textContent = '🔊';
+                    
+                    // Title
+                    const title = document.createElement('div');
+                    title.className = 'music-title';
+                    title.textContent = sfxId.replace(/_/g, ' ').toUpperCase();
+                    
+                    // Button
+                    const button = document.createElement('button');
+                    button.className = 'action-btn';
+                    button.textContent = 'Play Sound';
+                    button.onclick = () => playSFX(sfxId);
+                    
+                    // Add all elements to card
+                    card.appendChild(icon);
+                    card.appendChild(title);
+                    card.appendChild(button);
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.getElementById('background-search').addEventListener('input', e => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#backgrounds-grid .card').forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('character-search').addEventListener('input', e => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.character-card').forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('music-search').addEventListener('input', e => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#music-grid .card').forEach(card => {
+                const title = card.querySelector('.music-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('sfx-search')?.addEventListener('input', e => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#sfx-grid .card').forEach(card => {
+                const title = card.querySelector('.music-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+
+        // Quick actions button
+        document.getElementById('quick-action-btn').addEventListener('click', () => {
+            document.getElementById('quick-actions').classList.toggle('show');
+        });
+
+        // Click outside to close quick actions
+        document.addEventListener('click', (e) => {
+            const quickActions = document.getElementById('quick-actions');
+            const fab = document.getElementById('quick-action-btn');
+            
+            if (quickActions.classList.contains('show') && e.target !== fab && !fab.contains(e.target) && e.target !== quickActions && !quickActions.contains(e.target)) {
+                quickActions.classList.remove('show');
+            }
+        });
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            populateBackgrounds();
+            populateCharacterEmotions();
+            populateMusicCards();
+            populateSfxCards();
+            updateStatus('Admin panel loaded successfully!');
+        });
+    </script>
 </body>
 </html>
