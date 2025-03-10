@@ -123,7 +123,7 @@ const characterData = {
         name: "Akira",
         image: "./assets/characters/akira/head.png"
     },
-    akemi: {
+    mia: {
         name: "Mia",
         image: "./assets/characters/akemi/head.png"
     },
@@ -181,6 +181,10 @@ const nonDatableCharacterData = {
     bg: {
         name: "Bedste mor gris",
         image: "./assets/characters/bedste/head.png"
+    },
+    puppet: {
+        name: "Bedste mor gris",
+        image: "./assets/characters/puppet/puppet_idle.png"
     },
     spongebob: {
         name: "Svampebob",
