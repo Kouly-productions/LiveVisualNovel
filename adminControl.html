@@ -562,6 +562,7 @@
             <button class="nav-tab" data-tab="sfx">Sound Effects</button>
             <button class="nav-tab" data-tab="dialogue">Dialogue</button>
             <button class="nav-tab" data-tab="scene">Scene Preview</button>
+            <button class="nav-tab" data-tab="overlay">Overlay</button>
         </div>
 
         <!-- Backgrounds Tab -->
@@ -1119,6 +1120,19 @@
         </div>
     </div>
 
+    <!-- Add this after the other tab-content divs -->
+    <div class="tab-content" id="overlay-tab">
+        <div class="search-bar">
+            <input type="text" id="overlay-search" placeholder="Search overlays...">
+        </div>
+        <div class="grid" id="overlays-grid">
+            <!-- Overlay items will be populated dynamically via JavaScript -->
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="action-btn" style="max-width: 300px; margin: 0 auto;" onclick="clearOverlay()">Clear Overlay</button>
+        </div>
+    </div>
+
     <div class="status-bar" id="status">Ready to create scenes!</div>
 
     <div class="fab" id="quick-action-btn">+</div>
@@ -1135,6 +1149,7 @@
         import { characters } from '/LiveVisualNovel/js/characters.js';
         import { bgm } from '/LiveVisualNovel/js/bgm.js';
         import { sfx } from '/LiveVisualNovel/js/sfx.js';
+        import { overlays } from '/LiveVisualNovel/js/overlays.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyCTNcv4Xpys0MTsMl22Bos2q5NnZt1ctsg",
@@ -1355,45 +1370,55 @@
             posElement.dataset.character = characterId;
         }
 
-        // Scene Update Handler
-        function updateDisplay(sceneData) {
-            if (!sceneData) return;
 
-            // Update background preview
-            if (sceneData.background) {
-                document.getElementById('scene-preview-bg').style.backgroundImage = `url(${sceneData.background})`;
-            }
+    // Scene Update Handler
+    function updateDisplay(sceneData) {
+        if (!sceneData) return;
 
-            // Update character previews
-            if (sceneData.characters) {
-                ['left', 'center', 'right'].forEach(position => {
-                    const container = document.getElementById(`${position}-char-preview`);
-                    if (container) {
-                        container.innerHTML = '';
-                        
-                        const imageUrl = sceneData.characters[position];
-                        if (imageUrl && imageUrl !== "") {
-                            const img = document.createElement('img');
-                            img.src = imageUrl;
-                            img.className = 'preview-character';
-                            container.appendChild(img);
-                        }
+        // Update background preview
+        if (sceneData.background) {
+            document.getElementById('scene-preview-bg').style.backgroundImage = `url(${sceneData.background})`;
+        }
+
+        // Update overlay preview
+        if (sceneData.overlay) {
+            updateOverlayPreview(sceneData.overlay);
+        } else {
+            // Clear overlay if none is set
+            const overlayEl = document.getElementById('scene-overlay-preview');
+            if (overlayEl) overlayEl.remove();
+        }
+
+        // Update character previews
+        if (sceneData.characters) {
+            ['left', 'center', 'right'].forEach(position => {
+                const container = document.getElementById(`${position}-char-preview`);
+                if (container) {
+                    container.innerHTML = '';
+                    
+                    const imageUrl = sceneData.characters[position];
+                    if (imageUrl && imageUrl !== "") {
+                        const img = document.createElement('img');
+                        img.src = imageUrl;
+                        img.className = 'preview-character';
+                        container.appendChild(img);
                     }
-                });
-            }
-
-            // Update dialogue preview
-            if (sceneData.dialogue) {
-                const speakerElement = document.getElementById('preview-speaker');
-                const dialogueText = document.getElementById('preview-text');
-                
-                if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
-                if (speakerElement) {
-                    speakerElement.textContent = sceneData.dialogue.speaker;
-                    speakerElement.style.display = sceneData.dialogue.speaker ? 'inline-block' : 'none';
                 }
+            });
+        }
+
+        // Update dialogue preview
+        if (sceneData.dialogue) {
+            const speakerElement = document.getElementById('preview-speaker');
+            const dialogueText = document.getElementById('preview-text');
+            
+            if (dialogueText) dialogueText.textContent = sceneData.dialogue.text;
+            if (speakerElement) {
+                speakerElement.textContent = sceneData.dialogue.speaker;
+                speakerElement.style.display = sceneData.dialogue.speaker ? 'inline-block' : 'none';
             }
         }
+    }
 
         // Initialize scene listener
         const sceneRef = ref(db, 'currentScene');
@@ -1642,8 +1667,157 @@
             populateCharacterEmotions();
             populateMusicCards();
             populateSfxCards();
+            populateOverlays();
             updateStatus('Admin panel loaded successfully!');
         });
+
+        // Overlay Control
+window.updateOverlay = function(overlayId) {
+    if (!overlays[overlayId]) {
+        console.error(`Overlay ${overlayId} not found!`);
+        return;
+    }
+
+    const overlayRef = ref(db, 'currentScene/overlay');
+    set(overlayRef, overlays[overlayId])
+        .then(() => {
+            updateStatus('Overlay updated successfully!');
+            // Update preview
+            updateOverlayPreview(overlays[overlayId]);
+        })
+        .catch(handleError);
+};
+
+window.clearOverlay = function() {
+    const overlayRef = ref(db, 'currentScene/overlay');
+    set(overlayRef, null)
+        .then(() => {
+            updateStatus('Overlay cleared!');
+            // Clear preview
+            document.getElementById('scene-overlay-preview').style.backgroundImage = '';
+        })
+        .catch(handleError);
+};
+
+// Update overlay preview in scene preview
+function updateOverlayPreview(overlayUrl) {
+    // Remove any existing overlay element first
+    const existingOverlay = document.getElementById('scene-overlay-preview');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+    
+    // Determine if this is a video file based on extension
+    const isVideo = overlayUrl.match(/\.(mp4|webm|ogg)$/i);
+    
+    if (isVideo) {
+        // Create video element for video overlays
+        const videoEl = document.createElement('video');
+        videoEl.id = 'scene-overlay-preview';
+        videoEl.src = overlayUrl;
+        videoEl.autoplay = true;
+        videoEl.loop = true;
+        videoEl.muted = true; // Important: muted videos can autoplay
+        videoEl.playsInline = true; // For iOS
+        videoEl.style.position = 'absolute';
+        videoEl.style.top = '0';
+        videoEl.style.left = '0';
+        videoEl.style.width = '100%';
+        videoEl.style.height = '100%';
+        videoEl.style.objectFit = 'cover';
+        videoEl.style.pointerEvents = 'none'; // Allow clicks to pass through
+        videoEl.style.zIndex = '1'; // Above background, below characters
+        
+        document.getElementById('scene-preview-bg').appendChild(videoEl);
+        
+        // Also update Firebase with metadata that this is a video
+        const overlayMetaRef = ref(db, 'currentScene/overlayMeta');
+        set(overlayMetaRef, { type: 'video' });
+    } else {
+        // Use div with background-image for static overlays
+        const imgEl = document.createElement('div');
+        imgEl.id = 'scene-overlay-preview';
+        imgEl.style.position = 'absolute';
+        imgEl.style.top = '0';
+        imgEl.style.left = '0';
+        imgEl.style.width = '100%';
+        imgEl.style.height = '100%';
+        imgEl.style.backgroundImage = `url(${overlayUrl})`;
+        imgEl.style.backgroundSize = 'cover';
+        imgEl.style.backgroundPosition = 'center';
+        imgEl.style.pointerEvents = 'none';
+        imgEl.style.zIndex = '1';
+        
+        document.getElementById('scene-preview-bg').appendChild(imgEl);
+        
+        // Update Firebase with metadata that this is an image
+        const overlayMetaRef = ref(db, 'currentScene/overlayMeta');
+        set(overlayMetaRef, { type: 'image' });
+    }
+}
+
+window.clearOverlay = function() {
+    const overlayRef = ref(db, 'currentScene/overlay');
+    const overlayMetaRef = ref(db, 'currentScene/overlayMeta');
+    
+    // Clear both the overlay URL and its metadata
+    Promise.all([
+        set(overlayRef, null),
+        set(overlayMetaRef, null)
+    ])
+        .then(() => {
+            updateStatus('Overlay cleared!');
+            // Clear preview
+            const overlayEl = document.getElementById('scene-overlay-preview');
+            if (overlayEl) overlayEl.remove();
+        })
+        .catch(handleError);
+};
+
+// Populate overlay cards
+function populateOverlays() {
+    const container = document.getElementById('overlays-grid');
+    if (container && overlays) {
+        Object.entries(overlays).forEach(([overlayId, overlayUrl]) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // Create title
+            const title = document.createElement('h3');
+            title.textContent = overlayId.replace(/_/g, ' ');
+            
+            // Create preview
+            const preview = document.createElement('div');
+            preview.className = 'preview';
+            preview.style.backgroundImage = `url(${overlayUrl})`;
+            
+            // Create button
+            const button = document.createElement('button');
+            button.className = 'action-btn';
+            button.textContent = 'Apply Overlay';
+            button.onclick = () => updateOverlay(overlayId);
+            
+            // Add all elements to card
+            card.appendChild(title);
+            card.appendChild(preview);
+            card.appendChild(button);
+            container.appendChild(card);
+        });
+    }
+}
+
+// Add overlay search functionality
+document.getElementById('overlay-search')?.addEventListener('input', e => {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('#overlays-grid .card').forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        if (title.includes(searchTerm)) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+});
     </script>
 </body>
 </html>

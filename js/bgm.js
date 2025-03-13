@@ -41,6 +41,7 @@ export const bgm = {
     doki_sayori_death: "./assets/bgm/sayori_death.mp3",
     doki_sayori_death_music: "./assets/bgm/sayori_death_music.mp3",
     doki_sayori_death_slow: "./assets/bgm/sayori_death_slow.mp3",
+    doki_sayori_cheerful_end: "./assets/bgm/digital_happyness.mp3",
     sv_adventure: "./assets/bgm/sv_adventure.mp3",
     sv_banjo: "./assets/bgm/sv_banjo.mp3",
     sv_buttercup: "./assets/bgm/sv_buttercup.mp3",

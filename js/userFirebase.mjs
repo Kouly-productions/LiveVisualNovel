@@ -261,6 +261,65 @@ function updateSceneDisplay(data) {
             userResponse.style.display = 'none';
         }
     }
+
+    // Update overlay
+if (data && data.overlay) {
+    // Remove existing overlay if any
+    const existingOverlay = document.getElementById('scene-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+    
+    // Check if it's a video or image based on metadata or file extension
+    const isVideo = data.overlayMeta?.type === 'video' || 
+                   data.overlay.match(/\.(mp4|webm|ogg)$/i);
+        
+            if (isVideo) {
+            // Create video element for overlay
+            const videoEl = document.createElement('video');
+            videoEl.id = 'scene-overlay';
+            videoEl.src = data.overlay;
+            videoEl.autoplay = true;
+            videoEl.loop = true;
+            videoEl.muted = true;
+            videoEl.playsInline = true;
+            videoEl.style.position = 'fixed';
+            videoEl.style.top = '0';
+            videoEl.style.left = '0';
+            videoEl.style.width = '100%';
+            videoEl.style.height = '100%';
+            videoEl.style.objectFit = 'cover';
+            videoEl.style.pointerEvents = 'none';
+            videoEl.style.zIndex = '1';
+            videoEl.style.mixBlendMode = 'screen'; // Add this line for transparency
+            
+            // Add before the character container but after the body background
+            document.body.insertBefore(videoEl, document.getElementById('character-container'));
+        } else {
+        // Create image div for overlay
+        const imgEl = document.createElement('div');
+        imgEl.id = 'scene-overlay';
+        imgEl.style.position = 'fixed';
+        imgEl.style.top = '0';
+        imgEl.style.left = '0';
+        imgEl.style.width = '100%';
+        imgEl.style.height = '100%';
+        imgEl.style.backgroundImage = `url(${data.overlay})`;
+        imgEl.style.backgroundSize = 'cover';
+        imgEl.style.backgroundPosition = 'center';
+        imgEl.style.pointerEvents = 'none';
+        imgEl.style.zIndex = '1';
+        
+        // Add before the character container but after the body background
+        document.body.insertBefore(imgEl, document.getElementById('character-container'));
+    }
+} else {
+    // Remove overlay if it exists and there's no overlay in the data
+    const existingOverlay = document.getElementById('scene-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+}
 }
 
 // Listen for scene changes

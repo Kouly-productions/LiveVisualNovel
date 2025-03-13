@@ -183,7 +183,7 @@ const nonDatableCharacterData = {
         image: "./assets/characters/bedste/head.png"
     },
     puppet: {
-        name: "Bedste mor gris",
+        name: "Puppet",
         image: "./assets/characters/puppet/puppet_idle.png"
     },
     spongebob: {
