@@ -466,5 +466,11 @@ export const characters = {
         creepy: "./assets/characters/sun/creepy.png",
       },
     },
+    staff_bot: {
+      name: "Staff Bot",
+      expressions: {
+        idle: "./assets/characters/staff_bot/idle.png",
+      },
+    },
   };
   

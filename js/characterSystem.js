@@ -236,6 +236,10 @@ const teacherCharacterData = {
     bonnie: {
         name: "Bonnie",
         image: "./assets/characters/bonnie/glad.png"
+    },
+    toy_bonnie: {
+        name: "Toy Bonnie",
+        image: "./assets/characters/toy_bonnie/tb_idle.png"
     }
 };
 
@@ -284,7 +288,6 @@ function getStageData(percentValue, thresholds) {
     };
 }
 
-// Renders active/inactive hearts based on the percentage value
 // Renders active/inactive hearts based on the percentage value
 function renderHearts(percentValue, thresholds, icon = '❤️') {
     // Determine if the relationship is negative
@@ -436,7 +439,7 @@ function createCharacterCard(id, character, relationships, type) {
 }
 
 // Create detailed popup for character
-// Update createCharacterPopup function to include the player name parameter
+// Update createCharacterPopup function to include simplified relationship editor
 function createCharacterPopup(id, character, relationships, type, playerName = 'kaiko') {
     // Convert to percentages for display
     let percentage = {
@@ -477,6 +480,35 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
     // Create the relationship stages visualization
     let stagesVisualization = createStagesVisualization(thresholds, currentStage, percentage[playerKey], descriptions);
     
+    // Simplified relationship editor
+    const relationshipEditor = `
+        <div class="relationship-editor">
+            <h4>Rediger Forhold</h4>
+            <div class="current-value">
+                <span class="value-label">Nuværende værdi:</span>
+                <span class="value-display" id="currentValue">${percentage[playerKey]}</span>%
+            </div>
+            
+            <div class="adjustment-controls">
+                <div class="preset-buttons">
+                    <button class="adjustment-btn decrease-large" data-adjust="-25">-25</button>
+                    <button class="adjustment-btn decrease-medium" data-adjust="-10">-10</button>
+                    <button class="adjustment-btn decrease-small" data-adjust="-5">-5</button>
+                    <button class="adjustment-btn decrease-mini" data-adjust="-1">-1</button>
+                    <button class="adjustment-btn increase-mini" data-adjust="1">+1</button>
+                    <button class="adjustment-btn increase-small" data-adjust="5">+5</button>
+                    <button class="adjustment-btn increase-medium" data-adjust="10">+10</button>
+                    <button class="adjustment-btn increase-large" data-adjust="25">+25</button>
+                </div>
+            </div>
+            
+            <div class="save-controls">
+                <button class="save-relationship-btn" data-id="${id}" data-player="${playerKey}">Gem Ændringer</button>
+                <div class="save-feedback" id="saveFeedback"></div>
+            </div>
+        </div>
+    `;
+    
     return `
         <div class="popup-header">
             <img src="${character.image}" alt="${character.name}" class="popup-avatar" id="popupAvatar">
@@ -497,6 +529,7 @@ function createCharacterPopup(id, character, relationships, type, playerName = '
                 <h4>Forhold Progression</h4>
                 ${stagesVisualization}
             </div>
+            ${relationshipEditor}
         </div>
     `;
 }
@@ -571,7 +604,6 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
     return html;
 }
 
-
 // Display update functions
 function updateCharacterGridDisplay(relationships) {
     const characterGrid = document.querySelector('.characters-grid');
@@ -622,6 +654,7 @@ function updateCharacterGridDisplay(relationships) {
             
             // Get currently active player
             const activePlayer = document.querySelector('.player-option.active').classList.contains('elias') ? 'kaiko' : 'james';
+            const activePlayerName = activePlayer === 'kaiko' ? 'elias' : 'jakob';
             
             const popup = document.getElementById('characterPopup');
             const popupContent = popup.querySelector('.popup-content');
@@ -637,8 +670,95 @@ function updateCharacterGridDisplay(relationships) {
             popup.querySelector('.close-popup').addEventListener('click', () => {
                 popup.classList.remove('active');
             });
+            
+            // Setup relationship editor listeners with correct player
+            setupRelationshipEditorListeners(popup, id, type, activePlayer, characterRelationship);
         });
     });
+}
+
+// Setup event listeners for relationship editor controls - simplified version
+function setupRelationshipEditorListeners(popup, characterId, type, playerKey, relationships) {
+    // Get initial value
+    const currentValue = relationships ? relationships[playerKey] || 0 : 0;
+    let newValue = currentValue;
+    
+    // Update the value display
+    const updateValueDisplay = (value) => {
+        const valueDisplay = popup.querySelector('#currentValue');
+        if (valueDisplay) {
+            valueDisplay.textContent = value;
+        }
+        
+        // Update the preview
+        updateRelationshipPreview(popup, value, type, playerKey);
+    };
+    
+    // Add event listeners for adjustment buttons
+    popup.querySelectorAll('.adjustment-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const adjustment = parseInt(button.getAttribute('data-adjust'));
+            newValue = Math.max(-100, Math.min(200, newValue + adjustment));
+            updateValueDisplay(newValue);
+        });
+    });
+    
+    // Add event listener for save button
+    popup.querySelector('.save-relationship-btn').addEventListener('click', () => {
+        saveRelationshipValue(characterId, playerKey, newValue);
+        
+        // Show feedback
+        const feedbackElement = popup.querySelector('#saveFeedback');
+        feedbackElement.textContent = 'Gemt!';
+        feedbackElement.classList.add('success');
+        
+        // Hide feedback after a delay
+        setTimeout(() => {
+            feedbackElement.textContent = '';
+            feedbackElement.classList.remove('success');
+        }, 2000);
+    });
+}
+
+// Update the relationship preview in the popup without saving to database
+function updateRelationshipPreview(popup, newValue, type, playerKey) {
+    let thresholds, icon;
+    
+    if (type === 'girls') {
+        thresholds = relationshipStageThresholds;
+        icon = '❤️';
+    } else if (type === 'teachers') {
+        thresholds = teacherRelationshipThresholds;
+        icon = '📚';
+    } else { // boys
+        thresholds = nonDatableRelationshipThresholds;
+        icon = '🤝';
+    }
+    
+    const { currentStage, progressBarWidth, isNegative } = getStageData(newValue, thresholds);
+    
+    // Update the status text
+    const statusElement = popup.querySelector('.relationship-status');
+    if (statusElement) {
+        statusElement.textContent = currentStage;
+    }
+    
+    // Update the progress bar
+    const progressBar = popup.querySelector('#popupProgress');
+    if (progressBar) {
+        progressBar.style.width = `${progressBarWidth}%`;
+        if (isNegative) {
+            progressBar.classList.add('negative');
+        } else {
+            progressBar.classList.remove('negative');
+        }
+    }
+    
+    // Update hearts
+    const heartsContainer = popup.querySelector('.hearts-container.large');
+    if (heartsContainer) {
+        heartsContainer.innerHTML = renderHearts(newValue, thresholds, icon);
+    }
 }
 
 // Apply search filter
@@ -656,7 +776,6 @@ function applySearchFilter(searchTerm) {
     });
 }
 
-// Switch active player
 // Switch active player
 function switchActivePlayer(player) {
     // Toggle player buttons
@@ -789,8 +908,113 @@ function createCharacterStatusUI() {
         </div>
     `;
     
-    // Rest of the function remains the same
+    // Add CSS for relationship editor
     const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        /* Existing CSS remains unchanged */
+        
+        /* Simplified Relationship Editor Styles */
+        .relationship-editor {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 192, 203, 0.1);
+            border-radius: 8px;
+            border: 1px solid #ffaabb;
+        }
+        
+        .relationship-editor h4 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #ff6699;
+            text-align: center;
+        }
+        
+        .current-value {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .value-display {
+            color: #ff6699;
+            font-size: 24px;
+        }
+        
+        .adjustment-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .adjustment-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+        
+        .decrease-large { background-color: #ff4040; color: white; }
+        .decrease-medium { background-color: #ff6b6b; color: white; }
+        .decrease-small { background-color: #ff9999; color: black; }
+        .decrease-mini { background-color: #ffcccc; color: black; }
+        .increase-mini { background-color: #ccffcc; color: black; }
+        .increase-small { background-color: #99ff99; color: black; }
+        .increase-medium { background-color: #6bff6b; color: black; }
+        .increase-large { background-color: #40ff40; color: black; }
+        
+        .save-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .save-relationship-btn {
+            padding: 10px 20px;
+            background-color: #ff6699;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .save-relationship-btn:hover {
+            background-color: #ff3377;
+        }
+        
+        .save-feedback {
+            height: 20px;
+            margin-top: 5px;
+            color: #4CAF50;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .save-feedback.success {
+            color: #4CAF50;
+        }
+        
+        .save-feedback.error {
+            color: #f44336;
+        }
+        
+        /* Hover effects for all buttons */
+        .adjustment-btn:hover {
+            filter: brightness(90%);
+        }
+    `;
     
     document.head.appendChild(styleElement);
     document.body.appendChild(overlay);
@@ -851,12 +1075,30 @@ function createCharacterStatusUI() {
 }
 
 // Helper function to update a character's relationship value in the database
-function updateRelationshipValue(characterId, player, percentValue) {
+function saveRelationshipValue(characterId, playerKey, percentValue) {
     // Store the percentage directly - no conversion needed
     const db = getDatabase();
-    const feelingRef = ref(db, `gameState/feelings/${characterId}/${player === 'elias' ? 'kaiko' : 'james'}`);
+    const feelingRef = ref(db, `gameState/feelings/${characterId}/${playerKey}`);
     
-    set(feelingRef, percentValue);
+    // Ensure value is within valid range
+    const validValue = Math.max(-100, Math.min(200, percentValue));
+    
+    // Update database
+    set(feelingRef, validValue)
+        .then(() => {
+            console.log(`Relationship updated for ${characterId}: ${validValue}%`);
+            
+            // Refresh character grid to reflect changes
+            const feelingsRef = ref(db, 'gameState/feelings');
+            onValue(feelingsRef, (snapshot) => {
+                // Store new relationships data
+                window.currentRelationships = snapshot.val();
+                updateCharacterGridDisplay(snapshot.val());
+            }, { onlyOnce: true });
+        })
+        .catch((error) => {
+            console.error("Error updating relationship:", error);
+        });
 }
 
 // Initialize the character system
