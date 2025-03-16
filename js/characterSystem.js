@@ -1,7 +1,23 @@
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
-// Keep your relationship stage descriptions for tooltips
-const relationshipStageDescriptions = {
+/*──────────────────────────────
+  CONSTANTS & THRESHOLDS
+──────────────────────────────*/
+// For girls, we now use two sets of descriptions & thresholds
+const romanticDescriptions = {
+    'Ingen interesse': 'Ser dig ikke på en romantisk måde',
+    'Nysgerrig': 'Begynder at se dig i et mere interessant lys',
+    'Synes godt om': 'Tænker på dig når du ikke er der',
+    'Interesseret': 'Synes du er sød og vil være sammen med dig',
+    'Tiltrukket': 'Vil gerne være tæt på dig hele tiden',
+    'Forelsket': 'Er blevet forelsket i dig',
+    'Kærlighed': 'Føler sig dybt forelsket i dig',
+    'Kæreste': 'Ser dig som sin kæreste (Eller i er kærester)',
+    'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
+    'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
+};
+
+const friendshipDescriptions = {
     'Hadefuld': 'Hader dig intenst, og kan blive farligt',
     'Fjendtlig': 'Ser dig som en fjende, vil gerne straffe dig',
     'Meget negativ': 'Har stærke negative følelser for dig',
@@ -11,17 +27,12 @@ const relationshipStageDescriptions = {
     'Skeptisk': 'Stoler ikke på dig',
     'Mindre værd': 'Tillader at du er i samme rum',
     'Neutral': 'Kender dig næsten ikke',
-    'Nysgerrig': 'vil gerne lære dig bedre at kende',
+    'Bekendt': 'Genkender dig og kan huske dit navn',
     'Venlig': 'Er glad for at snakke med dig',
-    'Venskab': 'Deler mere personlige ting med dig',
-    'Bedste ven': 'Ser dig som sin bedste ven',
-    'Interesseret': 'Synes du er sød og vil være sammen med dig',
-    'Tiltrukket': 'Vil gerne være tæt på dig hele tiden',
-    'Forelsket': 'Er blevet forelsket i dig',
-    'Kærlighed': 'Føler dybt forelsket i dig',
-    'Kæreste': 'Ser dig som sin kæreste (Eller i er kærester)',
-    'Besættelse': 'Kan ikke acceptere at komme væk fra dig',
-    'Yandere': 'Vil gøre alt for at beholde dig - også skade andre.'
+    'Venskab': 'Føler sig tryg med dig og deler tanker',
+    'Tæt ven': 'Stoler på dig med personlige problemer',
+    'Bedste ven': 'Ser dig som sin bedste ven og fortrolige',
+    'Uadskillelige': 'Vil altid være der for dig uanset hvad'
 };
 
 const teacherRelationshipDescriptions = {
@@ -54,9 +65,21 @@ const nonDatableRelationshipDescriptions = {
     'Bedste ven': 'Det stærkeste venskab.'
 };
 
-// Stage thresholds for heart progression - these values will be used for determining stages
-// but the actual progress will be directly calculated from the percentage (0-100)
-const relationshipStageThresholds = [
+// Thresholds for girls – separate values for friendship and romantic
+const romanticThresholds = [
+    { stage: 'Ingen interesse', threshold: 0 }, // This is our "neutral" equivalent for romantic
+    { stage: 'Nysgerrig', threshold: 10 },
+    { stage: 'Synes godt om', threshold: 25 },
+    { stage: 'Interesseret', threshold: 40 },
+    { stage: 'Tiltrukket', threshold: 60 },
+    { stage: 'Forelsket', threshold: 80 },
+    { stage: 'Kærlighed', threshold: 90 },
+    { stage: 'Kæreste', threshold: 100 },
+    { stage: 'Besættelse', threshold: 150 },
+    { stage: 'Yandere', threshold: 200 }
+];
+
+const friendshipThresholds = [
     { stage: 'Hadefuld', threshold: -100 },
     { stage: 'Fjendtlig', threshold: -80 },
     { stage: 'Meget negativ', threshold: -60 },
@@ -66,17 +89,12 @@ const relationshipStageThresholds = [
     { stage: 'Skeptisk', threshold: -10 },
     { stage: 'Mindre værd', threshold: -5 },
     { stage: 'Neutral', threshold: 0 },
-    { stage: 'Nysgerrig', threshold: 15 },
+    { stage: 'Bekendt', threshold: 15 },
     { stage: 'Venlig', threshold: 30 },
-    { stage: 'Venskab', threshold: 40 },
-    { stage: 'Bedste ven', threshold: 50 },
-    { stage: 'Interesseret', threshold: 60 },
-    { stage: 'Tiltrukket', threshold: 70 },
-    { stage: 'Forelsket', threshold: 80 },
-    { stage: 'Kærlighed', threshold: 90 },
-    { stage: 'Kæreste', threshold: 100 },
-    { stage: 'Besættelse', threshold: 150 },
-    { stage: 'Yandere', threshold: 200 }
+    { stage: 'Venskab', threshold: 50 },
+    { stage: 'Tæt ven', threshold: 70 },
+    { stage: 'Bedste ven', threshold: 90 },
+    { stage: 'Uadskillelige', threshold: 100 }
 ];
 
 const teacherRelationshipThresholds = [
@@ -117,7 +135,9 @@ const nonDatableRelationshipThresholds = [
     { stage: 'Bedste ven', threshold: 100 }
 ];
 
-// Character data unchanged
+/*──────────────────────────────
+  CHARACTER DATA
+──────────────────────────────*/
 const characterData = {
     akira: {
         name: "Akira",
@@ -243,7 +263,10 @@ const teacherCharacterData = {
     }
 };
 
-// Core utility functions for determining relationship stages based on percentage
+/*──────────────────────────────
+  UTILITY FUNCTIONS
+──────────────────────────────*/
+// Determines stage info based on percentage and thresholds
 function getStageData(percentValue, thresholds) {
     let currentStage = thresholds[0].stage;
     let nextStage = null;
@@ -251,12 +274,9 @@ function getStageData(percentValue, thresholds) {
     const isNegative = percentValue < 0;
 
     if (isNegative) {
-        // Handle negative percentages
         for (let i = thresholds.length - 1; i >= 0; i--) {
             if (thresholds[i].threshold < 0) {
-                // Define the lower bound (previous threshold)
                 const previousThreshold = i > 0 ? thresholds[i - 1].threshold : -Infinity;
-                // Check if percentValue is in the range (previousThreshold, threshold]
                 if (percentValue > previousThreshold && percentValue <= thresholds[i].threshold) {
                     currentStage = thresholds[i].stage;
                     nextStage = i < thresholds.length - 1 ? thresholds[i + 1].stage : null;
@@ -266,7 +286,6 @@ function getStageData(percentValue, thresholds) {
             }
         }
     } else {
-        // Handle positive percentages (including 0)
         for (let i = 0; i < thresholds.length; i++) {
             const nextThreshold = i < thresholds.length - 1 ? thresholds[i + 1].threshold : Infinity;
             if (percentValue >= thresholds[i].threshold && percentValue < nextThreshold) {
@@ -277,7 +296,6 @@ function getStageData(percentValue, thresholds) {
             }
         }
     }
-
     return {
         currentStage,
         progress: percentValue,
@@ -288,292 +306,85 @@ function getStageData(percentValue, thresholds) {
     };
 }
 
-// Renders active/inactive hearts based on the percentage value
-function renderHearts(percentValue, thresholds, icon = '❤️') {
-    // Determine if the relationship is negative
+// Renders hearts based on the value and thresholds
+// Modified to handle friendship and romantic differently
+function renderHearts(percentValue, thresholds, icon, isRomantic = false) {
     const isNegative = percentValue < 0;
-    
-    // Check if this is a high-level relationship (Besættelse or Yandere)
     const isHighLevel = percentValue > 100;
     
-    // Set appropriate total emoji count based on icon type and relationship
-    let totalHearts;
-    if (icon === '📚' || icon === '🤝') {
-        totalHearts = 8; // Always show 8 emojis for teachers and boys
-    } else {
-        totalHearts = isNegative ? 8 : 12; // Only hearts vary (8 for negative, 12 for positive)
-    }
-
-    // Find the neutral index to split positive and negative stages
-    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    // Total hearts remains the same
+    let totalHearts = (icon === '📚' || icon === '🤝') ? 8 : (isNegative ? 8 : 12);
+    
+    // For friendship, we'll use plain hearts without special effects
+    const neutralIndex = thresholds.findIndex(t => {
+        // For romantic relationships, "Ingen interesse" is our base (neutral) stage
+        if (isRomantic) return t.stage === 'Ingen interesse';
+        return t.stage === 'Neutral';
+    });
+    
     if (neutralIndex === -1) {
-        console.error('Neutral stage not found in thresholds');
+        console.error(`Base stage not found in thresholds for ${isRomantic ? 'romantic' : 'friendship'} relationship`);
         return '';
     }
-
-    // Separate positive and negative thresholds
-    const negativeThresholds = thresholds.slice(0, neutralIndex).reverse(); // Most negative first
-
-    // Calculate the number of filled hearts
+    
+    const negativeThresholds = thresholds.slice(0, neutralIndex).reverse();
     let filledHearts = 0;
-
+    
     if (isNegative) {
-        // For negative relationships, count how many negative stages are achieved
         for (let i = 0; i < negativeThresholds.length; i++) {
             if (percentValue <= negativeThresholds[i].threshold) {
                 filledHearts = i + 1;
-            } else {
-                break;
-            }
+            } else { break; }
         }
     } else {
-        // For positive relationships, calculate filled hearts proportionally
-        // Adjust the denominator based on icon type
         const denominator = 100;
         filledHearts = Math.min(totalHearts, Math.max(0, Math.round(totalHearts * (percentValue / denominator))));
     }
-
-    // Generate hearts HTML
+    
     let heartsHTML = '';
     for (let i = 0; i < totalHearts; i++) {
         if (i < filledHearts) {
-            // Filled hearts (active)
             const heartEmoji = isNegative ? '🖤' : icon;
-            // Add 'obsession-heart' class for hearts in relationships above 100%
-            const highLevelClass = isHighLevel ? 'obsession-heart' : '';
+            // Only add special effects for romantic hearts
+            const highLevelClass = (isRomantic && isHighLevel) ? 'obsession-heart' : '';
             heartsHTML += `<span class="heart active ${highLevelClass}">${heartEmoji}</span>`;
         } else {
-            // Unfilled hearts (inactive)
             heartsHTML += `<span class="heart">${icon}</span>`;
         }
     }
-
     return heartsHTML;
 }
 
-// New card creation functions for the grid layout
-// Modify the createCharacterCard function to make the perfect relationship animation player-specific
-function createCharacterCard(id, character, relationships, type) {
-    // Get the active player from the UI or default to Jakob (james)
-    const activePlayerElement = document.querySelector('.player-option.active');
-    const isJakobActive = !activePlayerElement || activePlayerElement.classList.contains('jakob');
-    const playerKey = isJakobActive ? 'james' : 'kaiko';
-    const displayName = isJakobActive ? 'Jakob' : 'Elias';
-    const playerClass = isJakobActive ? 'jakob' : 'elias';
-    
-    let percentage = {
-        kaiko: 0,
-        james: 0
-    };
-
-    if (relationships) {
-        percentage.kaiko = relationships.kaiko || 0;
-        percentage.james = relationships.james || 0;
-    }
-    
-    let thresholds, descriptions, icon;
-    
-    if (type === 'girls') {
-        thresholds = relationshipStageThresholds;
-        descriptions = relationshipStageDescriptions;
-        icon = '❤️';
-    } else if (type === 'teachers') {
-        thresholds = teacherRelationshipThresholds;
-        descriptions = teacherRelationshipDescriptions;
-        icon = '📚';
-    } else { // boys
-        thresholds = nonDatableRelationshipThresholds;
-        descriptions = nonDatableRelationshipDescriptions;
-        icon = '🤝';
-    }
-    
-    // Get relationship data for the active player
-    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
-    
-    // Get relationship class based on percentage
-    let relationshipClass = '';
-    if (type === 'girls') {
-        if (percentage[playerKey] === 100) {
-            relationshipClass = 'perfect-relationship';
-        } else if (percentage[playerKey] > 100) {
-            relationshipClass = 'above-perfect-relationship';
-        }
-    }
-    
-    let typeLabel;
-    if (type === 'girls') {
-        const isDatable = relationships?.datable ?? true;
-        typeLabel = isDatable ? 'Kan dates' : 'Har kæreste';
-    } else if (type === 'teachers') {
-        typeLabel = 'Lære';
-    } else {
-        typeLabel = 'Ven';
-    }
-    
-    return `
-        <div class="character-card" data-id="${id}" data-type="${type}">
-            <div class="character-info">
-                <img src="${character.image}" alt="${character.name}" class="character-avatar">
-                <div class="character-details">
-                    <h3 class="character-name">${character.name}</h3>
-                    <span class="character-type">${typeLabel}</span>
-                </div>
-            </div>
-            <div class="relationship-tracks">
-                <div class="relationship-track ${relationshipClass}" data-player="${playerKey}">
-                    <div class="track-header">
-                        <span class="player-name player-${playerClass}">${displayName}</span>
-                        <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${currentStage}</span></span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar ${isNegative ? 'negative' : ''}" style="width: ${progressBarWidth}%;"></div>
-                    </div>
-                    <div class="hearts-container">
-                        ${renderHearts(percentage[playerKey], thresholds, icon)}
-                    </div>
-                </div>
-            </div>
-            <button class="expand-button" data-id="${id}" data-type="${type}">+</button>
-        </div>
-    `;
-}
-
-// Create detailed popup for character
-// Update createCharacterPopup function to include simplified relationship editor
-function createCharacterPopup(id, character, relationships, type, playerName = 'kaiko') {
-    // Convert to percentages for display
-    let percentage = {
-        kaiko: relationships?.kaiko || 0,
-        james: relationships?.james || 0
-    };
-
-    if (relationships) {
-        percentage.kaiko = relationships.kaiko || 0;
-        percentage.james = relationships.james || 0;
-    }
-    
-    let thresholds, descriptions, icon;
-    
-    if (type === 'girls') {
-        thresholds = relationshipStageThresholds;
-        descriptions = relationshipStageDescriptions;
-        icon = '❤️';
-    } else if (type === 'teachers') {
-        thresholds = teacherRelationshipThresholds;
-        descriptions = teacherRelationshipDescriptions;
-        icon = '📚';
-    } else { // boys
-        thresholds = nonDatableRelationshipThresholds;
-        descriptions = nonDatableRelationshipDescriptions;
-        icon = '🤝';
-    }
-    
-    // Get data for the selected player
-    const playerKey = playerName === 'kaiko' ? 'kaiko' : 'james';
-    const displayName = playerName === 'kaiko' ? 'Elias' : 'Jakob';
-    
-    // Current active player 
-    const { currentStage, progressBarWidth, isNegative } = getStageData(percentage[playerKey], thresholds);
-    
-    const typeLabel = type === 'girls' ? 'Datable' : (type === 'teachers' ? 'Teacher' : 'Friend');
-    
-    // Create the relationship stages visualization
-    let stagesVisualization = createStagesVisualization(thresholds, currentStage, percentage[playerKey], descriptions);
-    
-    // Simplified relationship editor
-    const relationshipEditor = `
-        <div class="relationship-editor">
-            <h4>Rediger Forhold</h4>
-            <div class="current-value">
-                <span class="value-label">Nuværende værdi:</span>
-                <span class="value-display" id="currentValue">${percentage[playerKey]}</span>%
-            </div>
-            
-            <div class="adjustment-controls">
-                <div class="preset-buttons">
-                    <button class="adjustment-btn decrease-large" data-adjust="-25">-25</button>
-                    <button class="adjustment-btn decrease-medium" data-adjust="-10">-10</button>
-                    <button class="adjustment-btn decrease-small" data-adjust="-5">-5</button>
-                    <button class="adjustment-btn decrease-mini" data-adjust="-1">-1</button>
-                    <button class="adjustment-btn increase-mini" data-adjust="1">+1</button>
-                    <button class="adjustment-btn increase-small" data-adjust="5">+5</button>
-                    <button class="adjustment-btn increase-medium" data-adjust="10">+10</button>
-                    <button class="adjustment-btn increase-large" data-adjust="25">+25</button>
-                </div>
-            </div>
-            
-            <div class="save-controls">
-                <button class="save-relationship-btn" data-id="${id}" data-player="${playerKey}">Gem Ændringer</button>
-                <div class="save-feedback" id="saveFeedback"></div>
-            </div>
-        </div>
-    `;
-    
-    return `
-        <div class="popup-header">
-            <img src="${character.image}" alt="${character.name}" class="popup-avatar" id="popupAvatar">
-            <div>
-                <h2 class="popup-name" id="popupName">${character.name}</h2>
-                <span class="character-type" id="popupType">${typeLabel}</span>
-            </div>
-        </div>
-        ${type === 'girls' && relationships?.datable === false ? '<p class="taken-note">Denne karakter er optaget og kan ikke dates.</p>' : ''}
-        <div class="relationship-details" data-player="${playerKey}">
-            <div class="progress-container">
-                <div class="progress-bar ${isNegative ? 'negative' : ''}" id="popupProgress" style="width: ${progressBarWidth}%;"></div>
-            </div>
-            <div class="hearts-container large">
-                ${renderHearts(percentage[playerKey], thresholds, icon)}
-            </div>
-            <div class="relationship-progression">
-                <h4>Forhold Progression</h4>
-                ${stagesVisualization}
-            </div>
-            ${relationshipEditor}
-        </div>
-    `;
-}
-
-function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions) {
+// Creates stages visualization (tooltip for each stage)
+// Modified to handle cases where "Neutral" doesn't exist (like in romantic relationships)
+function createStagesVisualization(thresholds, currentStage, currentPercentage, descriptions, isRomantic = false) {
     let html = '<div class="stages-container">';
     
-    // Find the neutral index
-    const neutralIndex = thresholds.findIndex(t => t.stage === 'Neutral');
+    // For romantic relationships, use "Ingen interesse" as the base stage
+    const neutralStage = isRomantic ? 'Ingen interesse' : 'Neutral';
+    const neutralIndex = thresholds.findIndex(t => t.stage === neutralStage);
+    
     if (neutralIndex === -1) {
-        console.error('Neutral stage not found in thresholds');
-        return '<div>Error: Neutral stage not found</div>';
+        console.error(`${neutralStage} stage not found in thresholds`);
+        return `<div>Error: ${neutralStage} stage not found</div>`;
     }
     
-    // Find current stage index
     const currentStageIndex = thresholds.findIndex(t => t.stage === currentStage);
-    
-    // Determine if we're in a negative relationship state
     const isNegativeRelationship = currentPercentage < 0;
     
     thresholds.forEach((threshold, index) => {
-        // Calculate stage number relative to neutral (0)
         const stageNumber = index - neutralIndex;
-        
         const isCurrentStage = index === currentStageIndex;
+        const isNegativeStage = threshold.threshold < 0 || (threshold.stage === neutralStage && isNegativeRelationship);
         
-        // Check if this is a negative threshold or neutral in a negative relationship
-        const isNegativeStage = threshold.threshold < 0 || 
-                               (threshold.stage === 'Neutral' && isNegativeRelationship);
-        
-        // Determine if a stage is "past" (completed)
         let isPastStage = false;
-        
         if (isNegativeRelationship) {
-            // For negative values: complete stages between current stage and Neutral (inclusive)
             isPastStage = (index >= currentStageIndex && index <= neutralIndex);
         } else {
-            // For positive values: complete stages between Neutral and current stage (inclusive)
             isPastStage = (index >= neutralIndex && index <= currentStageIndex);
         }
         
-        // Determine the stage class based on whether it's current, completed, and negative/positive
-        let stageClass = 'future'; // Default - not reached
-        
+        let stageClass = 'future';
         if (isCurrentStage) {
             stageClass = isNegativeStage ? 'current-negative' : 'current';
         } else if (isPastStage) {
@@ -581,16 +392,11 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
         }
         
         const nextThreshold = index < thresholds.length - 1 ? thresholds[index + 1].threshold : 100;
-        const stageWidth = index < thresholds.length - 1 ? 
-            (nextThreshold - threshold.threshold) + '%' : 
-            (100 - threshold.threshold) + '%';
+        const stageWidth = index < thresholds.length - 1 ? (nextThreshold - threshold.threshold) + '%' : (100 - threshold.threshold) + '%';
         
         html += `
-            <div class="stage-item ${stageClass}" 
-                 style="--stage-width: ${stageWidth};">
-                <div class="stage-marker">
-                    <span class="stage-number">${stageNumber}</span>
-                </div>
+            <div class="stage-item ${stageClass}" style="--stage-width: ${stageWidth};">
+                <div class="stage-marker"><span class="stage-number">${stageNumber}</span></div>
                 <div class="stage-info">
                     <div class="stage-name">${threshold.stage}</div>
                     <div class="stage-threshold">${threshold.threshold}%</div>
@@ -604,316 +410,552 @@ function createStagesVisualization(thresholds, currentStage, currentPercentage, 
     return html;
 }
 
-// Display update functions
+/*──────────────────────────────
+  CARD & POPUP CREATION
+──────────────────────────────*/
+// Creates a character card. For girls, shows two separate bars.
+function createCharacterCard(id, character, relationships, type) {
+    // Determine active player from UI (defaults to Jakob)
+    const activePlayerElement = document.querySelector('.player-option.active');
+    const isJakobActive = !activePlayerElement || activePlayerElement.classList.contains('jakob');
+    const playerKey = isJakobActive ? 'james' : 'kaiko';
+    const displayName = isJakobActive ? 'Jakob' : 'Elias';
+    const playerClass = isJakobActive ? 'jakob' : 'elias';
+
+    if (type === 'girls') {
+        // For girls, expect relationships with two fields: romantic & friendship
+        const romanticValue = relationships?.romantic ? (relationships.romantic[playerKey] || 0) : 0;
+        const friendshipValue = relationships?.friendship ? (relationships.friendship[playerKey] || 0) : 0;
+        const isDatable = relationships?.datable ?? true;
+        const typeLabel = isDatable ? 'Kan dates' : 'Har kæreste';
+        const romanticData = getStageData(romanticValue, romanticThresholds);
+        const friendshipData = getStageData(friendshipValue, friendshipThresholds);
+        
+        // Assign classes based on relationship values
+        let romanticClass = '';
+        if (romanticValue === 100) {
+            romanticClass = 'perfect-relationship';
+        } else if (romanticValue > 100) {
+            romanticClass = 'above-perfect-relationship';
+        }
+        
+        let friendshipClass = '';
+        if (friendshipValue === 100) {
+            friendshipClass = 'perfect-relationship';
+        } else if (friendshipValue > 100) {
+            friendshipClass = 'above-perfect-relationship';
+        }
+        
+        // Define icons for each bar
+        const romanticIcon = '💖';
+        const friendshipIcon = '🤝';
+        
+        return `
+            <div class="character-card" data-id="${id}" data-type="${type}">
+                <div class="character-info">
+                    <img src="${character.image}" alt="${character.name}" class="character-avatar">
+                    <div class="character-details">
+                        <h3 class="character-name">${character.name}</h3>
+                        <span class="character-type">${typeLabel}</span>
+                    </div>
+                </div>
+                <div class="relationship-tracks girls">
+                    <div class="relationship-track romantic ${romanticClass}" data-player="${playerKey}" data-field="romantic">
+                        <div class="track-header">
+                            <span class="relationship-label">💖 Romantik</span>
+                            <span class="relationship-points">${romanticValue}% - <span class="relationship-status" data-field="romantic">${romanticData.currentStage}</span></span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar ${romanticData.isNegative ? 'negative' : ''}" style="width: ${romanticData.progressBarWidth}%;"></div>
+                        </div>
+                        <div class="hearts-container">
+                            ${renderHearts(romanticValue, romanticThresholds, romanticIcon, true)}
+                        </div>
+                    </div>
+                    <div class="relationship-track friendship ${friendshipClass}" data-player="${playerKey}" data-field="friendship">
+                        <div class="track-header">
+                            <span class="relationship-label">🤝 Venskab</span>
+                            <span class="relationship-points">${friendshipValue}% - <span class="relationship-status" data-field="friendship">${friendshipData.currentStage}</span></span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar ${friendshipData.isNegative ? 'negative' : ''}" style="width: ${friendshipData.progressBarWidth}%;"></div>
+                        </div>
+                        <div class="hearts-container">
+                            ${renderHearts(friendshipValue, friendshipThresholds, friendshipIcon, false)}
+                        </div>
+                    </div>
+                </div>
+                <button class="expand-button" data-id="${id}" data-type="${type}">+</button>
+            </div>
+        `;
+    } else {
+        // For teachers and boys (non-datable)
+        let percentage = { kaiko: 0, james: 0 };
+        if (relationships) { percentage[playerKey] = relationships[playerKey] || 0; }
+        let thresholds, descriptions, icon, typeLabel;
+        if (type === 'teachers') {
+            thresholds = teacherRelationshipThresholds;
+            descriptions = teacherRelationshipDescriptions;
+            icon = '📚';
+            typeLabel = 'Lære';
+        } else {
+            thresholds = nonDatableRelationshipThresholds;
+            descriptions = nonDatableRelationshipDescriptions;
+            icon = '🤝';
+            typeLabel = 'Ven';
+        }
+        const data = getStageData(percentage[playerKey], thresholds);
+        
+        // Add relationship class
+        let relationshipClass = '';
+        if (percentage[playerKey] === 100) {
+            relationshipClass = 'perfect-relationship';
+        } else if (percentage[playerKey] > 100) {
+            relationshipClass = 'above-perfect-relationship';
+        }
+        
+        return `
+            <div class="character-card" data-id="${id}" data-type="${type}">
+                <div class="character-info">
+                    <img src="${character.image}" alt="${character.name}" class="character-avatar">
+                    <div class="character-details">
+                        <h3 class="character-name">${character.name}</h3>
+                        <span class="character-type">${typeLabel}</span>
+                    </div>
+                </div>
+                <div class="relationship-tracks">
+                    <div class="relationship-track ${relationshipClass}" data-player="${playerKey}">
+                        <div class="track-header">
+                            <span class="player-name player-${playerClass}">${displayName}</span>
+                            <span class="relationship-points">${percentage[playerKey]}% - <span class="relationship-status">${data.currentStage}</span></span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar ${data.isNegative ? 'negative' : ''}" style="width: ${data.progressBarWidth}%;"></div>
+                        </div>
+                        <div class="hearts-container">
+                            ${renderHearts(percentage[playerKey], thresholds, icon, false)}
+                        </div>
+                    </div>
+                </div>
+                <button class="expand-button" data-id="${id}" data-type="${type}">+</button>
+            </div>
+        `;
+    }
+}
+
+// Creates a detailed popup. For girls, shows separate sections for romantic and friendship.
+function createCharacterPopup(id, character, relationships, type, activePlayerName = 'kaiko') {
+    const playerKey = activePlayerName === 'kaiko' ? 'kaiko' : 'james';
+    let popupHTML = `
+        <div class="popup-header">
+            <img src="${character.image}" alt="${character.name}" class="popup-avatar" id="popupAvatar">
+            <div>
+                <h2 class="popup-name" id="popupName">${character.name}</h2>
+            </div>
+        </div>
+    `;
+    if (type === 'girls') {
+        // For girls, extract both relationship values
+        const romanticValue = relationships?.romantic ? (relationships.romantic[playerKey] || 0) : 0;
+        const friendshipValue = relationships?.friendship ? (relationships.friendship[playerKey] || 0) : 0;
+        const isDatable = relationships?.datable ?? true;
+        const typeLabel = isDatable ? 'Datable' : 'Optaget';
+        const romanticData = getStageData(romanticValue, romanticThresholds);
+        const friendshipData = getStageData(friendshipValue, friendshipThresholds);
+        const romanticIcon = '💖';
+        const friendshipIcon = '🤝';
+        
+        // Create separate sections for each bar
+        popupHTML += `
+            ${!isDatable ? '<p class="taken-note">Denne karakter er optaget og kan ikke dates.</p>' : ''}
+            <div class="relationship-details girls" data-player="${playerKey}">
+                <h3>${typeLabel}</h3>
+                <div class="relationship-section" data-field="romantic">
+                    <h4>💖 Romantisk Forhold</h4>
+                    <div class="progress-container">
+                        <div class="progress-bar ${romanticData.isNegative ? 'negative' : ''}" id="popupProgress-romantic" style="width: ${romanticData.progressBarWidth}%;"></div>
+                    </div>
+                    <div class="hearts-container large" id="heartsContainer-romantic">
+                        ${renderHearts(romanticValue, romanticThresholds, romanticIcon, true)}
+                    </div>
+                    <div class="relationship-progression">
+                        <h5>Romantisk Progression</h5>
+                        ${createStagesVisualization(romanticThresholds, romanticData.currentStage, romanticValue, romanticDescriptions, true)}
+                    </div>
+                    <div class="relationship-editor" data-field="romantic">
+                        <h4>Rediger Romantisk Forhold</h4>
+                        <div class="current-value">
+                            <span class="value-label">Nuværende værdi:</span>
+                            <span class="value-display" id="currentValue-romantic">${romanticValue}</span>%
+                        </div>
+                        <div class="adjustment-controls">
+                            <div class="preset-buttons">
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="-25">-25</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="-10">-10</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="-5">-5</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="-1">-1</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="1">+1</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="5">+5</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="10">+10</button>
+                                <button class="adjustment-btn" data-field="romantic" data-adjust="25">+25</button>
+                            </div>
+                        </div>
+                        <div class="save-controls">
+                            <button class="save-relationship-btn" data-id="${id}" data-player="${playerKey}" data-field="romantic">Gem Romantiske Ændringer</button>
+                            <div class="save-feedback" id="saveFeedback-romantic"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relationship-section" data-field="friendship">
+                    <h4>🤝 Venskabs Forhold</h4>
+                    <div class="progress-container">
+                        <div class="progress-bar ${friendshipData.isNegative ? 'negative' : ''}" id="popupProgress-friendship" style="width: ${friendshipData.progressBarWidth}%;"></div>
+                    </div>
+                    <div class="hearts-container large" id="heartsContainer-friendship">
+                        ${renderHearts(friendshipValue, friendshipThresholds, friendshipIcon, false)}
+                    </div>
+                    <div class="relationship-progression">
+                        <h5>Venskabs Progression</h5>
+                        ${createStagesVisualization(friendshipThresholds, friendshipData.currentStage, friendshipValue, friendshipDescriptions, false)}
+                    </div>
+                    <div class="relationship-editor" data-field="friendship">
+                        <h4>Rediger Venskab</h4>
+                        <div class="current-value">
+                            <span class="value-label">Nuværende værdi:</span>
+                            <span class="value-display" id="currentValue-friendship">${friendshipValue}</span>%
+                        </div>
+                        <div class="adjustment-controls">
+                            <div class="preset-buttons">
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="-25">-25</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="-10">-10</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="-5">-5</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="-1">-1</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="1">+1</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="5">+5</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="10">+10</button>
+                                <button class="adjustment-btn" data-field="friendship" data-adjust="25">+25</button>
+                            </div>
+                        </div>
+                        <div class="save-controls">
+                            <button class="save-relationship-btn" data-id="${id}" data-player="${playerKey}" data-field="friendship">Gem Venskabs Ændringer</button>
+                            <div class="save-feedback" id="saveFeedback-friendship"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // For teachers and boys – single relationship value
+        let percentage = { kaiko: 0, james: 0 };
+        if (relationships) { percentage[playerKey] = relationships[playerKey] || 0; }
+        let thresholds, descriptions, icon, typeLabel;
+        if (type === 'teachers') {
+            thresholds = teacherRelationshipThresholds;
+            descriptions = teacherRelationshipDescriptions;
+            icon = '📚';
+            typeLabel = 'Teacher';
+        } else {
+            thresholds = nonDatableRelationshipThresholds;
+            descriptions = nonDatableRelationshipDescriptions;
+            icon = '🤝';
+            typeLabel = 'Friend';
+        }
+        const data = getStageData(percentage[playerKey], thresholds);
+        popupHTML += `
+            <div class="relationship-details" data-player="${playerKey}">
+                <div class="progress-container">
+                    <div class="progress-bar ${data.isNegative ? 'negative' : ''}" id="popupProgress" style="width: ${data.progressBarWidth}%;"></div>
+                </div>
+                <div class="hearts-container large">
+                    ${renderHearts(percentage[playerKey], thresholds, icon, false)}
+                </div>
+                <div class="relationship-progression">
+                    <h4>Forhold Progression</h4>
+                    ${createStagesVisualization(thresholds, data.currentStage, percentage[playerKey], descriptions, false)}
+                </div>
+                <div class="relationship-editor">
+                    <h4>Rediger Forhold</h4>
+                    <div class="current-value">
+                        <span class="value-label">Nuværende værdi:</span>
+                        <span class="value-display" id="currentValue">${percentage[playerKey]}</span>%
+                    </div>
+                    <div class="adjustment-controls">
+                        <div class="preset-buttons">
+                            <button class="adjustment-btn" data-adjust="-25">-25</button>
+                            <button class="adjustment-btn" data-adjust="-10">-10</button>
+                            <button class="adjustment-btn" data-adjust="-5">-5</button>
+                            <button class="adjustment-btn" data-adjust="-1">-1</button>
+                            <button class="adjustment-btn" data-adjust="1">+1</button>
+                            <button class="adjustment-btn" data-adjust="5">+5</button>
+                            <button class="adjustment-btn" data-adjust="10">+10</button>
+                            <button class="adjustment-btn" data-adjust="25">+25</button>
+                        </div>
+                    </div>
+                    <div class="save-controls">
+                        <button class="save-relationship-btn" data-id="${id}" data-player="${playerKey}">Gem Ændringer</button>
+                        <div class="save-feedback" id="saveFeedback"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    return popupHTML;
+}
+
+/*──────────────────────────────
+  DISPLAY & EVENT HANDLERS
+──────────────────────────────*/
 function updateCharacterGridDisplay(relationships) {
     const characterGrid = document.querySelector('.characters-grid');
     if (!characterGrid) return;
-
-    // Build the grid based on the active filter
     const activeFilter = document.querySelector('.filter-button.active').getAttribute('data-filter');
-    
     let html = '';
-    
     if (activeFilter === 'all' || activeFilter === 'girls') {
         Object.entries(characterData).forEach(([id, char]) => {
             html += createCharacterCard(id, char, relationships[id], 'girls');
         });
     }
-    
     if (activeFilter === 'all' || activeFilter === 'teachers') {
         Object.entries(teacherCharacterData).forEach(([id, char]) => {
             html += createCharacterCard(id, char, relationships[id], 'teachers');
         });
     }
-    
     if (activeFilter === 'all' || activeFilter === 'boys') {
         Object.entries(nonDatableCharacterData).forEach(([id, char]) => {
             html += createCharacterCard(id, char, relationships[id], 'boys');
         });
     }
-    
     characterGrid.innerHTML = html;
-    
-    // Add click event listeners to all expand buttons
     document.querySelectorAll('.expand-button').forEach(button => {
         button.addEventListener('click', event => {
             const id = event.target.getAttribute('data-id');
             const type = event.target.getAttribute('data-type');
-            
             let character, characterRelationship;
-            
             if (type === 'girls') {
                 character = characterData[id];
             } else if (type === 'teachers') {
                 character = teacherCharacterData[id];
-            } else { // boys
+            } else {
                 character = nonDatableCharacterData[id];
             }
-            
-            characterRelationship = relationships[id] || { kaiko: 0, james: 0 };
-            
-            // Get currently active player
+            characterRelationship = relationships[id] || (type === 'girls' ? { romantic: { kaiko: 0, james: 0 }, friendship: { kaiko: 0, james: 0 } } : { kaiko: 0, james: 0 });
             const activePlayer = document.querySelector('.player-option.active').classList.contains('elias') ? 'kaiko' : 'james';
-            const activePlayerName = activePlayer === 'kaiko' ? 'elias' : 'jakob';
-            
             const popup = document.getElementById('characterPopup');
             const popupContent = popup.querySelector('.popup-content');
-            
             popupContent.innerHTML = `
                 <button class="close-popup">&times;</button>
                 ${createCharacterPopup(id, character, characterRelationship, type, activePlayer)}
             `;
-            
             popup.classList.add('active');
-            
-            // Add close event listener
-            popup.querySelector('.close-popup').addEventListener('click', () => {
-                popup.classList.remove('active');
-            });
-            
-            // Setup relationship editor listeners with correct player
+            popup.querySelector('.close-popup').addEventListener('click', () => { popup.classList.remove('active'); });
             setupRelationshipEditorListeners(popup, id, type, activePlayer, characterRelationship);
         });
     });
 }
 
-// Setup event listeners for relationship editor controls - simplified version
 function setupRelationshipEditorListeners(popup, characterId, type, playerKey, relationships) {
-    // Get initial value
-    const currentValue = relationships ? relationships[playerKey] || 0 : 0;
-    let newValue = currentValue;
-    
-    // Update the value display
-    const updateValueDisplay = (value) => {
-        const valueDisplay = popup.querySelector('#currentValue');
-        if (valueDisplay) {
-            valueDisplay.textContent = value;
-        }
-        
-        // Update the preview
-        updateRelationshipPreview(popup, value, type, playerKey);
-    };
-    
-    // Add event listeners for adjustment buttons
-    popup.querySelectorAll('.adjustment-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const adjustment = parseInt(button.getAttribute('data-adjust'));
-            newValue = Math.max(-100, Math.min(200, newValue + adjustment));
-            updateValueDisplay(newValue);
-        });
-    });
-    
-    // Add event listener for save button
-    popup.querySelector('.save-relationship-btn').addEventListener('click', () => {
-        saveRelationshipValue(characterId, playerKey, newValue);
-        
-        // Show feedback
-        const feedbackElement = popup.querySelector('#saveFeedback');
-        feedbackElement.textContent = 'Gemt!';
-        feedbackElement.classList.add('success');
-        
-        // Hide feedback after a delay
-        setTimeout(() => {
-            feedbackElement.textContent = '';
-            feedbackElement.classList.remove('success');
-        }, 2000);
-    });
-}
-
-// Update the relationship preview in the popup without saving to database
-function updateRelationshipPreview(popup, newValue, type, playerKey) {
-    let thresholds, icon;
-    
+    // For girls, set up listeners for both "romantic" and "friendship" fields.
     if (type === 'girls') {
-        thresholds = relationshipStageThresholds;
-        icon = '❤️';
-    } else if (type === 'teachers') {
-        thresholds = teacherRelationshipThresholds;
-        icon = '📚';
-    } else { // boys
-        thresholds = nonDatableRelationshipThresholds;
-        icon = '🤝';
-    }
-    
-    const { currentStage, progressBarWidth, isNegative } = getStageData(newValue, thresholds);
-    
-    // Update the status text
-    const statusElement = popup.querySelector('.relationship-status');
-    if (statusElement) {
-        statusElement.textContent = currentStage;
-    }
-    
-    // Update the progress bar
-    const progressBar = popup.querySelector('#popupProgress');
-    if (progressBar) {
-        progressBar.style.width = `${progressBarWidth}%`;
-        if (isNegative) {
-            progressBar.classList.add('negative');
-        } else {
-            progressBar.classList.remove('negative');
-        }
-    }
-    
-    // Update hearts
-    const heartsContainer = popup.querySelector('.hearts-container.large');
-    if (heartsContainer) {
-        heartsContainer.innerHTML = renderHearts(newValue, thresholds, icon);
+        // Setup each relationship field independently
+        ['romantic', 'friendship'].forEach(field => {
+            const currentValueElement = popup.querySelector(`#currentValue-${field}`);
+            let currentValue = relationships?.[field] ? (relationships[field][playerKey] || 0) : 0;
+            let newValue = currentValue;
+            
+            // Update display for this specific field
+            const updateValueDisplay = (value) => {
+                const el = popup.querySelector(`#currentValue-${field}`);
+                if (el) { el.textContent = value; }
+                updateRelationshipPreview(popup, value, type, playerKey, field);
+            };
+            
+            // Setup adjustment buttons for this field
+            popup.querySelectorAll(`.adjustment-btn[data-field="${field}"]`).forEach(button => {
+                button.addEventListener('click', () => {
+                    const adjustment = parseInt(button.getAttribute('data-adjust'));
+                    // For romantic relationships, don't allow negative values
+                    if (field === 'romantic') {
+                        newValue = Math.max(0, Math.min(200, newValue + adjustment));
+                    } else {
+                        newValue = Math.max(-100, Math.min(200, newValue + adjustment));
+                    }
+                    updateValueDisplay(newValue);
+                });
+            });
+            
+            // Setup save button for this field
+            popup.querySelector(`.save-relationship-btn[data-field="${field}"]`).addEventListener('click', () => {
+                const newValue = parseInt(popup.querySelector(`#currentValue-${field}`).textContent);
+                saveRelationshipTypeValue(characterId, playerKey, field, newValue);
+                
+                const feedbackElement = popup.querySelector(`#saveFeedback-${field}`);
+                feedbackElement.textContent = 'Gemt!';
+                feedbackElement.classList.add('success');
+                setTimeout(() => {
+                    feedbackElement.textContent = '';
+                    feedbackElement.classList.remove('success');
+                }, 2000);
+            });
+        });
+    } else {
+        // Single value case for teachers and boys
+        const currentValueElement = popup.querySelector('#currentValue');
+        let currentValue = currentValueElement ? parseInt(currentValueElement.textContent) : 0;
+        let newValue = currentValue;
+        
+        const updateValueDisplay = (value) => {
+            const el = popup.querySelector('#currentValue');
+            if (el) { el.textContent = value; }
+            updateRelationshipPreview(popup, value, type, playerKey);
+        };
+        
+        popup.querySelectorAll('.adjustment-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const adjustment = parseInt(button.getAttribute('data-adjust'));
+                newValue = Math.max(-100, Math.min(200, newValue + adjustment));
+                updateValueDisplay(newValue);
+            });
+        });
+        
+        popup.querySelector('.save-relationship-btn').addEventListener('click', () => {
+            saveRelationshipValue(characterId, playerKey, newValue);
+            
+            const feedbackElement = popup.querySelector('#saveFeedback');
+            feedbackElement.textContent = 'Gemt!';
+            feedbackElement.classList.add('success');
+            setTimeout(() => {
+                feedbackElement.textContent = '';
+                feedbackElement.classList.remove('success');
+            }, 2000);
+        });
     }
 }
 
-// Apply search filter
-function applySearchFilter(searchTerm) {
-    const characterCards = document.querySelectorAll('.character-card');
+function updateRelationshipPreview(popup, newValue, type, playerKey, field = null) {
+    let thresholds, icon, isRomantic = false;
     
-    characterCards.forEach(card => {
-        const characterName = card.querySelector('.character-name').textContent.toLowerCase();
-        
-        if (characterName.includes(searchTerm.toLowerCase())) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Switch active player
-function switchActivePlayer(player) {
-    // Toggle player buttons
-    document.querySelectorAll('.player-option').forEach(opt => {
-        opt.classList.remove('active');
-    });
-    document.querySelector(`.player-option.${player}`).classList.add('active');
-    
-    // Update all cards to show the selected player's relationship
-    document.querySelectorAll('.character-card').forEach(card => {
-        const id = card.getAttribute('data-id');
-        const type = card.getAttribute('data-type');
-        
-        // Get the current data from global store
-        const relationships = window.currentRelationships || {}; 
-        const relationshipData = relationships[id] || { kaiko: 0, james: 0 };
-        
-        // Convert to percentage
-        let percentage;
-        if (player === 'elias') {
-            percentage = relationshipData.kaiko || 0;
-        } else {
-            percentage = relationshipData.james || 0;
+    if (type === 'girls' && field) {
+        if (field === 'romantic') {
+            thresholds = romanticThresholds;
+            icon = '💖';
+            isRomantic = true;
+        } else if (field === 'friendship') {
+            thresholds = friendshipThresholds;
+            icon = '🤝';
         }
         
-        let thresholds, icon;
-        if (type === 'girls') {
-            thresholds = relationshipStageThresholds;
-            icon = '❤️';
-        } else if (type === 'teachers') {
+        const data = getStageData(newValue, thresholds);
+        
+        // Update status for the specific field
+        const statusElement = popup.querySelector(`.relationship-section[data-field="${field}"] .relationship-status`);
+        if (statusElement) { statusElement.textContent = data.currentStage; }
+        
+        // Update progress bar for the specific field
+        const progressBar = popup.querySelector(`#popupProgress-${field}`);
+        if (progressBar) {
+            progressBar.style.width = `${data.progressBarWidth}%`;
+            if (data.isNegative) { progressBar.classList.add('negative'); }
+            else { progressBar.classList.remove('negative'); }
+        }
+        
+        // Update hearts container for the specific field
+        const heartsContainer = popup.querySelector(`#heartsContainer-${field}`);
+        if (heartsContainer) {
+            heartsContainer.innerHTML = renderHearts(newValue, thresholds, icon, isRomantic);
+        }
+    } else {
+        if (type === 'teachers') {
             thresholds = teacherRelationshipThresholds;
             icon = '📚';
-        } else { // boys
+        } else {
             thresholds = nonDatableRelationshipThresholds;
             icon = '🤝';
         }
         
-        const { currentStage, progressBarWidth, isNegative } = getStageData(percentage, thresholds);
+        const data = getStageData(newValue, thresholds);
         
-        // Update the track element
-        const trackElement = card.querySelector('.relationship-track');
-        trackElement.setAttribute('data-player', player === 'elias' ? 'kaiko' : 'james');
+        const statusElement = popup.querySelector('.relationship-status');
+        if (statusElement) { statusElement.textContent = data.currentStage; }
         
-        // Remove both relationship classes first
-        trackElement.classList.remove('perfect-relationship');
-        trackElement.classList.remove('above-perfect-relationship');
-        
-        // Check relationship percentage and add appropriate class
-        if (type === 'girls') {
-            if (percentage === 100) {
-                trackElement.classList.add('perfect-relationship');
-            } else if (percentage > 100) {
-                trackElement.classList.add('above-perfect-relationship');
-            }
+        const progressBar = popup.querySelector('#popupProgress');
+        if (progressBar) {
+            progressBar.style.width = `${data.progressBarWidth}%`;
+            if (data.isNegative) { progressBar.classList.add('negative'); }
+            else { progressBar.classList.remove('negative'); }
         }
         
-        const playerNameElement = trackElement.querySelector('.player-name');
-        playerNameElement.className = `player-name player-${player}`;
-        playerNameElement.textContent = player === 'elias' ? 'Elias' : 'Jakob';
-        
-        // Update the points display
-        const pointsElement = trackElement.querySelector('.relationship-points');
-        pointsElement.innerHTML = `${percentage}% - <span class="relationship-status">${currentStage}</span>`;
-        
-        // Update the progress bar
-        const progressBar = trackElement.querySelector('.progress-bar');
-        progressBar.style.width = `${progressBarWidth}%`;
-        progressBar.className = `progress-bar ${isNegative ? 'negative' : ''}`;
-        
-        // Update hearts
-        const heartsContainer = trackElement.querySelector('.hearts-container');
-        heartsContainer.innerHTML = renderHearts(percentage, thresholds, icon);
+        const heartsContainer = popup.querySelector('.hearts-container.large');
+        if (heartsContainer) {
+            heartsContainer.innerHTML = renderHearts(newValue, thresholds, icon, false);
+        }
+    }
+}
+
+function applySearchFilter(searchTerm) {
+    document.querySelectorAll('.character-card').forEach(card => {
+        const characterName = card.querySelector('.character-name').textContent.toLowerCase();
+        card.style.display = characterName.includes(searchTerm.toLowerCase()) ? 'block' : 'none';
     });
 }
 
-// Create new UI structure
+function switchActivePlayer(player) {
+    // Toggle active class on player buttons
+    document.querySelectorAll('.player-option').forEach(opt => { opt.classList.remove('active'); });
+    document.querySelector(`.player-option.${player}`).classList.add('active');
+    
+    // Get current player key
+    const playerKey = player === 'elias' ? 'kaiko' : 'james';
+    const displayName = player === 'elias' ? 'Elias' : 'Jakob';
+    const playerClass = player === 'elias' ? 'elias' : 'jakob';
+    
+    // Update all cards
+    const relationships = window.currentRelationships || {};
+    
+    // For simplicity, we'll refresh the entire grid
+    updateCharacterGridDisplay(relationships);
+}
+
 function createCharacterStatusUI() {
     const menuContainer = document.getElementById('character-menu-container').children[0];
     menuContainer.id = 'character-menu';
-    
     const button = document.createElement('button');
     button.id = 'character_btn';
     button.textContent = 'Characters';
     button.classList.add('character-button');
     menuContainer.appendChild(button);
-
     const overlay = document.createElement('div');
     overlay.id = 'character-status-overlay';
     overlay.classList.add('hidden');
-    
     overlay.innerHTML = `
         <div class="container">
             <h1>💕 Sweet Pink Dating Sim - Relationship Tracker 💕</h1>
-            
-            <!-- Player switcher - Note Jakob is active by default -->
             <div class="player-switch">
                 <button class="player-option elias">Elias</button>
                 <button class="player-option jakob active">Jakob</button>
             </div>
-            
-            <!-- Filter controls -->
             <div class="filter-controls">
                 <button class="filter-button" data-filter="all">All Characters</button>
                 <button class="filter-button active" data-filter="girls">Girls</button>
                 <button class="filter-button" data-filter="teachers">Teachers</button>
                 <button class="filter-button" data-filter="boys">Boys</button>
             </div>
-            
-            <!-- Search -->
             <div class="characters-search">
                 <input type="text" class="search-input" placeholder="Søg efter en karakter...">
             </div>
-            
-            <!-- Characters grid -->
-            <div class="characters-grid">
-                <!-- Characters will be dynamically inserted here -->
-            </div>
-            
+            <div class="characters-grid"></div>
             <div class="footer">
                 Sweet Pink Dating Sim © 2025 - Relationship Tracker v2.0
             </div>
         </div>
-        
-        <!-- Character Details Popup -->
         <div class="character-details-popup" id="characterPopup">
             <div class="popup-content">
                 <button class="close-popup">&times;</button>
-                <!-- Character details will be dynamically inserted here -->
             </div>
         </div>
     `;
-    
-    // Add CSS for relationship editor
     const styleElement = document.createElement('style');
     styleElement.textContent = `
-        /* Existing CSS remains unchanged */
-        
-        /* Simplified Relationship Editor Styles */
+        /* Base styles */
         .relationship-editor {
             margin-top: 20px;
             padding: 15px;
@@ -921,39 +963,33 @@ function createCharacterStatusUI() {
             border-radius: 8px;
             border: 1px solid #ffaabb;
         }
-        
         .relationship-editor h4 {
             margin-top: 0;
             font-size: 18px;
             color: #ff6699;
             text-align: center;
         }
-        
         .current-value {
             text-align: center;
             margin-bottom: 15px;
             font-size: 20px;
             font-weight: bold;
         }
-        
         .value-display {
             color: #ff6699;
             font-size: 24px;
         }
-        
         .adjustment-controls {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
         .preset-buttons {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 5px;
         }
-        
         .adjustment-btn {
             padding: 8px 12px;
             border: none;
@@ -962,7 +998,6 @@ function createCharacterStatusUI() {
             transition: background-color 0.2s;
             font-weight: bold;
         }
-        
         .decrease-large { background-color: #ff4040; color: white; }
         .decrease-medium { background-color: #ff6b6b; color: white; }
         .decrease-small { background-color: #ff9999; color: black; }
@@ -971,14 +1006,12 @@ function createCharacterStatusUI() {
         .increase-small { background-color: #99ff99; color: black; }
         .increase-medium { background-color: #6bff6b; color: black; }
         .increase-large { background-color: #40ff40; color: black; }
-        
         .save-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 15px;
         }
-        
         .save-relationship-btn {
             padding: 10px 20px;
             background-color: #ff6699;
@@ -989,11 +1022,7 @@ function createCharacterStatusUI() {
             font-weight: bold;
             transition: background-color 0.2s;
         }
-        
-        .save-relationship-btn:hover {
-            background-color: #ff3377;
-        }
-        
+        .save-relationship-btn:hover { background-color: #ff3377; }
         .save-feedback {
             height: 20px;
             margin-top: 5px;
@@ -1001,62 +1030,97 @@ function createCharacterStatusUI() {
             text-align: center;
             font-weight: bold;
         }
+        .save-feedback.success { color: #4CAF50; }
+        .save-feedback.error { color: #f44336; }
+        .adjustment-btn:hover { filter: brightness(90%); }
         
-        .save-feedback.success {
-            color: #4CAF50;
+        /* Specific styling for relationship types */
+        .relationship-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
         }
         
-        .save-feedback.error {
-            color: #f44336;
+        .relationship-section[data-field="romantic"] h4 {
+            color: #ff6699;
         }
         
-        /* Hover effects for all buttons */
-        .adjustment-btn:hover {
-            filter: brightness(90%);
+        .relationship-section[data-field="friendship"] h4 {
+            color: #4287f5;
+        }
+        
+        .save-relationship-btn[data-field="romantic"] {
+            background-color: #ff6699;
+        }
+        
+        .save-relationship-btn[data-field="friendship"] {
+            background-color: #4287f5;
+        }
+        
+        /* Styling for heart animations - only for romantic hearts */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .heart.active {
+            display: inline-block;
+        }
+        
+        /* Only romantic hearts pulse */
+        .romantic .heart.active, 
+        .relationship-section[data-field="romantic"] .heart.active {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Friendship hearts don't pulse */
+        .friendship .heart.active,
+        .relationship-section[data-field="friendship"] .heart.active {
+            animation: none;
+        }
+        
+        /* Additional styling for cards */
+        .relationship-tracks.girls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .relationship-track.romantic {
+            border-left: 4px solid #ff6699;
+        }
+        
+        .relationship-track.friendship {
+            border-left: 4px solid #4287f5;
+        }
+        
+        .relationship-label {
+            font-weight: bold;
+        }
+        
+        /* Styles for extreme values */
+        .obsession-heart {
+            color: #ff0000;
+            text-shadow: 0 0 5px #ff0000;
         }
     `;
-    
     document.head.appendChild(styleElement);
     document.body.appendChild(overlay);
-
-    // Event Listeners
-    button.addEventListener('click', () => {
-        overlay.classList.remove('hidden');
-    });
-
-    // Close on clicking outside container
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.classList.add('hidden');
-        }
-    });
-
-    // Filter functionality
+    button.addEventListener('click', () => { overlay.classList.remove('hidden'); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
     const filterButtons = overlay.querySelectorAll('.filter-button');
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove active class from all buttons
             filterButtons.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button
             button.classList.add('active');
-            
-            // Update grid based on database values (happens in updateCharacterGridDisplay)
             const db = getDatabase();
             const feelingsRef = ref(db, 'gameState/feelings');
-            onValue(feelingsRef, (snapshot) => {
-                updateCharacterGridDisplay(snapshot.val());
-            }, { onlyOnce: true });
+            onValue(feelingsRef, (snapshot) => { updateCharacterGridDisplay(snapshot.val()); }, { onlyOnce: true });
         });
     });
-    
-    // Search functionality
     const searchInput = overlay.querySelector('.search-input');
-    searchInput.addEventListener('input', () => {
-        applySearchFilter(searchInput.value);
-    });
-    
-    // Player switcher
+    searchInput.addEventListener('input', () => { applySearchFilter(searchInput.value); });
     const playerOptions = overlay.querySelectorAll('.player-option');
     playerOptions.forEach(option => {
         option.addEventListener('click', () => {
@@ -1064,26 +1128,16 @@ function createCharacterStatusUI() {
             switchActivePlayer(player);
         });
     });
-    
-    // Initialize popup click outside to close
     const popup = overlay.querySelector('.character-details-popup');
-    popup.addEventListener('click', (e) => {
-        if (e.target === popup) {
-            popup.classList.remove('active');
-        }
-    });
+    popup.addEventListener('click', (e) => { if (e.target === popup) popup.classList.remove('active'); });
 }
 
-// Helper function to update a character's relationship value in the database
+// Save a single value for teachers/boys
 function saveRelationshipValue(characterId, playerKey, percentValue) {
-    // Store the percentage directly - no conversion needed
     const db = getDatabase();
     const feelingRef = ref(db, `gameState/feelings/${characterId}/${playerKey}`);
-    
-    // Ensure value is within valid range
     const validValue = Math.max(-100, Math.min(200, percentValue));
     
-    // Update database
     set(feelingRef, validValue)
         .then(() => {
             console.log(`Relationship updated for ${characterId}: ${validValue}%`);
@@ -1091,26 +1145,100 @@ function saveRelationshipValue(characterId, playerKey, percentValue) {
             // Refresh character grid to reflect changes
             const feelingsRef = ref(db, 'gameState/feelings');
             onValue(feelingsRef, (snapshot) => {
-                // Store new relationships data
                 window.currentRelationships = snapshot.val();
                 updateCharacterGridDisplay(snapshot.val());
             }, { onlyOnce: true });
         })
-        .catch((error) => {
-            console.error("Error updating relationship:", error);
+        .catch((error) => { 
+            console.error("Error updating relationship:", error); 
         });
 }
 
-// Initialize the character system
-function initializeCharacterSystem() {
+// Save a specific relationship type (friendship/romantic) for girls
+function saveRelationshipTypeValue(characterId, playerKey, relationshipType, percentValue) {
+    const db = getDatabase();
+    const feelingRef = ref(db, `gameState/feelings/${characterId}/${relationshipType}/${playerKey}`);
+    
+    // Ensure value is within valid range, romantic relationship cannot be negative
+    let validValue;
+    if (relationshipType === 'romantic') {
+        validValue = Math.max(0, Math.min(200, percentValue));
+    } else {
+        validValue = Math.max(-100, Math.min(200, percentValue));
+    }
+    
+    set(feelingRef, validValue)
+        .then(() => {
+            console.log(`${relationshipType} updated for ${characterId}: ${validValue}%`);
+            
+            // Refresh character grid to reflect changes
+            const feelingsRef = ref(db, 'gameState/feelings');
+            onValue(feelingsRef, (snapshot) => {
+                window.currentRelationships = snapshot.val();
+                updateCharacterGridDisplay(snapshot.val());
+            }, { onlyOnce: true });
+        })
+        .catch((error) => { 
+            console.error(`Error updating ${relationshipType}:`, error); 
+        });
+}
+
+// Function to migrate old data structure to new
+function migrateRelationshipData() {
     const db = getDatabase();
     const feelingsRef = ref(db, 'gameState/feelings');
     
-    createCharacterStatusUI();
+    onValue(feelingsRef, (snapshot) => {
+        const relationships = snapshot.val() || {};
+        
+        // For each girl character
+        Object.entries(characterData).forEach(([id, char]) => {
+            const relationship = relationships[id];
+            
+            // Check if this relationship needs migration (has direct james/kaiko properties)
+            if (relationship && (relationship.james !== undefined || relationship.kaiko !== undefined)) {
+                console.log(`Migrating data for ${id}...`);
+                
+                // Create new structure
+                const newData = {
+                    friendship: {
+                        james: relationship.james || 0,
+                        kaiko: relationship.kaiko || 0
+                    },
+                    romantic: {
+                        james: 0,
+                        kaiko: 0
+                    }
+                };
+                
+                // Preserve datable status if it exists
+                if (relationship.datable !== undefined) {
+                    newData.datable = relationship.datable;
+                }
+                
+                // Save the new structure
+                set(ref(db, `gameState/feelings/${id}`), newData)
+                    .then(() => {
+                        console.log(`Migration complete for ${id}`);
+                    })
+                    .catch((error) => {
+                        console.error(`Migration failed for ${id}:`, error);
+                    });
+            }
+        });
+    }, { onlyOnce: true });
+}
 
+function initializeCharacterSystem() {
+    const db = getDatabase();
+    const feelingsRef = ref(db, 'gameState/feelings');
+    createCharacterStatusUI();
+    
+    // Run data migration to convert old structure to new
+    migrateRelationshipData();
+    
     onValue(feelingsRef, (snapshot) => {
         const relationships = snapshot.val();
-        // Store relationships for use in player switching
         window.currentRelationships = relationships;
         updateCharacterGridDisplay(relationships);
     });

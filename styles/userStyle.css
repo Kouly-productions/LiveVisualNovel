@@ -915,7 +915,7 @@ h1 {
 /* Expand button */
 .expand-button {
     position: absolute;
-    bottom: 155px;
+    bottom: 250px;
     right: 5px;
     background-color: var(--primary);
     color: white;
