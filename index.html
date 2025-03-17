@@ -5,8 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Novel</title>
     <link rel="stylesheet" href="/LiveVisualNovel/styles/userStyle.css">
+    <style>
+        /* Fullscreen overlay */
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(0, 0, 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+
+        #password-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: black;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        #password-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        #submit-password {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #submit-password:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Password Overlay -->
+    <div id="password-overlay">
+        <div id="password-box">
+            <h2>Enter Password to Access</h2>
+            <input type="password" id="password-input" placeholder="Enter Password">
+            <br>
+            <button id="submit-password">Submit</button>
+        </div>
+    </div>
 
     <!-- Character Container -->
     <div id="character-container">
@@ -75,6 +135,31 @@
     <script type="module">
         import { initializeCharacterSystem } from '/LiveVisualNovel/js/characterSystem.js';
         document.addEventListener('DOMContentLoaded', initializeCharacterSystem);
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const correctPassword = "helpy"; // Change this to your password
+            const overlay = document.getElementById("password-overlay");
+            const inputField = document.getElementById("password-input");
+            const submitButton = document.getElementById("submit-password");
+
+            submitButton.addEventListener("click", function () {
+                if (inputField.value === correctPassword) {
+                    overlay.style.display = "none"; // Hide the overlay
+                } else {
+                    alert("Incorrect password! Try again.");
+                    inputField.value = ""; // Clear input
+                }
+            });
+
+            // Allow Enter key to submit password
+            inputField.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    submitButton.click();
+                }
+            });
+        });
     </script>
 </body>
 </html>
