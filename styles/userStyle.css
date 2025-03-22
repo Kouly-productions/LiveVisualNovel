@@ -1029,6 +1029,7 @@ h1 {
 
 .popup-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
 }
@@ -1499,4 +1500,149 @@ h1 {
     justify-content: space-around;
     animation: twinkle 1.5s infinite alternate ease-in-out;
     z-index: -1;
+}
+
+
+
+/* Mood Indicator */
+.mood-indicator {
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mood-emoji {
+    font-size: 24px;
+    margin-right: 5px;
+}
+
+.mood-text {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.mood-positive {
+    color: #4CAF50;
+}
+
+.mood-negative {
+    color: #f44336;
+}
+
+.mood-neutral {
+    color: #9e9e9e;
+}
+
+/* Popup Mood Section */
+.mood-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border-left: 4px solid #9e9e9e;
+}
+
+.mood-title {
+    margin-top: 0;
+    font-size: 18px;
+    color: #555;
+}
+
+.current-mood {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.current-mood-emoji {
+    font-size: 32px;
+    margin-right: 15px;
+}
+
+.current-mood-details {
+    flex-grow: 1;
+}
+
+.current-mood-name {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.current-mood-description {
+    color: #666;
+    font-size: 14px;
+}
+
+.mood-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .mood-selector {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mood-option:hover {
+    border-color: #ccc;
+    transform: translateY(-2px);
+}
+
+.mood-option.active {
+    border-color: #ff6699;
+    background-color: rgba(255, 102, 153, 0.1);
+}
+
+.mood-option-emoji {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.mood-option-name {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.save-mood-btn {
+    display: block;
+    margin: 20px auto 10px;
+    padding: 10px 25px;
+    background-color: #9e9e9e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.save-mood-btn:hover {
+    background-color: #757575;
 }

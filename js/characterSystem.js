@@ -1244,4 +1244,297 @@ function initializeCharacterSystem() {
     });
 }
 
+
+// ──────────────────────────────
+// MOOD TRACKING IMPLEMENTATION
+// ──────────────────────────────
+
+// Define mood data and descriptions
+const moodData = {
+    'very-happy': { 
+        emoji: '😄', 
+        name: 'Meget glad', 
+        description: name => `${name} er ekstatisk og strålende glad!`,
+        class: 'mood-positive'
+    },
+    'happy': { 
+        emoji: '😊', 
+        name: 'Glad', 
+        description: name => `${name} er i godt humør og nyder samtaler.`,
+        class: 'mood-positive'
+    },
+    'neutral': { 
+        emoji: '😐', 
+        name: 'Neutral', 
+        description: name => `${name} har et neutralt humør lige nu.`,
+        class: 'mood-neutral'
+    },
+    'sad': { 
+        emoji: '😔',
+        name: 'Ked af det', 
+        description: name => `${name} er ked af det og lidt nedtrykt.`,
+        class: 'mood-negative'
+    },
+    'very-sad': { 
+        emoji: '😢', 
+        name: 'Meget ked af det', 
+        description: name => `${name} er meget ked af det og har behov for trøst.`,
+        class: 'mood-negative'
+    },
+    'guilt': { 
+        emoji: '😓', 
+        name: 'Skyldfølelse', 
+        description: name => `${name} føler skyld og anger over noget.`,
+        class: 'mood-negative'
+    },
+    'angry': { 
+        emoji: '😠', 
+        name: 'Sur', 
+        description: name => `${name} er sur og irritabel.`,
+        class: 'mood-negative'
+    },
+    'very-angry': { 
+        emoji: '😡', 
+        name: 'Meget sur', 
+        description: name => `${name} er rasende og har svært ved at kontrollere sit temperament.`,
+        class: 'mood-negative'
+    },
+    'afraid': { 
+        emoji: '😨', 
+        name: 'Bange', 
+        description: name => `${name} er bange og nervøs.`,
+        class: 'mood-negative'
+    },
+    'excited': { 
+        emoji: '🤩', 
+        name: 'Begejstret', 
+        description: name => `${name} er begejstret og fuld af energi!`,
+        class: 'mood-positive'
+    },
+    'embarrassed': { 
+        emoji: '😳', 
+        name: 'Flov', 
+        description: name => `${name} er flov og genert lige nu.`,
+        class: 'mood-neutral'
+    },
+    'confused': { 
+        emoji: '😕', 
+        name: 'Forvirret', 
+        description: name => `${name} er forvirret og har svært ved at forstå situationen.`,
+        class: 'mood-neutral'
+    },
+};
+
+// Store references to original functions
+const originalCreateCharacterCard = createCharacterCard;
+const originalCreateCharacterPopup = createCharacterPopup;
+const originalSetupRelationshipEditorListeners = setupRelationshipEditorListeners;
+
+// Override createCharacterCard to include mood indicators
+createCharacterCard = function(id, character, relationships, type) {
+    // Call the original function to get the base HTML
+    const baseHTML = originalCreateCharacterCard(id, character, relationships, type);
+    
+    // Check if the character has mood data
+    const mood = relationships?.mood || { current: 'neutral' };
+    const moodInfo = moodData[mood.current] || moodData.neutral;
+    
+    // Create mood indicator HTML
+    const moodIndicatorHTML = `
+        <div class="mood-indicator">
+            <span class="mood-emoji">${moodInfo.emoji}</span>
+            <span class="mood-text ${moodInfo.class}">${moodInfo.name}</span>
+        </div>
+    `;
+    
+    // Insert mood indicator AFTER the character-info div closes and BEFORE the relationship-tracks div opens
+    return baseHTML.replace(
+        '</div>\n                <div class="relationship-tracks',
+        '</div>\n                ' + moodIndicatorHTML + '\n                <div class="relationship-tracks'
+    );
+};
+
+// Override createCharacterPopup to include mood section
+createCharacterPopup = function(id, character, relationships, type, activePlayerName = 'kaiko') {
+    // Call the original function to get the base HTML
+    let baseHTML = originalCreateCharacterPopup(id, character, relationships, type, activePlayerName);
+    
+    // Check if the character has mood data
+    const mood = relationships?.mood || { current: 'neutral' };
+    const moodInfo = moodData[mood.current] || moodData.neutral;
+    
+    // Create mood section HTML
+    const moodSectionHTML = `
+        <div class="mood-section">
+            <h3 class="mood-title">🎭 Humør</h3>
+            
+            <div class="current-mood">
+                <div class="current-mood-emoji">${moodInfo.emoji}</div>
+                <div class="current-mood-details">
+                    <div class="current-mood-name">${moodInfo.name}</div>
+                    <div class="current-mood-description">${moodInfo.description(character.name)}</div>
+                </div>
+            </div>
+            
+            <h4>Skift humør:</h4>
+            <div class="mood-selector">
+                ${Object.entries(moodData).map(([key, data]) => `
+                    <div class="mood-option ${key === mood.current ? 'active' : ''}" data-mood="${key}">
+                        <div class="mood-option-emoji">${data.emoji}</div>
+                        <div class="mood-option-name">${data.name}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <button class="save-mood-btn" data-id="${id}">Gem humørændring</button>
+        </div>
+    `;
+    
+    // Insert mood section after popup header
+    return baseHTML.replace(
+        '</div>\n    ',
+        '</div>\n    ' + moodSectionHTML + '\n    '
+    );
+};
+
+// Function to save mood to Firebase
+// Function to save mood to Firebase
+function saveMood(characterId, moodKey) {
+    const db = getDatabase();
+    const moodRef = ref(db, `gameState/feelings/${characterId}/mood`);
+    const moodInfo = moodData[moodKey];
+    
+    if (!moodInfo) return;
+    
+    // This variable name conflicts with the global moodData object!
+    // Let's rename it to avoid the conflict:
+    const moodDataToSave = {
+        current: moodKey,
+        emoji: moodInfo.emoji,
+        name: moodInfo.name
+    };
+    
+    console.log(`Attempting to save mood for ${characterId}:`, moodDataToSave);
+    
+    set(moodRef, moodDataToSave)
+        .then(() => {
+            console.log(`Mood updated for ${characterId}: ${moodKey}`);
+            
+            // Refresh character grid to reflect changes
+            const feelingsRef = ref(db, 'gameState/feelings');
+            onValue(feelingsRef, (snapshot) => {
+                window.currentRelationships = snapshot.val();
+                updateCharacterGridDisplay(snapshot.val());
+            }, { onlyOnce: true });
+        })
+        .catch((error) => { 
+            console.error("Error updating mood:", error); 
+        });
+}
+
+// Function to setup mood editor listeners in the popup
+function setupMoodEditorListeners(popup, characterId) {
+    const moodOptions = popup.querySelectorAll('.mood-option');
+    const saveMoodBtn = popup.querySelector('.save-mood-btn');
+    let selectedMood = popup.querySelector('.mood-option.active')?.getAttribute('data-mood') || 'neutral';
+    
+    moodOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Update active class
+            moodOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            
+            // Get selected mood
+            selectedMood = option.getAttribute('data-mood');
+            
+            // Update the current mood display
+            const moodInfo = moodData[selectedMood];
+            const currentMoodEmoji = popup.querySelector('.current-mood-emoji');
+            const currentMoodName = popup.querySelector('.current-mood-name');
+            const currentMoodDescription = popup.querySelector('.current-mood-description');
+            const characterName = popup.querySelector('#popupName').textContent;
+            
+            if (currentMoodEmoji && currentMoodName && currentMoodDescription && moodInfo) {
+                currentMoodEmoji.textContent = moodInfo.emoji;
+                currentMoodName.textContent = moodInfo.name;
+                currentMoodDescription.textContent = moodInfo.description(characterName);
+            }
+        });
+    });
+    
+    if (saveMoodBtn) {
+        saveMoodBtn.addEventListener('click', () => {
+            saveMood(characterId, selectedMood);
+            
+            // Show feedback
+            saveMoodBtn.textContent = 'Gemt!';
+            saveMoodBtn.style.backgroundColor = '#4CAF50';
+            
+            setTimeout(() => {
+                saveMoodBtn.textContent = 'Gem humørændring';
+                saveMoodBtn.style.backgroundColor = '#9e9e9e';
+            }, 2000);
+        });
+    }
+}
+
+// Extend setupRelationshipEditorListeners to include mood editor
+setupRelationshipEditorListeners = function(popup, characterId, type, playerKey, relationships) {
+    // Call the original setup function
+    originalSetupRelationshipEditorListeners(popup, characterId, type, playerKey, relationships);
+    
+    // Add mood editor listeners
+    setupMoodEditorListeners(popup, characterId);
+};
+
+// Function to add default moods to characters that don't have them yet
+function migrateCharacterMoods() {
+    const db = getDatabase();
+    const feelingsRef = ref(db, 'gameState/feelings');
+    
+    onValue(feelingsRef, (snapshot) => {
+        const relationships = snapshot.val() || {};
+        
+        // Process all character types
+        const allCharacters = {
+            ...characterData,
+            ...nonDatableCharacterData,
+            ...teacherCharacterData
+        };
+        
+        Object.entries(allCharacters).forEach(([id, char]) => {
+            const relationship = relationships[id];
+            
+            // If character exists but has no mood data, add default mood
+            if (relationship && !relationship.mood) {
+                console.log(`Adding default mood for ${id}...`);
+                
+                // Default mood is 'neutral'
+                const defaultMood = {
+                    current: 'neutral',
+                    emoji: '😐',
+                    name: 'Neutral'
+                };
+                
+                // Add the mood data
+                set(ref(db, `gameState/feelings/${id}/mood`), defaultMood)
+                    .then(() => {
+                        console.log(`Default mood added for ${id}`);
+                    })
+                    .catch((error) => {
+                        console.error(`Failed to add mood for ${id}:`, error);
+                    });
+            }
+        });
+    }, { onlyOnce: true });
+}
+
+// Call migration function when initializing
+const originalInitializeCharacterSystem = initializeCharacterSystem;
+initializeCharacterSystem = function() {
+    originalInitializeCharacterSystem();
+    migrateCharacterMoods();
+    console.log("Mood tracking initialized");
+};
+
 export { initializeCharacterSystem };
