@@ -178,7 +178,23 @@ const characterData = {
     sayori: {
         name: "Sayori",
         image: "./assets/characters/sayori/head.png"
-    }
+    },
+    reika: {
+        name: "Reika",
+        image: "./assets/characters/reika/head.png"
+    },
+    funtimefoxy: {
+        name: "Funtime Foxy",
+        image: "./assets/characters/FT/FTHappy.png"
+    },
+    vanny: {
+        name: "Vanny",
+        image: "./assets/characters/vanny/head.png"
+    },
+    bg: {
+        name: "Bedste mor gris",
+        image: "./assets/characters/bedste/head.png"
+    },
 };
 
 const nonDatableCharacterData = {
@@ -186,21 +202,17 @@ const nonDatableCharacterData = {
         name: "Eddy",
         image: "./assets/characters/eddy/head.png"
     },
-    vanny: {
-        name: "Vanny",
-        image: "./assets/characters/vanny/head.png"
-    },
-    funtimefoxy: {
-        name: "Funtime Foxy",
-        image: "./assets/characters/FT/FTHappy.png"
-    },
     helpy: {
         name: "Helpy",
         image: "./assets/characters/helpy/head.png"
     },
-    bg: {
-        name: "Bedste mor gris",
-        image: "./assets/characters/bedste/head.png"
+    jan: {
+        name: "Jan",
+        image: "./assets/characters/jan/head.png"
+    },
+    shaggy: {
+        name: "Stuppe",
+        image: "./assets/characters/shaggy/head.png"
     },
     puppet: {
         name: "Puppet",
@@ -229,6 +241,14 @@ const teacherCharacterData = {
         name: "Toy Freddy",
         image: "./assets/characters/toyfreddy/toyfreddyNeutral.png"
     },
+    dawko: {
+        name: "Dawko",
+        image: "./assets/characters/dawko/head.png"
+    },
+    markiplier: {
+        name: "Markiplier",
+        image: "./assets/characters/markiplier/head.png"
+    },
     goldenfreddy: {
         name: "Golden Freddy",
         image: "./assets/characters/gf/gfIdle.png"
@@ -248,6 +268,10 @@ const teacherCharacterData = {
     baldi: {
         name: "Baldi",
         image: "./assets/characters/baldi/idle.png"
+    },
+    oogway: {
+        name: "Oogway",
+        image: "./assets/characters/oogway/head.png"
     },
     sun: {
         name: "Sun",

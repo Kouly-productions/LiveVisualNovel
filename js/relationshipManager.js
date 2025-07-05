@@ -190,6 +190,7 @@ if (typeof window.characterRelationshipManager === 'undefined') {
         },
         
         // Get stage info based on percentage value
+        // Get stage info based on percentage value
         getStageInfo: function(percentValue, characterType) {
             let stageName = 'Neutral';
             let thresholds;
@@ -257,27 +258,16 @@ if (typeof window.characterRelationshipManager === 'undefined') {
                 ];
             }
             
-            // Find current stage based on percentage
-            const isNegative = percentValue < 0;
-            
-            if (isNegative) {
-                for (let i = thresholds.length - 1; i >= 0; i--) {
-                    if (thresholds[i].threshold < 0 && percentValue <= thresholds[i].threshold) {
-                        stageName = thresholds[i].stage;
-                        break;
-                    }
-                }
-            } else {
-                for (let i = 0; i < thresholds.length; i++) {
-                    const nextThreshold = i < thresholds.length - 1 ? thresholds[i + 1].threshold : Infinity;
-                    if (percentValue >= thresholds[i].threshold && percentValue < nextThreshold) {
-                        stageName = thresholds[i].stage;
-                        break;
-                    }
+            // Find current stage based on percentage - ONE UNIFIED APPROACH
+            for (let i = thresholds.length - 1; i >= 0; i--) {
+                if (percentValue >= thresholds[i].threshold) {
+                    stageName = thresholds[i].stage;
+                    break;
                 }
             }
-            
+
             const progressBarWidth = Math.min(Math.abs(percentValue), 100);
+            const isNegative = percentValue < 0;
             
             return {
                 stageName,
@@ -285,7 +275,6 @@ if (typeof window.characterRelationshipManager === 'undefined') {
                 isNegative
             };
         },
-        
         // Generate hearts based on percentage
         renderHearts: function(percentValue, characterType) {
             const isNegative = percentValue < 0;
